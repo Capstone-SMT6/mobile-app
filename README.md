@@ -29,5 +29,7 @@ This is the front-end application built with Flutter.
    *Tip: You can set this up permanently in your IDE's run configuration.*
 
 ## 📁 Project Structure
-- `/lib/auth` - Authentication UI (Login / Register) and Google Sign-in logic
+- `/lib/auth` - Authentication UI (Login / Register), secure token management, and Google Sign-in logic
+- `/lib/chat` - RAG Chatbot UI utilizing the Gemini/ChromaDB backend integration
+- `/lib/pages` - Generic, reusable template pages (Beranda, Laporan, Profil)
 - `/lib/config.dart` - Central app configuration (URLs, API keys)

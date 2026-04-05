@@ -192,10 +192,6 @@ class _ProfilPageState extends State<ProfilPage> {
     );
   }
 
-  // ═══════════════════════════════════════════
-  // ── HELPER WIDGETS
-  // ═══════════════════════════════════════════
-
   Widget _buildAchievementChip(IconData icon, String label, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -264,7 +260,7 @@ class _ProfilPageState extends State<ProfilPage> {
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: Colors.purple.shade700,
+        activeThumbColor: Colors.purple.shade700,
       ),
     );
   }
