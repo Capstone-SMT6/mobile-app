@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'pages/beranda_page.dart';
 import 'pages/laporan_page.dart';
 import 'pages/profil_page.dart';
 import 'pages/chatbot_page.dart';
-import 'auth/auth_service.dart';
+import 'controllers/auth_controller.dart';
+import 'services/plant_disease_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,18 +16,45 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
-  final AuthService _authService = AuthService();
+  final AuthController _authController = Get.find<AuthController>();
 
   @override
   void initState() {
     super.initState();
     _checkAuth();
+    _testTfliteModel();
+  }
+
+  void _testTfliteModel() async {
+    try {
+      final plantService = PlantDiseaseService();
+      await plantService.init();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ TFLite Model Loaded Successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Failed to load model: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
   }
 
   void _checkAuth() async {
-    bool isLoggedIn = await _authService.isLoggedIn();
-    if (!isLoggedIn && mounted) {
-      Navigator.pushReplacementNamed(context, '/login');
+    final loggedIn = await _authController.getToken();
+    if (loggedIn == null) {
+      Get.offAllNamed('/login');
     }
   }
 

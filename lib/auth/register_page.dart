@@ -3,8 +3,10 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'auth_service.dart';
+import 'package:get/get.dart';
+import '../controllers/auth_controller.dart';
 import '../config.dart';
+import '../routes/app_routes.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -18,8 +20,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
-  bool _isLoading = false;
+  final _authController = Get.find<AuthController>();
+  final RxBool _isLoading = false.obs;
 
   @override
   void dispose() {
@@ -32,7 +34,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    _isLoading.value = true;
     try {
       final response = await http.post(
         Uri.parse(AppConfig.usersEndpoint),
@@ -45,78 +47,59 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registration successful')),
-          );
-          Navigator.pushReplacementNamed(context, '/login');
-        }
+        Get.snackbar('Success', 'Registration successful!',
+            backgroundColor: Colors.green, colorText: Colors.white);
+        Get.offAllNamed(AppRoutes.login);
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registration failed, email might be taken')),
-          );
-        }
+        Get.snackbar('Failed', 'Registration failed, email might be taken',
+            backgroundColor: Colors.red, colorText: Colors.white);
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Network error: $e')),
-        );
-      }
+      Get.snackbar('Network Error', e.toString(),
+          backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      _isLoading.value = false;
     }
   }
 
   Future<void> _handleGoogleRegister() async {
-    setState(() => _isLoading = true);
+    _isLoading.value = true;
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
         clientId: AppConfig.googleClientId,
       );
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      
+
       if (googleUser != null) {
         final response = await http.post(
           Uri.parse(AppConfig.googleLoginEndpoint),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
-             'email': googleUser.email,
-             'username': googleUser.displayName ?? 'Google User',
-             'google_id': googleUser.id,
+            'email': googleUser.email,
+            'username': googleUser.displayName ?? 'Google User',
+            'google_id': googleUser.id,
           }),
         );
-        
+
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           final token = data['access_token'];
           if (token != null) {
-            await AuthService().saveToken(token);
+            await _authController.saveToken(token);
           }
-          
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Registration with Google successful!')),
-            );
-            Navigator.pushReplacementNamed(context, '/home');
-          }
+          Get.snackbar('Success', 'Registration with Google successful!',
+              backgroundColor: Colors.green, colorText: Colors.white);
+          Get.offAllNamed(AppRoutes.home);
         } else {
-           if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Server rejected Google Registration')),
-              );
-           }
+          Get.snackbar('Failed', 'Server rejected Google Registration',
+              backgroundColor: Colors.red, colorText: Colors.white);
         }
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Google Registration Error: $e')),
-        );
-      }
+      Get.snackbar('Google Registration Error', e.toString(),
+          backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      _isLoading.value = false;
     }
   }
 
@@ -244,8 +227,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         },
                       ),
                       const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: _isLoading ? null : _handleRegister,
+                      Obx(() => ElevatedButton(
+                        onPressed: _isLoading.value ? null : _handleRegister,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colorScheme.primary,
                           foregroundColor: colorScheme.onPrimary,
@@ -254,7 +237,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
-                        child: _isLoading
+                        child: _isLoading.value
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
@@ -264,7 +247,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ),
                               )
                             : const Text('Register'),
-                      ),
+                      )),
                       const SizedBox(height: 20),
                       const Row(
                         children: [
@@ -277,8 +260,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         ],
                       ),
                       const SizedBox(height: 20),
-                      OutlinedButton.icon(
-                        onPressed: _isLoading ? null : _handleGoogleRegister,
+                      Obx(() => OutlinedButton.icon(
+                        onPressed: _isLoading.value ? null : _handleGoogleRegister,
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
@@ -288,7 +271,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         icon: const FaIcon(FontAwesomeIcons.google, size: 16),
                         label: const Text('Continue with Google'),
-                      ),
+                      )),
                       const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -296,9 +279,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           const Text("Already have an account?"),
                           const SizedBox(width: 4),
                           GestureDetector(
-                            onTap: () {
-                              Navigator.pushReplacementNamed(context, '/login');
-                            },
+                            onTap: () => Get.offAllNamed(AppRoutes.login),
                             child: const Text(
                               "Login here",
                               style: TextStyle(
