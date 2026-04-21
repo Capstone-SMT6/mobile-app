@@ -1,47 +1,225 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../controllers/laporan_controller.dart';
 
-class LaporanPage extends StatefulWidget {
+const _bg = Color(0xFF0D0F14);
+const _surface = Color(0xFF1C2030);
+const _border = Color(0xFF2A2F45);
+const _green = Color(0xFF4FFFB0);
+const _purple = Color(0xFF7C6AF7);
+const _textPrimary = Color(0xFFE8EAF2);
+const _textSecondary = Color(0xFF6B7280);
+const _gold = Color(0xFFF59E0B);
+const _silver = Color(0xFF9CA3AF);
+const _bronze = Color(0xFFCD7F32);
+
+class LaporanPage extends StatelessWidget {
   const LaporanPage({super.key});
 
   @override
-  State<LaporanPage> createState() => _LaporanPageState();
-}
-
-class _LaporanPageState extends State<LaporanPage> {
-  final TextEditingController _searchController = TextEditingController();
-  int _selectedFilter = 0;
-  final List<String> _filters = ['All', 'Completed', 'In Progress', 'Pending'];
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
+    final LaporanController controller = Get.find<LaporanController>();
+
+    return Container(
+      color: _bg,
       child: Column(
         children: [
-          Container(
-            color: Colors.white,
-            child: TabBar(
-              labelColor: Colors.purple.shade700,
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: Colors.purple.shade700,
-              tabs: const [
-                Tab(text: 'Reports'),
-                Tab(text: 'Activity Log'),
-              ],
+          // ── Tab bar ─────────────────────────────────────────
+          Obx(() => Container(
+                color: _surface,
+                child: Row(
+                  children: [
+                    _tabButton(
+                      label: 'LEADERBOARD',
+                      selected: controller.selectedTab.value == 0,
+                      onTap: () => controller.selectTab(0),
+                    ),
+                    _tabButton(
+                      label: 'MY STATS',
+                      selected: controller.selectedTab.value == 1,
+                      onTap: () => controller.selectTab(1),
+                    ),
+                  ],
+                ),
+              )),
+          Expanded(
+            child: Obx(() => controller.selectedTab.value == 0
+                ? _buildLeaderboardTab(controller)
+                : _buildMyStatsTab()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _tabButton({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) =>
+      Expanded(
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: selected ? _green : Colors.transparent,
+                  width: 2,
+                ),
+              ),
+            ),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: selected ? _green : _textSecondary,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                _buildReportsTab(),
-                _buildActivityLogTab(),
-              ],
+        ),
+      );
+
+  // ── Leaderboard Tab ──────────────────────────────────────────
+  Widget _buildLeaderboardTab(LaporanController controller) {
+    return Column(
+      children: [
+        // Exercise selector
+        Container(
+          color: _bg,
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          child: SizedBox(
+            height: 36,
+            child: Obx(() => ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: controller.exercises.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (context, i) {
+                    final sel = controller.selectedExercise.value == i;
+                    return GestureDetector(
+                      onTap: () => controller.selectExercise(i),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: sel ? _purple : _surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                              color: sel ? _purple : _border, width: 1),
+                        ),
+                        child: Text(
+                          controller.exercises[i],
+                          style: TextStyle(
+                            color: sel ? Colors.white : _textSecondary,
+                            fontSize: 12,
+                            fontWeight:
+                                sel ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                )),
+          ),
+        ),
+
+        // Podium (top 3)
+        Container(
+          color: _bg,
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _podiumBlock(controller.topEntries[1], 2, 80),
+              const SizedBox(width: 12),
+              _podiumBlock(controller.topEntries[0], 1, 100),
+              const SizedBox(width: 12),
+              _podiumBlock(controller.topEntries[2], 3, 64),
+            ],
+          ),
+        ),
+
+        // Rest of entries
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            itemCount: controller.topEntries.length - 3,
+            itemBuilder: (context, i) =>
+                _rankTile(controller.topEntries[i + 3]),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _podiumBlock(Map<String, dynamic> entry, int rank, double height) {
+    final Color accent = rank == 1
+        ? _gold
+        : rank == 2
+            ? _silver
+            : _bronze;
+    return Expanded(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Avatar
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: accent.withValues(alpha: 0.15),
+              border: Border.all(color: accent, width: 2),
+            ),
+            child: Center(
+              child: Text(
+                (entry['name'] as String)[0],
+                style: TextStyle(
+                    color: accent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20),
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            entry['name'],
+            style: const TextStyle(
+                color: _textPrimary,
+                fontSize: 11,
+                fontWeight: FontWeight.bold),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            '${entry['score']} pts',
+            style: TextStyle(color: accent, fontSize: 11),
+          ),
+          const SizedBox(height: 6),
+          // Podium bar
+          Container(
+            height: height,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.15),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(8)),
+              border: Border.all(color: accent.withValues(alpha: 0.4)),
+            ),
+            child: Center(
+              child: Text(
+                '#$rank',
+                style: TextStyle(
+                    color: accent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18),
+              ),
             ),
           ),
         ],
@@ -49,325 +227,223 @@ class _LaporanPageState extends State<LaporanPage> {
     );
   }
 
-  Widget _buildReportsTab() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          child: TextField(
-            controller: _searchController,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              hintText: 'Search reports...',
-              hintStyle: const TextStyle(fontSize: 14),
-              prefixIcon: const Icon(Icons.search, size: 20),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.close, size: 18),
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() {});
-                      },
-                    )
-                  : null,
-              contentPadding: const EdgeInsets.symmetric(vertical: 0),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.shade300),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.shade300),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.purple.shade400, width: 1.5),
-              ),
-              filled: true,
-              fillColor: Colors.grey.shade50,
+  Widget _rankTile(Map<String, dynamic> entry) {
+    final bool isYou = entry['you'] as bool;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: isYou ? _purple.withValues(alpha: 0.15) : _surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+            color: isYou ? _purple.withValues(alpha: 0.5) : _border),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 28,
+            child: Text(
+              '#${entry['rank']}',
+              style: TextStyle(
+                  color: isYou ? _purple : _textSecondary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13),
             ),
           ),
-        ),
-
-        SizedBox(
-          height: 52,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            itemCount: _filters.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (context, index) {
-              final selected = _selectedFilter == index;
-              return ChoiceChip(
-                label: Text(_filters[index]),
-                selected: selected,
-                onSelected: (_) => setState(() => _selectedFilter = index),
-                selectedColor: Colors.purple.shade700,
-                labelStyle: TextStyle(
-                  color: selected ? Colors.white : Colors.grey.shade700,
-                  fontSize: 12,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                ),
-                backgroundColor: Colors.grey.shade100,
-              );
-            },
+          const SizedBox(width: 10),
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: (isYou ? _purple : _green).withValues(alpha: 0.15),
+            child: Text(
+              (entry['name'] as String)[0],
+              style: TextStyle(
+                  color: isYou ? _purple : _green,
+                  fontWeight: FontWeight.bold),
+            ),
           ),
-        ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              entry['name'],
+              style: TextStyle(
+                  color: isYou ? _purple : _textPrimary,
+                  fontWeight:
+                      isYou ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 14),
+            ),
+          ),
+          Text(
+            '${entry['score']} pts',
+            style: TextStyle(
+                color: isYou ? _green : _textSecondary,
+                fontWeight: FontWeight.bold,
+                fontSize: 13),
+          ),
+        ],
+      ),
+    );
+  }
 
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+  // ── My Stats Tab ─────────────────────────────────────────────
+  Widget _buildMyStatsTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Personal bests
+          const Text('PERSONAL BESTS',
+              style: TextStyle(
+                  color: _green,
+                  fontSize: 11,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          Row(
             children: [
-              _buildReportCard(
-                category: 'System Error',
-                date: '28 Mar 2026',
-                description: 'Database connection pool exhausted during peak load. Automatic failover was triggered.',
-                status: 'Completed',
-                statusColor: Colors.green,
-                icon: Icons.error_outline,
-                iconColor: Colors.deepOrange,
-              ),
-              _buildReportCard(
-                category: 'Security Incident',
-                date: '26 Mar 2026',
-                description: 'Multiple failed login attempts detected from unknown IP range. Blocked by firewall.',
-                status: 'In Progress',
-                statusColor: Colors.orange,
-                icon: Icons.shield_outlined,
-                iconColor: Colors.blue,
-              ),
-              _buildReportCard(
-                category: 'Performance Issue',
-                date: '15 Mar 2026',
-                description: 'API response times spiked above 2000ms for the /users endpoint during batch job.',
-                status: 'Completed',
-                statusColor: Colors.green,
-                icon: Icons.speed_outlined,
-                iconColor: Colors.deepPurple,
-              ),
-              _buildEmptyState(),
+              _pbCard('Bench Press', '90 kg', _purple),
+              const SizedBox(width: 12),
+              _pbCard('Squat', '120 kg', _green),
             ],
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActivityLogTab() {
-    return ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: [
-        _buildLogCard(
-          title: 'Deployment successful',
-          detail: 'Version 2.4.1 deployed to production.',
-          date: 'Today, 06:45',
-          icon: Icons.rocket_launch_outlined,
-          iconColor: Colors.green,
-        ),
-        _buildLogCard(
-          title: 'Config updated',
-          detail: 'Rate limit increased from 100 to 200 req/min.',
-          date: 'Today, 07:10',
-          icon: Icons.tune_outlined,
-          iconColor: Colors.orange,
-        ),
-        _buildLogCard(
-          title: 'User exported data',
-          detail: 'CSV export of Q1 report completed (2.3 MB).',
-          date: 'Yesterday, 09:20',
-          icon: Icons.download_outlined,
-          iconColor: Colors.blue,
-        ),
-        _buildLogCard(
-          title: 'Scheduled backup completed',
-          detail: 'Full database snapshot stored to cloud.',
-          date: 'Yesterday, 03:00',
-          icon: Icons.cloud_done_outlined,
-          iconColor: Colors.purple,
-        ),
-        _buildLogCard(
-          title: 'Alert dismissed',
-          detail: 'Low disk space warning cleared after cleanup.',
-          date: '28 Mar 2026',
-          icon: Icons.notifications_off_outlined,
-          iconColor: Colors.grey,
-        ),
-        const SizedBox(height: 24),
-        _buildEmptyState(),
-      ],
-    );
-  }
-
-  // ═══════════════════════════════════════════
-  // ── HELPER WIDGETS
-  // ═══════════════════════════════════════════
-
-  Widget _buildReportCard({
-    required String category,
-    required String date,
-    required String description,
-    required String status,
-    required Color statusColor,
-    required IconData icon,
-    required Color iconColor,
-  }) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: iconColor.withValues(alpha: 0.12),
-                  child: Icon(icon, color: iconColor, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        category,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                      ),
-                      Text(
-                        date,
-                        style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    status,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              description,
-              style: TextStyle(fontSize: 13, color: Colors.grey.shade700, height: 1.4),
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {
-                  // TODO: Navigate to detail page
-                },
-                child: const Text('View Details'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLogCard({
-    required String title,
-    required String detail,
-    required String date,
-    required IconData icon,
-    required Color iconColor,
-  }) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(12),
-        leading: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: iconColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _pbCard('Deadlift', '140 kg', _gold),
+              const SizedBox(width: 12),
+              _pbCard('Pull-ups', '20 reps', const Color(0xFFEC4899)),
+            ],
           ),
-          child: Icon(icon, color: iconColor),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
+
+          const SizedBox(height: 28),
+
+          const Text('WEEKLY VOLUME',
+              style: TextStyle(
+                  color: _green,
+                  fontSize: 11,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          _barChart(),
+
+          const SizedBox(height: 28),
+
+          const Text('ACHIEVEMENTS',
+              style: TextStyle(
+                  color: _green,
+                  fontSize: 11,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _badge(Icons.local_fire_department, '7-Day Streak', _gold),
+              _badge(Icons.emoji_events, 'Top 50 Global', _purple),
+              _badge(Icons.bolt, 'PR Breaker', _green),
+              _badge(Icons.star, 'Consistent', const Color(0xFFEC4899)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _pbCard(String label, String value, Color accent) => Expanded(
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: _surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: accent.withValues(alpha: 0.4)),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                detail,
-                style: TextStyle(color: Colors.grey.shade700, fontSize: 12, fontWeight: FontWeight.w400),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                date,
-                style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
-              ),
+              Text(label,
+                  style: const TextStyle(
+                      color: _textSecondary, fontSize: 11)),
+              const SizedBox(height: 6),
+              Text(value,
+                  style: TextStyle(
+                      color: accent,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold)),
+              const SizedBox(height: 2),
+              const Text('Personal Best',
+                  style: TextStyle(
+                      color: _textSecondary, fontSize: 10)),
             ],
           ),
         ),
+      );
+
+  Widget _barChart() {
+    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final vals = [0.6, 0.3, 0.85, 0.4, 0.95, 0.5, 0.2];
+    return Container(
+      height: 120,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _border),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: List.generate(7, (i) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 400),
+                    width: 22,
+                    height: 80 * vals[i],
+                    decoration: BoxDecoration(
+                      color: i == 4
+                          ? _green
+                          : _purple.withValues(alpha: 0.5),
+                      borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(4)),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(days[i],
+                  style: const TextStyle(
+                      color: _textSecondary, fontSize: 10)),
+            ],
+          );
+        }),
       ),
     );
   }
 
-  Widget _buildEmptyState() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.inbox_outlined, size: 64, color: Colors.grey.shade300),
-          const SizedBox(height: 16),
-          Text(
-            'Nothing here yet',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Items you create or receive will appear here.',
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade400),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          OutlinedButton.icon(
-            onPressed: () {
-              // TODO: CTA action (e.g., create first item)
-            },
-            icon: const Icon(Icons.add),
-            label: const Text('Create one'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.purple.shade700,
-              side: BorderSide(color: Colors.purple.shade300),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _badge(IconData icon, String label, Color color) => Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 6),
+            Text(label,
+                style: TextStyle(
+                    fontSize: 12,
+                    color: color,
+                    fontWeight: FontWeight.w600)),
+          ],
+        ),
+      );
 }

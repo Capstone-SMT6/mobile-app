@@ -3,151 +3,108 @@ import 'package:get/get.dart';
 import 'pages/beranda_page.dart';
 import 'pages/laporan_page.dart';
 import 'pages/profil_page.dart';
-import 'pages/chatbot_page.dart';
-import 'controllers/auth_controller.dart';
-import 'services/plant_disease_service.dart';
+import 'controllers/home_controller.dart';
+import 'routes/app_routes.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
-  final AuthController _authController = Get.find<AuthController>();
-
-  @override
-  void initState() {
-    super.initState();
-    _checkAuth();
-    _testTfliteModel();
-  }
-
-  void _testTfliteModel() async {
-    try {
-      final plantService = PlantDiseaseService();
-      await plantService.init();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ TFLite Model Loaded Successfully!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Failed to load model: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-      }
-    }
-  }
-
-  void _checkAuth() async {
-    final loggedIn = await _authController.getToken();
-    if (loggedIn == null) {
-      Get.offAllNamed('/login');
-    }
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final HomeController controller = Get.find<HomeController>();
+
+    const bgColor = Color(0xFF0D0F14);
+    const surfaceColor = Color(0xFF1C2030);
+    const borderColor = Color(0xFF2A2F45);
+    const accentGreen = Color(0xFF4FFFB0);
+    const accentPurple = Color(0xFF7C6AF7);
+    const textSecondary = Color(0xFF6B7280);
+    const textPrimary = Color(0xFFE8EAF2);
 
     return Scaffold(
+      backgroundColor: bgColor,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: surfaceColor,
+        elevation: 0,
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Good Morning, User',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-              ),
-            )
+            Text('GOOD MORNING',
+                style: TextStyle(
+                    color: accentGreen,
+                    fontSize: 10,
+                    letterSpacing: 2,
+                    fontWeight: FontWeight.bold)),
+            Text('Athlete',
+                style: TextStyle(
+                    color: textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800)),
           ],
         ),
-        automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none),
-            color: Colors.white,
-            onPressed: () {
-              // TODO: Notifikasi
-            },
+            icon: const Icon(Icons.notifications_none, color: textSecondary),
+            onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(Icons.account_circle_outlined),
-            color: Colors.white,
-            onPressed: () {
-              // TODO: Profil
-            },
+            icon: const Icon(Icons.account_circle_outlined, color: textSecondary),
+            onPressed: () {},
           ),
         ],
-        backgroundColor: Colors.purple.shade700,
-        elevation: 0,
-      ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          BerandaPage(colorScheme: colorScheme),
-          const LaporanPage(),
-          const ProfilPage(),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const ChatbotPage()),
-          );
-        },
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: borderColor),
         ),
-        elevation: 4,
+      ),
+      body: Obx(() => IndexedStack(
+            index: controller.selectedIndex.value,
+            children: [
+              BerandaPage(colorScheme: Theme.of(context).colorScheme),
+              const LaporanPage(),
+              const ProfilPage(),
+            ],
+          )),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Get.toNamed(AppRoutes.chatbot),
+        backgroundColor: accentPurple,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 6,
         child: const Icon(Icons.smart_toy_outlined),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Beranda',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.description_outlined),
-            activeIcon: Icon(Icons.description),
-            label: 'Laporan',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.purple.shade700,
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: surfaceColor,
+          border: Border(top: BorderSide(color: borderColor, width: 1)),
+        ),
+        child: Obx(() => BottomNavigationBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home_outlined),
+                  activeIcon: Icon(Icons.home),
+                  label: 'Home',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.leaderboard_outlined),
+                  activeIcon: Icon(Icons.leaderboard),
+                  label: 'Leaderboard',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_outline),
+                  activeIcon: Icon(Icons.person),
+                  label: 'Profile',
+                ),
+              ],
+              currentIndex: controller.selectedIndex.value,
+              selectedItemColor: accentGreen,
+              unselectedItemColor: textSecondary,
+              onTap: controller.changeTab,
+              type: BottomNavigationBarType.fixed,
+            )),
       ),
     );
   }

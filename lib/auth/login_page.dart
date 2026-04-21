@@ -7,7 +7,6 @@ import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
 import '../config.dart';
 import '../routes/app_routes.dart';
-import '../services/plant_disease_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -22,34 +21,6 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   final _authController = Get.find<AuthController>();
   final RxBool _isLoading = false.obs;
-
-  @override
-  void initState() {
-    super.initState();
-    _testTfliteModel();
-  }
-
-  void _testTfliteModel() async {
-    try {
-      final plantService = PlantDiseaseService();
-      await plantService.init();
-      Get.snackbar(
-        '✅ Model Ready',
-        'TFLite Model Loaded Successfully!',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-      );
-    } catch (e) {
-      Get.snackbar(
-        '❌ Model Error',
-        'Failed to load model: $e',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 5),
-      );
-    }
-  }
 
   @override
   void dispose() {
@@ -136,170 +107,201 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    const bgColor = Color(0xFF0D0F14);
+    const surfaceColor = Color(0xFF1C2030);
+    const borderColor = Color(0xFF2A2F45);
+    const accentGreen = Color(0xFF4FFFB0);
+    const accentPurple = Color(0xFF7C6AF7);
+    const textPrimary = Color(0xFFE8EAF2);
+    const textSecondary = Color(0xFF6B7280);
 
     return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 12),
-            Image.asset(
-              'assets/images/helmsman.png',
-              height: 120,
-            ),
-            const SizedBox(height: 12),
-            Card(
-              shape: RoundedRectangleBorder(
-                side: const BorderSide(color: Colors.black, width: 1),
-                borderRadius: BorderRadius.circular(16),
+      backgroundColor: bgColor,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: accentPurple.withValues(alpha: 0.1),
+                  border: Border.all(color: accentPurple.withValues(alpha: 0.3), width: 1),
+                ),
+                child: const Icon(
+                  Icons.fitness_center,
+                  size: 64,
+                  color: accentPurple,
+                ),
               ),
-              child: Padding(
+              const SizedBox(height: 32),
+              const Text(
+                'SYSTEM ACCESS',
+                style: TextStyle(
+                  color: accentGreen,
+                  letterSpacing: 3,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Welcome Back',
+                style: TextStyle(
+                  color: textPrimary,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 48),
+              Container(
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: borderColor),
+                ),
                 padding: const EdgeInsets.all(24.0),
                 child: Form(
                   key: _formKey,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'Welcome back!',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 32),
+                      // Email Field
                       TextFormField(
                         controller: _emailController,
+                        style: const TextStyle(color: textPrimary),
                         decoration: InputDecoration(
                           labelText: 'Email',
-                          labelStyle: TextStyle(color: Colors.purple.shade700),
-                          prefixIcon: Icon(Icons.email_outlined, color: Colors.purple.shade700),
+                          labelStyle: const TextStyle(color: textSecondary),
+                          prefixIcon: const Icon(Icons.email_outlined, color: textSecondary),
+                          filled: true,
+                          fillColor: bgColor,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(4),
-                            borderSide: BorderSide(color: Colors.purple.shade200),
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(4),
-                            borderSide: const BorderSide(color: Colors.purple, width: 2),
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(color: accentPurple, width: 2),
                           ),
+                          errorStyle: const TextStyle(color: Colors.redAccent),
                         ),
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your email';
-                          }
-                          final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-                          if (!emailRegex.hasMatch(value.trim())) {
-                            return 'Please enter a valid email address';
-                          }
+                          if (value == null || value.trim().isEmpty) return 'Please enter your email';
+                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$').hasMatch(value.trim())) return 'Invalid email';
                           return null;
                         },
                       ),
                       const SizedBox(height: 16),
+                      // Password Field
                       TextFormField(
                         controller: _passwordController,
+                        style: const TextStyle(color: textPrimary),
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          labelStyle: TextStyle(color: Colors.purple.shade700),
-                          prefixIcon: Icon(Icons.lock_outline, color: Colors.purple.shade700),
+                          labelStyle: const TextStyle(color: textSecondary),
+                          prefixIcon: const Icon(Icons.lock_outline, color: textSecondary),
+                          filled: true,
+                          fillColor: bgColor,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(4),
-                            borderSide: BorderSide(color: Colors.purple.shade200),
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(4),
-                            borderSide: const BorderSide(color: Colors.purple, width: 2),
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(color: accentPurple, width: 2),
                           ),
+                          errorStyle: const TextStyle(color: Colors.redAccent),
                         ),
                         obscureText: true,
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
-                          }
-                          if (value.length < 6) {
-                            return 'Password must be at least 6 characters';
-                          }
+                          if (value == null || value.isEmpty) return 'Please enter your password';
+                          if (value.length < 6) return 'Password must be at least 6 characters';
                           return null;
                         },
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 32),
+                      // Login Button
                       Obx(() => ElevatedButton(
-                        onPressed: _isLoading.value ? null : _handleLogin,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colorScheme.primary,
-                          foregroundColor: colorScheme.onPrimary,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        child: _isLoading.value
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Text('Login'),
-                      )),
-                      const SizedBox(height: 20),
-                      const Row(
+                            onPressed: _isLoading.value ? null : _handleLogin,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: accentGreen,
+                              foregroundColor: bgColor,
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: _isLoading.value
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: bgColor,
+                                    ),
+                                  )
+                                : const Text(
+                                    'ACTIVATE SESSION',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.5,
+                                    ),
+                                  ),
+                          )),
+                      const SizedBox(height: 24),
+                      Row(
                         children: [
-                          Expanded(child: Divider()),
+                          const Expanded(child: Divider(color: borderColor)),
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16),
-                            child: Text('Or login with'),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text('OR', style: TextStyle(color: textSecondary, fontSize: 12)),
                           ),
-                          Expanded(child: Divider()),
+                          const Expanded(child: Divider(color: borderColor)),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
+                      // Google Button
                       Obx(() => OutlinedButton.icon(
-                        onPressed: _isLoading.value ? null : _handleGoogleLogin,
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          side: BorderSide(color: colorScheme.outline),
-                        ),
-                        icon: const FaIcon(FontAwesomeIcons.google, size: 16),
-                        label: const Text('Login with Google'),
-                      )),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text("Don't have an account?"),
-                          const SizedBox(width: 4),
-                          GestureDetector(
-                            onTap: () => Get.offAllNamed(AppRoutes.register),
-                            child: const Text(
-                              "Register",
-                              style: TextStyle(
-                                color: Colors.purple,
+                            onPressed: _isLoading.value ? null : _handleGoogleLogin,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: textPrimary,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              side: const BorderSide(color: borderColor, width: 1.5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
+                            icon: const FaIcon(FontAwesomeIcons.google, size: 18, color: textPrimary),
+                            label: const Text('CONTINUE WITH GOOGLE', style: TextStyle(letterSpacing: 1)),
+                          )),
                     ],
                   ),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("New recruit? ", style: TextStyle(color: textSecondary)),
+                  GestureDetector(
+                    onTap: () => Get.offAllNamed(AppRoutes.register),
+                    child: const Text(
+                      "Initialize Profile",
+                      style: TextStyle(
+                        color: accentPurple,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

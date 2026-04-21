@@ -1,234 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
-import '../services/chatbot_service.dart';
+import 'package:get/get.dart';
+import '../controllers/chatbot_controller.dart';
 
-class ChatbotPage extends StatefulWidget {
+class ChatbotPage extends StatelessWidget {
   const ChatbotPage({super.key});
 
   @override
-  State<ChatbotPage> createState() => _ChatbotPageState();
-}
-
-class _ChatbotPageState extends State<ChatbotPage> {
-  final List<_DisplayMessage> _messages = [];
-  int? _sessionId;
-  List<ChatSession> _sessions = [];
-  bool _isLoadingSessions = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSessions();
-    _loadSessions();
-  }
-
-  Future<void> _loadSessions() async {
-    setState(() => _isLoadingSessions = true);
-    try {
-      final sessions = await ChatbotService.getSessions();
-      if (mounted) {
-        setState(() {
-          _sessions = sessions;
-          _isLoadingSessions = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) setState(() => _isLoadingSessions = false);
-    }
-  }
-
-  Future<void> _openSession(ChatSession session) async {
-    setState(() {
-      _sessionId = session.id;
-      _messages.clear();
-    });
-    Navigator.pop(context);
-
-    try {
-      final msgs = await ChatbotService.getMessages(session.id);
-      if (mounted) {
-        setState(() {
-          for (var msg in msgs) {
-            _messages.add(_DisplayMessage(
-                role: msg.role, text: msg.text, sources: msg.sources));
-          }
-        });
-        _scrollToBottom();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed to load session: $e')));
-      }
-    }
-  }
-
-  Future<void> _deleteSession(int id) async {
-    final bool? confirm = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF1E1E2E),
-          title: const Text('Delete Chat', style: TextStyle(color: Colors.white)),
-          content: const Text('Are you sure you want to delete this conversation?', style: TextStyle(color: Colors.white70)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel', style: TextStyle(color: Colors.purpleAccent)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirm != true) return;
-
-    try {
-      await ChatbotService.deleteSession(id);
-      if (mounted) {
-        if (_sessionId == id) {
-          setState(() {
-            _sessionId = null;
-            _messages.clear();
-          });
-        }
-        _loadSessions();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to delete session: $e')));
-      }
-    }
-  }
-
-  Future<void> _initSession() async {
-    try {
-      final id = await ChatbotService.createSession();
-      if (mounted) {
-        setState(() {
-          _sessionId = id;
-        });
-        _loadSessions(); // Refresh list to show newly created session
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to initialize chat: $e')));
-      }
-    }
-  }
-
-  String? _streamingText;
-  List<String> _streamingSources = [];
-  bool _isStreaming = false;
-
-  final TextEditingController _controller = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-
-  Future<void> _send() async {
-    final text = _controller.text.trim();
-    if (text.isEmpty || _isStreaming) return;
-
-    if (_sessionId == null) {
-      await _initSession();
-      if (_sessionId == null) return; // failed to create
-    }
-
-    _controller.clear();
-    FocusScope.of(context).unfocus();
-
-    setState(() {
-      _messages.add(_DisplayMessage(role: 'user', text: text));
-      _streamingText = '';
-      _streamingSources = [];
-      _isStreaming = true;
-    });
-    _scrollToBottom();
-
-    final String userText = text;
-
-    try {
-      await for (final event in ChatbotService.sendMessageStream(
-        sessionId: _sessionId!,
-        message: userText,
-      )) {
-        switch (event) {
-          case ChatStreamSources(:final sources):
-            setState(() => _streamingSources = sources);
-
-          case ChatStreamChunk(:final text):
-            setState(() => _streamingText = (_streamingText ?? '') + text);
-            _scrollToBottom();
-
-          case ChatStreamDone():
-            final answer = _streamingText ?? '';
-            setState(() {
-              _messages.add(_DisplayMessage(
-                role: 'model',
-                text: answer,
-                sources: List.from(_streamingSources),
-              ));
-              _streamingText = null;
-              _streamingSources = [];
-              _isStreaming = false;
-            });
-
-          case ChatStreamError(:final message):
-            setState(() {
-              _messages.add(_DisplayMessage(role: 'error', text: message));
-              _streamingText = null;
-              _isStreaming = false;
-            });
-        }
-      }
-    } catch (e) {
-      setState(() {
-        _messages.add(_DisplayMessage(
-            role: 'error', text: e.toString().replaceFirst('Exception: ', '')));
-        _streamingText = null;
-        _isStreaming = false;
-      });
-    }
-
-    _scrollToBottom();
-  }
-
-  void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final hasStreamingBubble = _streamingText != null;
-    final showTypingDot = _isStreaming && !hasStreamingBubble;
-
-    final itemCount = _messages.length +
-        (hasStreamingBubble ? 1 : 0) +
-        (showTypingDot ? 1 : 0);
+    final ChatbotController controller = Get.find<ChatbotController>();
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F0F1A),
-      endDrawer: _buildDrawer(),
+      endDrawer: _buildDrawer(controller),
       appBar: AppBar(
         backgroundColor: Colors.purple.shade800,
         foregroundColor: Colors.white,
@@ -249,10 +33,13 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 const Text('AI Assistant',
                     style: TextStyle(
                         fontSize: 15, fontWeight: FontWeight.bold)),
-                Text(
-                  _isStreaming ? 'Generating…' : 'Automotive & Electronics',
-                  style: const TextStyle(fontSize: 11, color: Colors.white70),
-                ),
+                Obx(() => Text(
+                      controller.isStreaming.value
+                          ? 'Generating…'
+                          : 'Personal Trainer',
+                      style: const TextStyle(
+                          fontSize: 11, color: Colors.white70),
+                    )),
               ],
             ),
           ],
@@ -262,35 +49,52 @@ class _ChatbotPageState extends State<ChatbotPage> {
       body: Column(
         children: [
           Expanded(
-            child: _messages.isEmpty && !_isStreaming
-                ? _buildEmptyState()
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 16),
-                    itemCount: itemCount,
-                    itemBuilder: (context, index) {
-                      if (showTypingDot && index == _messages.length) {
-                        return _buildTypingIndicator();
-                      }
-                      if (hasStreamingBubble && index == _messages.length) {
-                        return _buildModelBubble(
-                          _streamingText!,
-                          sources: _streamingSources,
-                          isStreaming: true,
-                        );
-                      }
-                      return _buildMessageBubble(_messages[index]);
-                    },
-                  ),
+            child: Obx(() {
+              final hasStreamingBubble =
+                  controller.streamingText.value != null;
+              final showTypingDot =
+                  controller.isStreaming.value && !hasStreamingBubble;
+              final itemCount = controller.messages.length +
+                  (hasStreamingBubble ? 1 : 0) +
+                  (showTypingDot ? 1 : 0);
+
+              if (controller.messages.isEmpty &&
+                  !controller.isStreaming.value) {
+                return _buildEmptyState(controller);
+              }
+
+              return ListView.builder(
+                controller: controller.scrollController,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 16),
+                itemCount: itemCount,
+                itemBuilder: (context, index) {
+                  if (showTypingDot &&
+                      index == controller.messages.length) {
+                    return _buildTypingIndicator();
+                  }
+                  if (hasStreamingBubble &&
+                      index == controller.messages.length) {
+                    return _buildModelBubble(
+                      context,
+                      controller.streamingText.value!,
+                      sources: controller.streamingSources,
+                      isStreaming: true,
+                    );
+                  }
+                  return _buildMessageBubble(
+                      context, controller.messages[index]);
+                },
+              );
+            }),
           ),
-          _buildInputBar(),
+          _buildInputBar(context, controller),
         ],
       ),
     );
   }
 
-  Widget _buildDrawer() {
+  Widget _buildDrawer(ChatbotController controller) {
     return Drawer(
       backgroundColor: const Color(0xFF1E1E2E),
       child: Column(
@@ -313,50 +117,51 @@ class _ChatbotPageState extends State<ChatbotPage> {
             title:
                 const Text('New Chat', style: TextStyle(color: Colors.white)),
             onTap: () {
-              Navigator.pop(context);
-              setState(() {
-                _messages.clear();
-                _sessionId = null;
-              });
+              Get.back();
+              controller.startNewChat();
             },
           ),
           const Divider(color: Colors.white24),
           Expanded(
-            child: _isLoadingSessions
+            child: Obx(() => controller.isLoadingSessions.value
                 ? const Center(
                     child: CircularProgressIndicator(color: Colors.purple))
                 : ListView.builder(
-                    itemCount: _sessions.length,
+                    itemCount: controller.sessions.length,
                     itemBuilder: (context, index) {
-                      final session = _sessions[index];
-                      return ListTile(
-                        leading: const Icon(Icons.chat_bubble_outline,
-                            color: Colors.white70, size: 20),
-                        title: Text(
-                          session.title.isEmpty ? 'New Chat' : session.title,
-                          style: const TextStyle(color: Colors.white),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        selected: _sessionId == session.id,
-                        selectedTileColor:
-                            Colors.purple.shade900.withValues(alpha: 0.5),
-                        onTap: () => _openSession(session),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete_outline,
-                              color: Colors.white38, size: 20),
-                          onPressed: () => _deleteSession(session.id),
-                        ),
-                      );
+                      final session = controller.sessions[index];
+                      return Obx(() => ListTile(
+                            leading: const Icon(Icons.chat_bubble_outline,
+                                color: Colors.white70, size: 20),
+                            title: Text(
+                              session.title.isEmpty
+                                  ? 'New Chat'
+                                  : session.title,
+                              style:
+                                  const TextStyle(color: Colors.white),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            selected: controller.sessionId.value == session.id,
+                            selectedTileColor:
+                                Colors.purple.shade900.withValues(alpha: 0.5),
+                            onTap: () => controller.openSession(session),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete_outline,
+                                  color: Colors.white38, size: 20),
+                              onPressed: () =>
+                                  controller.deleteSession(session.id),
+                            ),
+                          ));
                     },
-                  ),
-          )
+                  )),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(ChatbotController controller) {
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -380,7 +185,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                     fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             const Text(
-              'Ask me anything about\nautomotive vehicles or electronics.',
+              'Ask me anything about\nexercise form, routines, or diet.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white54, fontSize: 14),
             ),
@@ -391,30 +196,25 @@ class _ChatbotPageState extends State<ChatbotPage> {
               alignment: WrapAlignment.center,
               children: [
                 _SuggestionChip(
-                    label: '🎮  Tell me about the PS5',
+                    label: '💪  Proper push-up form',
                     onTap: () {
-                      _controller.text = 'Tell me about the PS5';
-                      _send();
+                      controller.textController.text =
+                          'How do I maintain proper push-up form?';
+                      controller.send();
                     }),
                 _SuggestionChip(
-                    label: '🚗  Mitsubishi Lancer Evo?',
+                    label: '🥗  Post-workout meal?',
                     onTap: () {
-                      _controller.text =
-                          'What is the Mitsubishi Lancer Evo?';
-                      _send();
+                      controller.textController.text =
+                          'What is a good post-workout meal?';
+                      controller.send();
                     }),
                 _SuggestionChip(
-                    label: '💻  MacBook Pro features',
+                    label: '🏃  Beginner cardio routine',
                     onTap: () {
-                      _controller.text =
-                          'What are the features of the MacBook Pro?';
-                      _send();
-                    }),
-                _SuggestionChip(
-                    label: '✈️  Tell me about the Boeing 737',
-                    onTap: () {
-                      _controller.text = 'Tell me about the Boeing 737';
-                      _send();
+                      controller.textController.text =
+                          'Can you suggest a beginner cardio routine?';
+                      controller.send();
                     }),
               ],
             ),
@@ -424,7 +224,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
     );
   }
 
-  Widget _buildMessageBubble(_DisplayMessage msg) {
+  Widget _buildMessageBubble(BuildContext context, DisplayMessage msg) {
     if (msg.role == 'user') {
       return Padding(
         padding: const EdgeInsets.only(bottom: 12),
@@ -466,7 +266,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
           ),
           child: Row(
             children: [
-              const Icon(Icons.error_outline, color: Colors.redAccent, size: 16),
+              const Icon(Icons.error_outline,
+                  color: Colors.redAccent, size: 16),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(msg.text,
@@ -479,10 +280,11 @@ class _ChatbotPageState extends State<ChatbotPage> {
       );
     }
 
-    return _buildModelBubble(msg.text, sources: msg.sources);
+    return _buildModelBubble(context, msg.text, sources: msg.sources);
   }
 
   Widget _buildModelBubble(
+    BuildContext context,
     String text, {
     List<String>? sources,
     bool isStreaming = false,
@@ -544,8 +346,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                     ),
                   ),
                 ),
-                if (isStreaming)
-                  _BlinkingCursor(),
+                if (isStreaming) _BlinkingCursor(),
               ],
             ),
           ),
@@ -609,7 +410,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
     );
   }
 
-  Widget _buildInputBar() {
+  Widget _buildInputBar(BuildContext context, ChatbotController controller) {
     return Container(
       padding: EdgeInsets.only(
         left: 12,
@@ -625,13 +426,13 @@ class _ChatbotPageState extends State<ChatbotPage> {
         children: [
           Expanded(
             child: TextField(
-              controller: _controller,
+              controller: controller.textController,
               style: const TextStyle(color: Colors.white, fontSize: 14),
               maxLines: 4,
               minLines: 1,
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
-                hintText: 'Ask about a car, phone, laptop…',
+                hintText: 'Ask about workouts, diet, form…',
                 hintStyle: const TextStyle(
                     color: Colors.white38, fontSize: 14),
                 filled: true,
@@ -643,32 +444,32 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   borderSide: BorderSide.none,
                 ),
               ),
-              onSubmitted: (_) => _send(),
+              onSubmitted: (_) => controller.send(),
             ),
           ),
           const SizedBox(width: 8),
-          GestureDetector(
-            onTap: _send,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: _isStreaming
-                    ? Colors.purple.shade900
-                    : Colors.purple.shade600,
-                shape: BoxShape.circle,
-              ),
-              child: _isStreaming
-                  ? const Padding(
-                      padding: EdgeInsets.all(10),
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white38),
-                    )
-                  : const Icon(Icons.send_rounded,
-                      color: Colors.white, size: 20),
-            ),
-          ),
+          Obx(() => GestureDetector(
+                onTap: controller.send,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: controller.isStreaming.value
+                        ? Colors.purple.shade900
+                        : Colors.purple.shade600,
+                    shape: BoxShape.circle,
+                  ),
+                  child: controller.isStreaming.value
+                      ? const Padding(
+                          padding: EdgeInsets.all(10),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white38),
+                        )
+                      : const Icon(Icons.send_rounded,
+                          color: Colors.white, size: 20),
+                ),
+              )),
         ],
       ),
     );
@@ -717,13 +518,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
   }
 }
 
-class _DisplayMessage {
-  final String role;
-  final String text;
-  final List<String>? sources;
-
-  _DisplayMessage({required this.role, required this.text, this.sources});
-}
+// ── Helper Widgets (kept as StatefulWidget — animation only) ──────
 
 class _SuggestionChip extends StatelessWidget {
   final String label;

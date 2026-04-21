@@ -8,8 +8,8 @@ class AuthController extends GetxController {
   final RxBool isLoggedIn = false.obs;
 
   @override
-  void onInit() {
-    super.onInit();
+  void onReady() {
+    super.onReady();
     checkAuth();
   }
 
