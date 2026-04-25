@@ -94,37 +94,39 @@ class LaporanPage extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
           child: SizedBox(
             height: 36,
-            child: Obx(() => ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: controller.exercises.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (context, i) {
-                    final sel = controller.selectedExercise.value == i;
-                    return GestureDetector(
-                      onTap: () => controller.selectExercise(i),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 7),
-                        decoration: BoxDecoration(
-                          color: sel ? _purple : _surface,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                              color: sel ? _purple : _border, width: 1),
-                        ),
-                        child: Text(
-                          controller.exercises[i],
-                          style: TextStyle(
-                            color: sel ? Colors.white : _textSecondary,
-                            fontSize: 12,
-                            fontWeight:
-                                sel ? FontWeight.bold : FontWeight.normal,
-                          ),
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: controller.exercises.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (context, i) {
+                return Obx(() {
+                  final sel = controller.selectedExercise.value == i;
+                  return GestureDetector(
+                    onTap: () => controller.selectExercise(i),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: sel ? _purple : _surface,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: sel ? _purple : _border, width: 1),
+                      ),
+                      child: Text(
+                        controller.exercises[i],
+                        style: TextStyle(
+                          color: sel ? Colors.white : _textSecondary,
+                          fontSize: 12,
+                          fontWeight:
+                              sel ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
-                    );
-                  },
-                )),
+                    ),
+                  );
+                });
+              },
+            ),
           ),
         ),
 
@@ -397,21 +399,16 @@ class LaporanPage extends StatelessWidget {
           return Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Expanded(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 400),
-                    width: 22,
-                    height: 80 * vals[i],
-                    decoration: BoxDecoration(
-                      color: i == 4
-                          ? _green
-                          : _purple.withValues(alpha: 0.5),
-                      borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(4)),
-                    ),
-                  ),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 400),
+                width: 22,
+                height: 80 * vals[i],
+                decoration: BoxDecoration(
+                  color: i == 4
+                      ? _green
+                      : _purple.withValues(alpha: 0.5),
+                  borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(4)),
                 ),
               ),
               const SizedBox(height: 4),
