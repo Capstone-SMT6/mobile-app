@@ -45,6 +45,8 @@ dependencies:
   image_picker: ^1.2.1
   image: ^4.8.0
   get: ^4.7.3
+  body_part_selector: ^0.2.0
+  animations: ^2.2.0
 
 dev_dependencies:
   flutter_test:

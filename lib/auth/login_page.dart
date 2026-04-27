@@ -109,7 +109,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     const accentGreen = Color(0xFF5AC837);
-    const darkBg = Color(0xFF1A1A1A);
     const formBg = Color(0xFF242424);
     const fieldBg = Color(0xFF2E2E2E);
     const textLight = Colors.white;
