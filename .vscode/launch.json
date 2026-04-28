@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "SmaFit (Chrome)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--web-port=8080",
+                "--dart-define=API_BASE_URL=https://justparadis-smafit-fastapi.hf.space"
+            ]
+        },
+        {
+            "name": "SmaFit (Mobile)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--dart-define=API_BASE_URL=https://justparadis-smafit-fastapi.hf.space"
+            ]
+        }
+    ]
+}

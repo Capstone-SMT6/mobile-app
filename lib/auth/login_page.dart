@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
     _isLoading.value = true;
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
-        clientId: AppConfig.googleClientId,
+        clientId: GetPlatform.isAndroid ? null : AppConfig.googleClientId,
       );
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
