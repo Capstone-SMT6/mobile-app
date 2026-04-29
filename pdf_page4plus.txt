@@ -1,0 +1,39 @@
+﻿=== PAGE 4 ===
+Sistem harus langsung memunculkan peringatan visual
+(seperti garis merah pada tubuh/teks instruksi) atau audio
+Real-time
+FR-07 (bunyi beep) jika pengguna melakukan postur yang salah
+Feedback (UI)
+(misalnya, punggung melorot saat push-up)
+Modul AI Chatbot Pembimbing
+Sistem backend harus secara otomatis menyimpan data
+Perekaman
+kesalahan gerakan yang ditangkap oleh modul Pose
+FR-08 Riwayat
+Detection (atau saat latihan selesai) ke dalam Vector
+Kesalahan
+Database.
+Antarmuka Sistem harus menyediakan UI ruang obrolan (chat room)
+FR-09
+Chat Room yang responsif agar pengguna dapat berinteraksi dengan AI.
+Saat pengguna mengirim pesan, sistem Backend API harus
+Konteks LLM menarik riwayat data dari Vector Database (FR-08) dan
+FR-10 (RAG menyuapkannya sebagai konteks tambahan ke model
+Retrieval) bahasa (LLM) agar jawaban AI relevan dengan progres
+pengguna.
+Modul Dashboard Progres
+Sistem front-end (Flutter) harus mampu menampilkan grafik
+Visualisasi atau metrik sederhana yang membandingkan progres latihan
+FR-11
+Data Historis pengguna (misalnya total repetisi atau intensitas) dari
+beberapa hari/minggu terakhir.
+Sistem dapat menampilkan ringkasan performa mingguan
+FR-12 Rekapitulasi AI yang dihasilkan (di-generate) secara otomatis oleh AI
+berdasarkan riwayat kesalahan/kebenaran postur pengguna.
+Sistem front-end harus memunculkan pop-up evaluasi berisi
+3 opsi (Terlalu Berat, Pas, Terlalu Mudah) pada akhir minggu.
+Feedback RPE
+FR-13 Input ini akan digunakan oleh sistem backend (algoritma rule-
+Mingguan
+based) untuk memodifikasi volume latihan (set/repetisi) pada
+pembuatan jadwal minggu berikutnya.

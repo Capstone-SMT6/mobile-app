@@ -1,0 +1,148 @@
+﻿=== PAGE 1 ===
+Product Requirements Document
+Apps SmaCoFit(Smart Coach Fitness)
+Document Owner Subandrio
+Product Manager Subandrio
+Designer Piresabil Panji Wistyorafi, Subandrio
+Tech Lead Piresabil Panji Wistyorafi
+Developer Piresabil Panji Wistyorafi, Subandrio
+QA QA1
+1. Latar Belakang dan Tujuan
+1.1. Latar Belakang
+Banyak masyarakat yang ingin mencapai target kebugaran fisik, seperti
+menurunkan berat badan, bulking, atau sekadar menjaga kesehatan. Namun, akses
+terhadap bimbingan profesional seringkali terhambat oleh biaya penyewaan coach fitness
+atau Personal Trainer yang lumayan mahal. Tanpa bimbingan yang tepat, pengguna
+rentan melakukan kesalahan gerakan saat berlatih yang bisa memicu cedera, serta
+kehilangan motivasi karena tidak ada yang memantau progres mereka.
+1.2. Tujuan
+ÔÇó Memberikan perencanaan latihan yang dipersonalisasi sesuai kondisi dan target
+spesifik pengguna
+ÔÇó Menyediakan fitur koreksi gerakan (form correction) secara real-time
+menggunakan teknologi AI Pose Detection untuk mencegah cedera.
+ÔÇó Menghadirkan AI Chatbot cerdas dengan "memori" jangka panjang yang mampu
+memberikan bimbingan, menjawab pertanyaan seputar progres, dan
+mengevaluasi kesalahan pengguna selama latihan.
+2. Success Metrics
+ÔùÅ [Main] Akurasi Sistem Form Correction
+ÔùÅ [Main] Performa On-Device ML
+ÔùÅ [Secondary] Keberhasilan Personalisasi
+ÔùÅ [Secondary] Relevansi Respons Chatbot
+ÔùÅ [Secondary] Dashboard Progres
+=== PAGE 2 ===
+3. Requirements (Kebutuhan) Aplikasi
+3.1 Daftar Requirement
+Kode Requirement Requirement
+Fitur Perencanaan Latihan (Workout Plan)
+REQ-001 Sistem harus mewajibkan pengguna baru untuk mengisi data:
+usia, jenis kelamin, berat badan, tinggi badan, target (Bulking,
+Cutting/Fat Loss, Maintenance), tingkat aktivitas harian,
+pengalaman fitness, dan ketersediaan alat bantu (Gym,
+Dumbbell, atau Bodyweight)
+REQ-002 Aplikasi harus memiliki algoritma rule-based untuk menghitung
+metrik dasar (seperti BMR dan TDEE) sebagai acuan variasi
+jadwal harian pengguna
+Fitur AI Pose Detection (Koreksi Gerakan)
+REQ-003 Sistem front-end menggunakan package
+google_mlkit_pose_detection untuk menjalankan
+pemrosesan kamera secara langsung di perangkat
+REQ-004 Untuk versi pertama (mencakup gerakan Push-up dan Squat),
+algoritma harus difokuskan untuk mengambil dan menganalisis
+koordinat X, Y, dan Z pada 3 titik sendi utama penyangga (misal
+untuk push-up: Bahu, Siku, dan Pergelangan Tangan)
+REQ-005 Sistem harus menggunakan rumus trigonometri untuk
+menghitung sudut antar sendi dan membandingkannya dengan
+threshold yang sudah ditetapkan dalam tabel spesifikasi logika
+REQ-006 Sistem harus memberikan feedback visual atau audio (seperti
+garis merah pada tubuh, bunyi beep, atau teks instruksi) secara
+instan jika pengguna melakukan postur yang salah (misalnya,
+punggung melorot saat push-up)
+Fitur AI Chatbot Pembimbing
+REQ-007 Flutter bertugas menyediakan User Interface ruang obrolan
+(chat room) yang responsif
+REQ-008 Setiap kali modul Pose Detection menangkap kesalahan
+gerakan atau pengguna menyelesaikan latihannya, sistem
+backend harus menyimpan data tersebut secara otomatis ke
+dalam Vector Database
+=== PAGE 3 ===
+REQ-009 Saat pengguna bertanya kepada Chatbot, Backend API harus
+menarik data riwayat dari Vector Database tersebut dan
+memberikannya sebagai konteks tambahan ke model bahasa
+(LLM) agar coach buatan ini mengingat riwayat pengguna
+3.2 Fitur di Luar Ruang Lingkup
+ÔùÅ Fitur sosial dan gamifikasi
+3.3 Functional Requirements (Kebutuhan Fungsional)
+ID Nama Fitur Spesifikasi Fungsional
+Modul Perencanaan Latihan (Workout Plan)
+Sistem harus memiliki formulir bagi pengguna baru untuk
+mengisi data pribadi: usia, jenis kelamin, berat badan, tinggi
+Onboarding
+FR-01 badan, target (Bulking, Cutting/Fat Loss, Maintenance),
+Data Entry
+tingkat aktivitas harian, pengalaman fitness, dan alat yang
+tersedia (Gym, Dumbbell, Bodyweight).
+Sistem harus menghitung metrik dasar kesehatan pengguna
+Kalkulasi
+FR-02 (seperti BMR dan TDEE) menggunakan algoritma rule-based
+Metrik Dasar
+berdasarkan data onboarding.
+Sistem harus menghasilkan jadwal latihan harian yang
+Pembuatan
+FR-03 dipersonalisasi dan bervariasi dengan menjadikan hasil
+Jadwal Latihan
+perhitungan metrik (FR-02) sebagai acuannya.
+Modul Pose Detection (Form Correction)
+Sistem (via antarmuka Flutter) harus mampu membuka dan
+Akses Kamera memproses tangkapan kamera secara langsung di perangkat
+FR-04
+Real-time (on-device) menggunakan package
+google_mlkit_pose_detection.
+Untuk versi awal (Push-up dan Squat), algoritma harus
+Ekstraksi mengambil koordinat X, Y, dan Z secara real-time dari 3 titik
+FR-05
+Keypoints sendi utama (misalnya untuk push-up: Bahu, Siku, dan
+Pergelangan Tangan).
+Sistem harus menggunakan rumus trigonometri untuk
+Evaluasi
+FR-06 menghitung sudut antar sendi dan membandingkannya
+Logika Koreksi
+dengan threshold (ambang batas) yang telah ditetapkan.
+=== PAGE 4 ===
+Sistem harus langsung memunculkan peringatan visual
+(seperti garis merah pada tubuh/teks instruksi) atau audio
+Real-time
+FR-07 (bunyi beep) jika pengguna melakukan postur yang salah
+Feedback (UI)
+(misalnya, punggung melorot saat push-up)
+Modul AI Chatbot Pembimbing
+Sistem backend harus secara otomatis menyimpan data
+Perekaman
+kesalahan gerakan yang ditangkap oleh modul Pose
+FR-08 Riwayat
+Detection (atau saat latihan selesai) ke dalam Vector
+Kesalahan
+Database.
+Antarmuka Sistem harus menyediakan UI ruang obrolan (chat room)
+FR-09
+Chat Room yang responsif agar pengguna dapat berinteraksi dengan AI.
+Saat pengguna mengirim pesan, sistem Backend API harus
+Konteks LLM menarik riwayat data dari Vector Database (FR-08) dan
+FR-10 (RAG menyuapkannya sebagai konteks tambahan ke model
+Retrieval) bahasa (LLM) agar jawaban AI relevan dengan progres
+pengguna.
+Modul Dashboard Progres
+Sistem front-end (Flutter) harus mampu menampilkan grafik
+Visualisasi atau metrik sederhana yang membandingkan progres latihan
+FR-11
+Data Historis pengguna (misalnya total repetisi atau intensitas) dari
+beberapa hari/minggu terakhir.
+Sistem dapat menampilkan ringkasan performa mingguan
+FR-12 Rekapitulasi AI yang dihasilkan (di-generate) secara otomatis oleh AI
+berdasarkan riwayat kesalahan/kebenaran postur pengguna.
+Sistem front-end harus memunculkan pop-up evaluasi berisi
+3 opsi (Terlalu Berat, Pas, Terlalu Mudah) pada akhir minggu.
+Feedback RPE
+FR-13 Input ini akan digunakan oleh sistem backend (algoritma rule-
+Mingguan
+based) untuk memodifikasi volume latihan (set/repetisi) pada
+pembuatan jadwal minggu berikutnya.

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:get/get.dart';
-import 'firebase_options.dart';
-import 'controllers/auth_controller.dart';
-import 'routes/app_pages.dart';
-import 'routes/app_routes.dart';
+import 'app/modules/auth/controllers/auth_controller.dart';
+import 'app/routes/app_pages.dart';
+import 'app/routes/app_routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+  
+  await Supabase.initialize(
+    url: 'https://tcihnffymdngpagsosbu.supabase.co',
+    anonKey: 'sb_publishable_UWIWg019c0hqvHYAF4JlLg_AYD25nur',
   );
   // Register AuthController permanently so it's available app-wide
   Get.put(AuthController(), permanent: true);
