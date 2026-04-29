@@ -22,14 +22,14 @@ class ChatMessage {
 }
 
 class ChatSession {
-  final int id;
+  final String id;
   final String title;
 
   ChatSession({required this.id, required this.title});
 
   factory ChatSession.fromJson(Map<String, dynamic> json) {
     return ChatSession(
-      id: json['id'] as int,
+      id: json['id'] as String,
       title: json['title'] as String,
     );
   }
@@ -66,7 +66,7 @@ class ChatbotService {
     };
   }
 
-  static Future<int> createSession() async {
+  static Future<String> createSession() async {
     final headers = await _getAuthHeaders();
     final response = await http.post(
       Uri.parse(AppConfig.chatbotSessionsEndpoint),
@@ -76,13 +76,13 @@ class ChatbotService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return data['id'] as int;
+      return data['id'] as String;
     } else {
       throw Exception('Failed to create session: ${response.statusCode}');
     }
   }
 
-  static Future<List<ChatMessage>> getMessages(int sessionId) async {
+  static Future<List<ChatMessage>> getMessages(String sessionId) async {
     final headers = await _getAuthHeaders();
     final response = await http.get(
       Uri.parse('${AppConfig.chatbotSessionsEndpoint}/$sessionId/messages'),
@@ -112,7 +112,7 @@ class ChatbotService {
     }
   }
 
-  static Future<void> deleteSession(int sessionId) async {
+  static Future<void> deleteSession(String sessionId) async {
     final headers = await _getAuthHeaders();
     final response = await http.delete(
       Uri.parse('${AppConfig.chatbotSessionsEndpoint}/$sessionId'),
@@ -125,7 +125,7 @@ class ChatbotService {
   }
 
   static Future<({String answer, List<String> sources})> sendMessage({
-    required int sessionId,
+    required String sessionId,
     required String message,
   }) async {
     final headers = await _getAuthHeaders();
@@ -148,7 +148,7 @@ class ChatbotService {
   }
 
   static Stream<ChatStreamEvent> sendMessageStream({
-    required int sessionId,
+    required String sessionId,
     required String message,
   }) async* {
     final token = await _authService.getToken();

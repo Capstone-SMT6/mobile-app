@@ -166,7 +166,7 @@ class _OnboardingIntensityPageState extends State<OnboardingIntensityPage> {
                     ),
                     TextButton(
                       onPressed: selectedIntensity.isNotEmpty
-                          ? () => Get.toNamed(AppRoutes.onboardingInjury)
+                          ? () => Get.toNamed(AppRoutes.onboardingEquipment)
                           : null,
                       style: TextButton.styleFrom(
                         backgroundColor: const Color(0xFF222434),

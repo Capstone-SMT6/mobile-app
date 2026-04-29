@@ -148,22 +148,24 @@ class BerandaPage extends StatelessWidget {
           children: [
             const Icon(Icons.local_fire_department, color: Colors.orange, size: 20),
             const SizedBox(width: 6),
-            RichText(
-              text: const TextSpan(
-                children: [
-                  TextSpan(
-                    text: '$_streakDays Hari ',
-                    style: TextStyle(
-                      color: Colors.orange,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
+            Expanded(
+              child: RichText(
+                text: const TextSpan(
+                  children: [
+                    TextSpan(
+                      text: '$_streakDays Hari ',
+                      style: TextStyle(
+                        color: Colors.orange,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  TextSpan(
-                    text: 'streak aktif',
-                    style: TextStyle(color: _textSecondary, fontSize: 14),
-                  ),
-                ],
+                    TextSpan(
+                      text: 'streak aktif',
+                      style: TextStyle(color: _textSecondary, fontSize: 14),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -175,9 +177,11 @@ class BerandaPage extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Kalori Terbakar',
-              style: TextStyle(color: _textSecondary, fontSize: 13),
+            const Expanded(
+              child: Text(
+                'Kalori Terbakar',
+                style: TextStyle(color: _textSecondary, fontSize: 13),
+              ),
             ),
             Text(
               '$_caloriesBurned / $_caloriesTarget kcal',
@@ -379,12 +383,14 @@ class BerandaPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Hidrasi Hari Ini',
-                        style: TextStyle(
-                          color: _textPrimary,
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
+                      const Expanded(
+                        child: Text(
+                          'Hidrasi Hari Ini',
+                          style: TextStyle(
+                            color: _textPrimary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       Text(
@@ -478,9 +484,11 @@ class BerandaPage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Tren Berat Badan & BMI',
-                style: TextStyle(color: _textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
+              const Expanded(
+                child: Text(
+                  'Tren Berat Badan & BMI',
+                  style: TextStyle(color: _textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
+                ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

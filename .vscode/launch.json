@@ -6,7 +6,7 @@
             "request": "launch",
             "type": "dart",
             "args": [
-                "--web-port=8080",
+                "--web-port=5000",
                 "--dart-define=API_BASE_URL=https://justparadis-smafit-fastapi.hf.space"
             ]
         },

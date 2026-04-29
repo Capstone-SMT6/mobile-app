@@ -15,8 +15,8 @@ class AppConfig {
   static String get meStatsEndpoint => '$apiBaseUrl/api/users/me/stats';
   static String get meFitnessProfileEndpoint => '$apiBaseUrl/api/users/me/fitness-profile';
   static String get chatbotSessionsEndpoint => '$apiBaseUrl/chatbot/sessions';
-  static String chatbotChatEndpoint(int sessionId) => '$apiBaseUrl/chatbot/sessions/$sessionId/chat';
-  static String chatbotStreamEndpoint(int sessionId) => '$apiBaseUrl/chatbot/sessions/$sessionId/stream';
+  static String chatbotChatEndpoint(String sessionId) => '$apiBaseUrl/chatbot/sessions/$sessionId/chat';
+  static String chatbotStreamEndpoint(String sessionId) => '$apiBaseUrl/chatbot/sessions/$sessionId/stream';
   // ---------------------------------------------------------------------------
   // Google OAuth
   // ---------------------------------------------------------------------------
