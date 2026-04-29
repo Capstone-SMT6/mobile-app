@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
 import 'firebase_options.dart';
 import 'controllers/auth_controller.dart';
+import 'controllers/user_controller.dart';
 import 'routes/app_pages.dart';
 import 'routes/app_routes.dart';
 
@@ -11,8 +12,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  // Register AuthController permanently so it's available app-wide
+  // Register Controllers permanently so they're available app-wide
   Get.put(AuthController(), permanent: true);
+  Get.put(UserController(), permanent: true);
   runApp(const MyApp());
 }
 

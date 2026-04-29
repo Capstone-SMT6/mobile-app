@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
+import '../controllers/user_controller.dart';
 import '../config.dart';
 import '../routes/app_routes.dart';
 
@@ -81,6 +82,7 @@ class _LoginPageState extends State<LoginPage> {
             'email': googleUser.email,
             'username': googleUser.displayName ?? 'Google User',
             'google_id': googleUser.id,
+            'photo_url': googleUser.photoUrl,
           }),
         );
 
@@ -92,6 +94,8 @@ class _LoginPageState extends State<LoginPage> {
           }
           Get.snackbar('Success', 'Google Login successful!',
               backgroundColor: Colors.green, colorText: Colors.white);
+          // Refresh global user data
+          Get.find<UserController>().refreshData();
           Get.offAllNamed(AppRoutes.home);
         } else {
           Get.snackbar('Failed', 'Server rejected Google Login',

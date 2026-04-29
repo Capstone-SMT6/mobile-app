@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/profil_controller.dart';
+import '../controllers/user_controller.dart';
+import '../routes/app_routes.dart';
 
 const _bg = Color(0xFF0D0F14);
 const _surface = Color(0xFF1C2030);
@@ -15,188 +17,246 @@ class ProfilPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ProfilController controller = Get.find<ProfilController>();
+    final UserController userController = Get.find<UserController>();
+    final ProfilController profilController = Get.find<ProfilController>();
 
-    return Container(
-      color: _bg,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 24, 16, 40),
-        child: Column(
-          children: [
-            // ── Avatar ──────────────────────────────────────
-            Stack(
-              alignment: Alignment.center,
+    return Scaffold(
+      backgroundColor: _bg,
+      body: Obx(() {
+        if (userController.isLoading.value && userController.user.value == null) {
+          return const Center(child: CircularProgressIndicator(color: _purple));
+        }
+
+        final user = userController.user.value;
+        final stats = userController.stats.value;
+        final profile = userController.fitnessProfile.value;
+
+        return RefreshIndicator(
+          onRefresh: () => userController.refreshData(),
+          color: _purple,
+          backgroundColor: _surface,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 40),
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
               children: [
-                // Outer glow ring
-                Container(
-                  width: 112,
-                  height: 112,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: _purple.withValues(alpha: 0.4), width: 2),
-                    color: _purple.withValues(alpha: 0.08),
-                  ),
-                ),
-                CircleAvatar(
-                  radius: 48,
-                  backgroundColor: _surface,
-                  child: const Icon(Icons.person, size: 56, color: _purple),
-                ),
-                Positioned(
-                  bottom: 4,
-                  right: 4,
-                  child: GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
+                // ── Avatar ──────────────────────────────────────
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Outer glow ring
+                    Container(
+                      width: 112,
+                      height: 112,
                       decoration: BoxDecoration(
-                        color: _green,
                         shape: BoxShape.circle,
-                        border: Border.all(color: _bg, width: 2),
+                        border: Border.all(
+                            color: _purple.withValues(alpha: 0.4), width: 2),
+                        color: _purple.withValues(alpha: 0.08),
                       ),
-                      child: const Icon(Icons.edit, size: 14, color: _bg),
                     ),
+                    Container(
+                      width: 104,
+                      height: 104,
+                      decoration: const BoxDecoration(
+                        color: _surface,
+                        shape: BoxShape.circle,
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: user?.photoUrl != null && user!.photoUrl!.isNotEmpty
+                          ? Image.network(
+                              user.photoUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.person,
+                                      size: 48, color: _textSecondary),
+                            )
+                          : const Icon(Icons.person,
+                              size: 48, color: _textSecondary),
+                    ),
+                    Positioned(
+                      bottom: 4,
+                      right: 4,
+                      child: GestureDetector(
+                        onTap: () => profilController.updateAvatar(),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: _green,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: _bg, width: 2),
+                          ),
+                          child: const Icon(Icons.edit, size: 14, color: _bg),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+                Text(user?.username ?? 'User',
+                    style: const TextStyle(
+                        color: _textPrimary,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800)),
+                const SizedBox(height: 4),
+                Text(profile?.goalFormatted ?? 'Setting up profile...',
+                    style: const TextStyle(color: _textSecondary, fontSize: 13)),
+                const SizedBox(height: 16),
+
+                // Edit button
+                OutlinedButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.edit_outlined, size: 15, color: _purple),
+                  label: const Text('EDIT PROFILE',
+                      style: TextStyle(
+                          color: _purple,
+                          letterSpacing: 1,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold)),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: _purple.withValues(alpha: 0.5)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20)),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                   ),
                 ),
-              ],
-            ),
 
-            const SizedBox(height: 16),
-            const Text('John Doe',
-                style: TextStyle(
-                    color: _textPrimary,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800)),
-            const SizedBox(height: 4),
-            const Text('Fitness Enthusiast · Level 12',
-                style: TextStyle(color: _textSecondary, fontSize: 13)),
-            const SizedBox(height: 10),
+                const SizedBox(height: 28),
 
-            // Rank badge
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
-                color: _green.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: _green.withValues(alpha: 0.3)),
-              ),
-              child: const Text('🏆 Top 50 Global',
-                  style: TextStyle(
-                      color: _green,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12)),
-            ),
+                // ── Stats row (Physical Metrics) ──────────────────
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: _surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: _border),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _statCol('${profile?.weight ?? "-"} kg', 'Weight'),
+                      _divider(),
+                      _statCol('${profile?.height ?? "-"} cm', 'Height'),
+                      _divider(),
+                      _statCol('${profile?.age ?? "-"}', 'Age'),
+                    ],
+                  ),
+                ),
 
-            const SizedBox(height: 20),
+                const SizedBox(height: 24),
 
-            // Edit button
-            OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.edit_outlined, size: 15, color: _purple),
-              label: const Text('EDIT PROFILE',
-                  style: TextStyle(
-                      color: _purple,
-                      letterSpacing: 1,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold)),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: _purple.withValues(alpha: 0.5)),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20)),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-              ),
-            ),
+                // ── Fitness Profile Details ───────────────────────
+                _sectionLabel('FITNESS PROFILE'),
+                const SizedBox(height: 10),
+                if (profile == null)
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: _purple.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: _purple.withValues(alpha: 0.3)),
+                    ),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.fitness_center, color: _purple, size: 40),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Profile Incomplete',
+                          style: TextStyle(color: _textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Set up your fitness profile to get personalized training recommendations.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: _textSecondary, fontSize: 13),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => Get.toNamed(AppRoutes.onboardingGoal),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _purple,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          ),
+                          child: const Text('COMPLETE PROFILE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  _menuGroup([
+                    _profileItem('Goal', profile.goalFormatted),
+                    _profileItem('Intensity', profile.intensity.capitalizeFirst ?? '-'),
+                    _profileItem('Skill Level', profile.skillLevel.capitalizeFirst ?? '-'),
+                    _profileItem('Duration', profile.durationTarget.replaceAll('_', ' ').capitalizeFirst ?? '-'),
+                  ]),
 
-            const SizedBox(height: 28),
+                const SizedBox(height: 28),
 
-            // ── Stats row ────────────────────────────────────
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              decoration: BoxDecoration(
-                color: _surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: _border),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _statCol('148', 'Workouts'),
-                  _divider(),
-                  _statCol('42 kg', 'Total Volume'),
-                  _divider(),
-                  _statCol('#42', 'Global Rank'),
-                ],
-              ),
-            ),
+                // ── Performance Metrics ──────────────────────────
+                _sectionLabel('LIFETIME PERFORMANCE'),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 38,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      _chip(Icons.fitness_center, '${stats?.totalPushUps ?? 0} Push Ups', _purple),
+                      const SizedBox(width: 8),
+                      _chip(Icons.accessibility_new, '${stats?.totalSitUps ?? 0} Sit Ups', _green),
+                    ],
+                  ),
+                ),
 
-            const SizedBox(height: 24),
+                const SizedBox(height: 28),
 
-            // ── Achievements ─────────────────────────────────
-            _sectionLabel('ACHIEVEMENTS'),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 38,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  _chip(Icons.local_fire_department, '7-Day Streak',
-                      const Color(0xFFF59E0B)),
-                  const SizedBox(width: 8),
-                  _chip(Icons.bolt, 'Early Adopter', _purple),
-                  const SizedBox(width: 8),
-                  _chip(Icons.verified_outlined, 'PR Breaker', _green),
-                  const SizedBox(width: 8),
-                  _chip(Icons.emoji_events_outlined, 'Top 50', const Color(0xFFEC4899)),
-                ],
-              ),
-            ),
+                // ── Account section ──────────────────────────────
+                _sectionLabel('ACCOUNT'),
+                const SizedBox(height: 10),
+                _menuGroup([
+                  _menuItem(Icons.person_outline, 'Account Information', () {}),
+                  _menuItem(Icons.history, 'Workout History', () {}),
+                  _menuItem(Icons.lock_outline, 'Privacy & Security', () {}),
+                ]),
 
-            const SizedBox(height: 28),
+                const SizedBox(height: 16),
 
-            // ── Account section ──────────────────────────────
-            _sectionLabel('ACCOUNT'),
-            const SizedBox(height: 10),
-            _menuGroup([
-              _menuItem(Icons.person_outline, 'Account Information', () {}),
-              _menuItem(Icons.history, 'Workout History', () {}),
-              _menuItem(Icons.lock_outline, 'Privacy & Security', () {}),
-            ]),
-
-            const SizedBox(height: 16),
-
-            // ── Preferences section ──────────────────────────
-            _sectionLabel('PREFERENCES'),
-            const SizedBox(height: 10),
-            Obx(() => _menuGroup([
+                // ── Preferences section ──────────────────────────
+                _sectionLabel('PREFERENCES'),
+                const SizedBox(height: 10),
+                _menuGroup([
                   _toggleItem(Icons.notifications_outlined, 'Notifications',
-                      controller.notificationsEnabled.value,
-                      controller.toggleNotifications),
+                      profilController.notificationsEnabled.value,
+                      profilController.toggleNotifications),
                   const Divider(height: 1, color: _border),
                   _toggleItem(Icons.vibration, 'Haptic Feedback',
-                      controller.hapticEnabled.value,
-                      controller.toggleHaptic),
-                ])),
+                      profilController.hapticEnabled.value,
+                      profilController.toggleHaptic),
+                ]),
 
-            const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-            // ── Support section ──────────────────────────────
-            _sectionLabel('SUPPORT'),
-            const SizedBox(height: 10),
-            _menuGroup([
-              _menuItem(Icons.help_outline, 'Help Center', () {}),
-              _menuItem(Icons.info_outline, 'About App', () {}),
-              _menuItem(
-                Icons.logout,
-                'Log Out',
-                () => controller.logout(),
-                accent: Colors.redAccent,
-              ),
-            ]),
-          ],
-        ),
-      ),
+                // ── Support section ──────────────────────────────
+                _sectionLabel('SUPPORT'),
+                const SizedBox(height: 10),
+                _menuGroup([
+                  _menuItem(Icons.help_outline, 'Help Center', () {}),
+                  _menuItem(Icons.info_outline, 'About App', () {}),
+                  _menuItem(
+                    Icons.logout,
+                    'Log Out',
+                    () => profilController.logout(),
+                    accent: Colors.redAccent,
+                  ),
+                ]),
+              ],
+            ),
+          ),
+        );
+      }),
     );
   }
 
@@ -257,6 +317,17 @@ class ProfilPage extends StatelessWidget {
         ),
         child: Column(children: children),
       );
+
+  Widget _profileItem(String label, String value) {
+    return ListTile(
+      title: Text(label,
+          style: const TextStyle(
+              color: _textSecondary, fontWeight: FontWeight.w500, fontSize: 13)),
+      trailing: Text(value,
+          style: const TextStyle(
+              color: _textPrimary, fontWeight: FontWeight.w600, fontSize: 14)),
+    );
+  }
 
   Widget _menuItem(IconData icon, String title, VoidCallback onTap,
       {Color? accent}) {

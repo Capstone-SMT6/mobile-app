@@ -4,6 +4,7 @@ import 'pages/beranda_page.dart';
 import 'pages/laporan_page.dart';
 import 'pages/profil_page.dart';
 import 'controllers/home_controller.dart';
+import 'controllers/user_controller.dart';
 import 'routes/app_routes.dart';
 
 class HomePage extends StatelessWidget {
@@ -12,6 +13,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final HomeController controller = Get.find<HomeController>();
+    final UserController userController = Get.find<UserController>();
 
     const bgColor = Color(0xFF0D0F14);
     const surfaceColor = Color(0xFF1C2030);
@@ -27,35 +29,51 @@ class HomePage extends StatelessWidget {
         automaticallyImplyLeading: false,
         backgroundColor: surfaceColor,
         elevation: 0,
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        title: Obx(
+          () => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             Text(
               'SELAMAT PAGI',
-              style: TextStyle(
-                color: accentGreen,
-                fontSize: 12,
-                letterSpacing: 1.0,
-                fontWeight: FontWeight.bold,
+                style: TextStyle(
+                  color: accentGreen,
+                  fontSize: 12,
+                  letterSpacing: 1.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            Text(
-              'Piresabil Panji Wistyorafi',
-              style: TextStyle(
-                color: textPrimary,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+              Text(
+                userController.user.value?.username ?? 'User',
+                style: const TextStyle(
+                  color: textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         actions: [
           Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              radius: 20,
-              backgroundColor: borderColor,
-              child: Icon(Icons.person, color: textSecondary),
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Obx(
+              () => Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  color: borderColor,
+                  shape: BoxShape.circle,
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: userController.user.value?.photoUrl != null && userController.user.value!.photoUrl!.isNotEmpty
+                    ? Image.network(
+                        userController.user.value!.photoUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.person, color: textSecondary),
+                      )
+                    : const Icon(Icons.person, color: textSecondary),
+              ),
             ),
           ),
         ],
@@ -108,9 +126,9 @@ class HomePage extends StatelessWidget {
                 label: 'Beranda',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.leaderboard_outlined),
-                activeIcon: Icon(Icons.leaderboard),
-                label: 'Peringkat',
+                icon: Icon(Icons.show_chart_outlined),
+                activeIcon: Icon(Icons.show_chart),
+                label: 'Progres',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.fitness_center_outlined),
