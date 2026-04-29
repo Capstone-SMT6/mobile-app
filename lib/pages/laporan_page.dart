@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/laporan_controller.dart';
 import '../controllers/user_controller.dart';
 
 const _bg = Color(0xFF0D0F14);
@@ -18,7 +17,6 @@ class LaporanPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final UserController userController = Get.find<UserController>();
-    final LaporanController laporanController = Get.find<LaporanController>();
 
     return Scaffold(
       backgroundColor: _bg,

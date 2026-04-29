@@ -13,7 +13,7 @@ class DisplayMessage {
 class ChatbotController extends GetxController {
   final RxList<DisplayMessage> messages = <DisplayMessage>[].obs;
   final RxList<ChatSession> sessions = <ChatSession>[].obs;
-  final Rx<int?> sessionId = Rx<int?>(null);
+  final Rx<String?> sessionId = Rx<String?>(null);
   final RxBool isLoadingSessions = false.obs;
   final RxBool isStreaming = false.obs;
   final Rx<String?> streamingText = Rx<String?>(null);
@@ -65,7 +65,7 @@ class ChatbotController extends GetxController {
     }
   }
 
-  Future<void> deleteSession(int id) async {
+  Future<void> deleteSession(String id) async {
     final bool? confirm = await Get.dialog<bool>(
       AlertDialog(
         backgroundColor: const Color(0xFF1E1E2E),

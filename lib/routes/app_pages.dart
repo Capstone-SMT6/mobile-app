@@ -11,7 +11,6 @@ import '../pages/onboarding/onboarding_weight.dart';
 import '../pages/onboarding/onboarding_expertise.dart';
 import '../pages/onboarding/onboarding_intensity.dart';
 import '../pages/onboarding/onboarding_equipment.dart';
-import '../pages/onboarding/onboarding_injury.dart';
 import '../pages/onboarding/onboarding_result.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/chatbot_binding.dart';
@@ -80,12 +79,6 @@ abstract class AppPages {
     GetPage(
       name: AppRoutes.onboardingIntensity,
       page: () => const OnboardingIntensityPage(),
-      customTransition: _carousel,
-      transitionDuration: const Duration(milliseconds: 350),
-    ),
-    GetPage(
-      name: AppRoutes.onboardingInjury,
-      page: () => const OnboardingInjuryPage(),
       customTransition: _carousel,
       transitionDuration: const Duration(milliseconds: 350),
     ),
