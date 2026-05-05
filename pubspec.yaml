@@ -47,6 +47,9 @@ dependencies:
   get: ^4.7.3
   body_part_selector: ^0.2.0
   animations: ^2.2.0
+  google_fonts: ^8.1.0
+  table_calendar: ^3.2.0
+  fl_chart: ^1.2.0
 
 dev_dependencies:
   flutter_test:

@@ -4,13 +4,26 @@ import '../controllers/profil_controller.dart';
 import '../controllers/user_controller.dart';
 import '../routes/app_routes.dart';
 
-const _bg = Color(0xFF0D0F14);
-const _surface = Color(0xFF1C2030);
-const _border = Color(0xFF2A2F45);
+const _bg = Color(0xFF0A0C10);
+const _surface = Color(0xFF161824);
+const _border = Color(0xFF262A3D);
 const _green = Color(0xFF4FFFB0);
 const _purple = Color(0xFF7C6AF7);
 const _textPrimary = Color(0xFFE8EAF2);
-const _textSecondary = Color(0xFF6B7280);
+const _textSecondary = Color(0xFF8B92A5);
+
+final _cardDecoration = BoxDecoration(
+  color: _surface,
+  borderRadius: BorderRadius.circular(20),
+  border: Border.all(color: _border, width: 1.5),
+  boxShadow: [
+    BoxShadow(
+      color: Colors.black.withValues(alpha: 0.2),
+      blurRadius: 20,
+      offset: const Offset(0, 10),
+    ),
+  ],
+);
 
 class ProfilPage extends StatelessWidget {
   const ProfilPage({super.key});
@@ -128,11 +141,7 @@ class ProfilPage extends StatelessWidget {
                 // ── Stats row (Physical Metrics) ──────────────────
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: _surface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: _border),
-                  ),
+                  decoration: _cardDecoration,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -154,9 +163,20 @@ class ProfilPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: _purple.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: _purple.withValues(alpha: 0.3)),
+                      gradient: LinearGradient(
+                        colors: [_purple.withValues(alpha: 0.15), _surface],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: _purple.withValues(alpha: 0.3), width: 1.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _purple.withValues(alpha: 0.05),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
                     child: Column(
                       children: [
@@ -310,11 +330,7 @@ class ProfilPage extends StatelessWidget {
       );
 
   Widget _menuGroup(List<Widget> children) => Container(
-        decoration: BoxDecoration(
-          color: _surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _border),
-        ),
+        decoration: _cardDecoration,
         child: Column(children: children),
       );
 

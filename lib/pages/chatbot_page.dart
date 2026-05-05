@@ -11,18 +11,29 @@ class ChatbotPage extends StatelessWidget {
     final ChatbotController controller = Get.find<ChatbotController>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1A),
+      backgroundColor: const Color(0xFF0A0C10),
       endDrawer: _buildDrawer(controller),
       appBar: AppBar(
-        backgroundColor: Colors.purple.shade800,
+        backgroundColor: const Color(0xFF161824),
         foregroundColor: Colors.white,
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.purple.shade600,
+                gradient: LinearGradient(
+                  colors: [Colors.purple.shade400, Colors.purple.shade700],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.purple.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: const Icon(Icons.smart_toy_outlined, size: 20),
             ),
@@ -96,7 +107,7 @@ class ChatbotPage extends StatelessWidget {
 
   Widget _buildDrawer(ChatbotController controller) {
     return Drawer(
-      backgroundColor: const Color(0xFF1E1E2E),
+      backgroundColor: const Color(0xFF161824),
       child: Column(
         children: [
           DrawerHeader(
@@ -237,13 +248,24 @@ class ChatbotPage extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.purple.shade700,
+                gradient: LinearGradient(
+                  colors: [Colors.purple.shade600, Colors.purple.shade800],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                  bottomLeft: Radius.circular(16),
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                  bottomLeft: Radius.circular(20),
                   bottomRight: Radius.circular(4),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.purple.shade900.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Text(msg.text,
                   style: const TextStyle(
@@ -300,14 +322,21 @@ class ChatbotPage extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E1E2E),
+              color: const Color(0xFF161824),
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
                 bottomLeft: Radius.circular(4),
-                bottomRight: Radius.circular(16),
+                bottomRight: Radius.circular(20),
               ),
-              border: Border.all(color: Colors.white12),
+              border: Border.all(color: const Color(0xFF262A3D)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -393,14 +422,21 @@ class ChatbotPage extends StatelessWidget {
         padding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E1E2E),
+          color: const Color(0xFF161824),
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(16),
-            topRight: Radius.circular(16),
-            bottomRight: Radius.circular(16),
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+            bottomRight: Radius.circular(20),
             bottomLeft: Radius.circular(4),
           ),
-          border: Border.all(color: Colors.white12),
+          border: Border.all(color: const Color(0xFF262A3D)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -419,8 +455,8 @@ class ChatbotPage extends StatelessWidget {
         bottom: MediaQuery.of(context).viewInsets.bottom + 12,
       ),
       decoration: const BoxDecoration(
-        color: Color(0xFF1A1A2E),
-        border: Border(top: BorderSide(color: Colors.white12)),
+        color: Color(0xFF161824),
+        border: Border(top: BorderSide(color: Color(0xFF262A3D))),
       ),
       child: Row(
         children: [
@@ -436,7 +472,7 @@ class ChatbotPage extends StatelessWidget {
                 hintStyle: const TextStyle(
                     color: Colors.white38, fontSize: 14),
                 filled: true,
-                fillColor: const Color(0xFF0F0F1A),
+                fillColor: const Color(0xFF0A0C10),
                 contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16, vertical: 10),
                 border: OutlineInputBorder(

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'pages/beranda_page.dart';
 import 'pages/laporan_page.dart';
 import 'pages/profil_page.dart';
+import 'pages/exercise_list_page.dart';
 import 'controllers/home_controller.dart';
 import 'controllers/user_controller.dart';
 import 'routes/app_routes.dart';
@@ -25,79 +26,14 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: surfaceColor,
-        elevation: 0,
-        title: Obx(
-          () => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-            Text(
-              'SELAMAT PAGI',
-                style: TextStyle(
-                  color: accentGreen,
-                  fontSize: 12,
-                  letterSpacing: 1.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                userController.user.value?.username ?? 'User',
-                style: const TextStyle(
-                  color: textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Obx(
-              () => Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(
-                  color: borderColor,
-                  shape: BoxShape.circle,
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: userController.user.value?.photoUrl != null && userController.user.value!.photoUrl!.isNotEmpty
-                    ? Image.network(
-                        userController.user.value!.photoUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.person, color: textSecondary),
-                      )
-                    : const Icon(Icons.person, color: textSecondary),
-              ),
-            ),
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: borderColor),
-        ),
-      ),
       body: Obx(
         () => IndexedStack(
           index: controller.selectedIndex.value,
           children: [
             BerandaPage(colorScheme: Theme.of(context).colorScheme),
             const LaporanPage(),
-            const Scaffold(
-              body: Center(
-                child: Text('Latihan', style: TextStyle(color: Colors.white)),
-              ),
-            ),
-            const Scaffold(
-              body: Center(
-                child: Text('Sejarah', style: TextStyle(color: Colors.white)),
-              ),
-            ),
+            const ExerciseListPage(),
+
             const ProfilPage(),
           ],
         ),
@@ -135,11 +71,7 @@ class HomePage extends StatelessWidget {
                 activeIcon: Icon(Icons.fitness_center),
                 label: 'Latihan',
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.history),
-                activeIcon: Icon(Icons.history),
-                label: 'Sejarah',
-              ),
+
               BottomNavigationBarItem(
                 icon: Icon(Icons.person_outline),
                 activeIcon: Icon(Icons.person),
