@@ -44,15 +44,16 @@ class ProfilPage extends StatelessWidget {
         final stats = userController.stats.value;
         final profile = userController.fitnessProfile.value;
 
-        return RefreshIndicator(
-          onRefresh: () => userController.refreshData(),
-          color: _purple,
-          backgroundColor: _surface,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 40),
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              children: [
+        return SafeArea(
+          child: RefreshIndicator(
+            onRefresh: () => userController.refreshData(),
+            color: _purple,
+            backgroundColor: _surface,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 32, 16, 40),
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
                 // ── Avatar ──────────────────────────────────────
                 Stack(
                   alignment: Alignment.center,
@@ -275,7 +276,8 @@ class ProfilPage extends StatelessWidget {
               ],
             ),
           ),
-        );
+        ),
+      );
       }),
     );
   }

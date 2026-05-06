@@ -207,21 +207,24 @@ class ChatbotPage extends StatelessWidget {
               alignment: WrapAlignment.center,
               children: [
                 _SuggestionChip(
-                    label: '💪  Proper push-up form',
+                    icon: Icons.fitness_center,
+                    label: 'Proper push-up form',
                     onTap: () {
                       controller.textController.text =
                           'How do I maintain proper push-up form?';
                       controller.send();
                     }),
                 _SuggestionChip(
-                    label: '🥗  Post-workout meal?',
+                    icon: Icons.restaurant_menu,
+                    label: 'Post-workout meal?',
                     onTap: () {
                       controller.textController.text =
                           'What is a good post-workout meal?';
                       controller.send();
                     }),
                 _SuggestionChip(
-                    label: '🏃  Beginner cardio routine',
+                    icon: Icons.directions_run,
+                    label: 'Beginner cardio routine',
                     onTap: () {
                       controller.textController.text =
                           'Can you suggest a beginner cardio routine?';
@@ -559,8 +562,9 @@ class ChatbotPage extends StatelessWidget {
 class _SuggestionChip extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
+  final IconData? icon;
 
-  const _SuggestionChip({required this.label, required this.onTap});
+  const _SuggestionChip({required this.label, required this.onTap, this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -573,8 +577,17 @@ class _SuggestionChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.purple.shade700, width: 1),
         ),
-        child: Text(label,
-            style: TextStyle(color: Colors.purple.shade200, fontSize: 12)),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[  
+              Icon(icon, size: 14, color: Colors.purple.shade300),
+              const SizedBox(width: 6),
+            ],
+            Text(label,
+                style: TextStyle(color: Colors.purple.shade200, fontSize: 12)),
+          ],
+        ),
       ),
     );
   }

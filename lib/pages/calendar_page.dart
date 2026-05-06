@@ -40,7 +40,7 @@ class _CalendarPageState extends State<CalendarPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 📅 CALENDAR
+          // CALENDAR
           Container(
             margin: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 12),
             padding: const EdgeInsets.only(bottom: 12, left: 8, right: 8),
@@ -97,7 +97,7 @@ class _CalendarPageState extends State<CalendarPage> {
             ),
           ),
 
-          // 📋 LIST LATIHAN
+          // LIST LATIHAN
           Expanded(
             child: Container(
               padding: const EdgeInsets.only(left: 20, right: 20, top: 24),

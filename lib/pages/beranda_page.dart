@@ -63,7 +63,7 @@ class HeaderSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${_greeting()}, 👋',
+                  _greeting(),
                   style: const TextStyle(
                     color: Colors.white60,
                     fontSize: 14,

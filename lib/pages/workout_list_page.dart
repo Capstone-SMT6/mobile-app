@@ -209,7 +209,7 @@ class WorkoutListPage extends StatelessWidget {
 
                   final streak = result['streak'] ?? 0;
                   Get.snackbar(
-                    'Workout Selesai! 💪',
+                    'Workout Selesai',
                     streak > 0
                         ? 'Keren! Streak kamu sekarang $streak hari!'
                         : 'Latihan berhasil disimpan!',

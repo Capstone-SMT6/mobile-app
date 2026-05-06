@@ -21,39 +21,52 @@ class LaporanPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: _bg,
-      body: SafeArea( // Tambahkan SafeArea agar tidak tertutup notch/status bar
+      body: SafeArea(
         child: Obx(() {
           final stats = c.stats.value;
 
           return ListView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             children: [
-              /// 🔥 HERO (CTA)
+              // PAGE HEADER
+              const Padding(
+                padding: EdgeInsets.only(bottom: 24),
+                child: Text(
+                  'Progress',
+                  style: TextStyle(
+                    color: Color(0xFFE8EAF2),
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+              // HERO (CTA)
               _heroSection(stats),
 
               const SizedBox(height: 24),
 
-              /// 🧠 AI INSIGHT
+              // AI INSIGHT
               _insightCard(),
 
               const SizedBox(height: 20),
 
-              /// ⚠️ FOCUS TODAY
+              // FOCUS TODAY
               _focusCard(),
 
               const SizedBox(height: 24),
 
-              /// 🏆 PERSONAL BEST
+              // PERSONAL BEST
               _personalBest(stats),
 
               const SizedBox(height: 24),
 
-              /// 📈 WEEKLY
+              // WEEKLY
               _weeklyChart(),
 
               const SizedBox(height: 24),
 
-              /// 🎯 GOALS
+              // GOALS
               _goals(),
 
               const SizedBox(height: 32),
@@ -64,7 +77,7 @@ class LaporanPage extends StatelessWidget {
     );
   }
 
-  // 🔥 HERO SECTION
+  // HERO SECTION
   Widget _heroSection(stats) {
     final streak = stats?.currentStreak ?? 0;
     return Container(
@@ -93,9 +106,20 @@ class LaporanPage extends StatelessWidget {
               color: Colors.white24,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Text(
-              streak > 0 ? '🔥 $streak Day Streak!' : '🌱 Start your streak today!',
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  streak > 0 ? Icons.local_fire_department : Icons.eco,
+                  size: 16,
+                  color: streak > 0 ? Colors.orangeAccent : Colors.greenAccent,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  streak > 0 ? '$streak Day Streak' : 'Mulai streak kamu hari ini',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
@@ -127,7 +151,7 @@ class LaporanPage extends StatelessWidget {
     );
   }
 
-  // 🧠 INSIGHT
+  // INSIGHT
   Widget _insightCard() {
     return _card(
       child: Column(
@@ -153,7 +177,7 @@ class LaporanPage extends StatelessWidget {
     );
   }
 
-  // ⚠️ FOCUS
+  // FOCUS
   Widget _focusCard() {
     return _card(
       child: Column(
@@ -176,7 +200,7 @@ class LaporanPage extends StatelessWidget {
     );
   }
 
-  // 🏆 PERSONAL BEST
+  // PERSONAL BEST
   Widget _personalBest(stats) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,7 +244,7 @@ class LaporanPage extends StatelessWidget {
     );
   }
 
-  // 📈 WEEKLY
+  // WEEKLY
   Widget _weeklyChart() {
     final vals = [0.6, 0.3, 0.85, 0.4, 0.95, 0.5, 0.2];
     final days = ["M", "T", "W", "T", "F", "S", "S"];
@@ -259,7 +283,7 @@ class LaporanPage extends StatelessWidget {
     );
   }
 
-  // 🎯 GOALS
+  // GOALS
   Widget _goals() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,7 +329,7 @@ class LaporanPage extends StatelessWidget {
     );
   }
 
-  // 🧱 CARD
+  // CARD
   Widget _card({required Widget child}) {
     return Container(
       width: double.infinity,

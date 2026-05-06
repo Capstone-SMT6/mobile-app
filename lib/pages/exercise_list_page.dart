@@ -163,7 +163,7 @@ class ExerciseDetailPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          // 🎥 GIF
+          // GIF
           Container(
             height: 250,
             width: double.infinity,
@@ -193,7 +193,7 @@ class ExerciseDetailPage extends StatelessWidget {
 
           const SizedBox(height: 32),
 
-          // 📌 DESCRIPTION
+          // DESCRIPTION
           _card(
             title: "Description",
             icon: Icons.info_outline_rounded,
@@ -206,7 +206,7 @@ class ExerciseDetailPage extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // 💪 MUSCLE
+          // MUSCLE
           _card(
             title: "Target Muscle",
             icon: Icons.fitness_center_rounded,
@@ -219,7 +219,7 @@ class ExerciseDetailPage extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // ✅ TIPS
+          // TIPS
           _card(
             title: "Pro Tips",
             icon: Icons.check_circle_outline_rounded,
@@ -247,7 +247,7 @@ class ExerciseDetailPage extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // ❌ MISTAKES
+          // MISTAKES
           _card(
             title: "Common Mistakes",
             icon: Icons.warning_amber_rounded,
@@ -275,7 +275,7 @@ class ExerciseDetailPage extends StatelessWidget {
 
           const SizedBox(height: 32),
 
-          // 🔥 BUTTON
+          // BUTTON
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(

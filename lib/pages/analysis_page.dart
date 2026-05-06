@@ -31,7 +31,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          // 📊 CHART CARD
+          // CHART CARD
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
@@ -176,12 +176,12 @@ class _AnalysisPageState extends State<AnalysisPage> {
 
           const SizedBox(height: 24),
 
-          // 🔥 SUMMARY CARD
+          // SUMMARY CARD
           summaryCard(),
 
           const SizedBox(height: 24),
 
-          // ⚠️ ERROR INSIGHT
+          // ERROR INSIGHT
           errorInsightCard(),
         ],
       ),
@@ -209,7 +209,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
     );
   }
 
-  // 📋 SUMMARY
+  // SUMMARY
   Widget summaryCard() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -260,7 +260,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
     );
   }
 
-  // ⚠️ ERROR INSIGHT
+  // ERROR INSIGHT
   Widget errorInsightCard() {
     return Container(
       padding: const EdgeInsets.all(24),
