@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../services/workout_service.dart';
-import '../controllers/user_controller.dart';
+import 'warmup_page.dart';
 
 class WorkoutListPage extends StatelessWidget {
   const WorkoutListPage({super.key});
@@ -191,45 +190,12 @@ class WorkoutListPage extends StatelessWidget {
                 elevation: 8,
                 shadowColor: const Color(0xFF6CC551).withOpacity(0.4),
               ),
-              onPressed: () async {
-                try {
-                  // Simpan sesi ke backend dengan log latihan
-                  final result = await WorkoutService.saveSession(
-                    durationSeconds: 0,
-                    logs: [
-                      {'exercise_name': 'Push Up', 'set_number': 1, 'reps_completed': 20},
-                      {'exercise_name': 'Push Up', 'set_number': 2, 'reps_completed': 20},
-                      {'exercise_name': 'Pull Up', 'set_number': 1, 'reps_completed': 10},
-                      {'exercise_name': 'Plank', 'set_number': 1, 'reps_completed': 30},
-                    ],
-                  );
-
-                  // Refresh data user agar streak terupdate di Beranda
-                  await Get.find<UserController>().refreshData();
-
-                  final streak = result['streak'] ?? 0;
-                  Get.snackbar(
-                    'Workout Selesai',
-                    streak > 0
-                        ? 'Keren! Streak kamu sekarang $streak hari!'
-                        : 'Latihan berhasil disimpan!',
-                    backgroundColor: const Color(0xFF222434),
-                    colorText: Colors.white,
-                    snackPosition: SnackPosition.BOTTOM,
-                    margin: const EdgeInsets.all(16),
-                    icon: const Icon(Icons.check_circle, color: Color(0xFF6CC551)),
-                    duration: const Duration(seconds: 3),
-                  );
-                } catch (e) {
-                  Get.snackbar(
-                    'Gagal menyimpan',
-                    'Pastikan koneksi ke server aktif.',
-                    backgroundColor: const Color(0xFF2A1A1A),
-                    colorText: Colors.redAccent,
-                    snackPosition: SnackPosition.BOTTOM,
-                    margin: const EdgeInsets.all(16),
-                  );
-                }
+              onPressed: () {
+                Get.to(
+                  () => const WarmupPage(),
+                  transition: Transition.fadeIn,
+                  duration: const Duration(milliseconds: 500),
+                );
               },
               child: const Text(
                 "Start Workout",
