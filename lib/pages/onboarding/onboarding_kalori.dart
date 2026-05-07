@@ -2,24 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
 
-class OnboardingIntensityPage extends StatefulWidget {
-  const OnboardingIntensityPage({super.key});
+class OnboardingKaloriPage extends StatefulWidget {
+  const OnboardingKaloriPage({super.key});
 
   @override
-  State<OnboardingIntensityPage> createState() =>
-      _OnboardingIntensityPageState();
+  State<OnboardingKaloriPage> createState() => _OnboardingKaloriPageState();
 }
 
-class _OnboardingIntensityPageState extends State<OnboardingIntensityPage> {
-  String selectedIntensity = '';
+class _OnboardingKaloriPageState extends State<OnboardingKaloriPage> {
+  String selectedKalori = '';
 
   Widget _buildOptionCard(String title, String subtitle) {
-    final bool isSelected = selectedIntensity == title;
+    final bool isSelected = selectedKalori == title;
 
     return GestureDetector(
       onTap: () {
         setState(() {
-          selectedIntensity = title;
+          selectedKalori = title;
         });
       },
       child: Container(
@@ -78,57 +77,57 @@ class _OnboardingIntensityPageState extends State<OnboardingIntensityPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 24.0),
                       child: Column(
                         children: [
-                    const SizedBox(height: 24),
-                    // Logo
-                    RichText(
-                      text: const TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'Sma',
+                          const SizedBox(height: 24),
+                          // Logo
+                          RichText(
+                            text: const TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Sma',
+                                  style: TextStyle(
+                                    fontSize: 56,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    letterSpacing: -1.0,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: 'Fit',
+                                  style: TextStyle(
+                                    fontSize: 56,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF6CC551),
+                                    letterSpacing: -1.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "Rancang Rencana Kamu Sendiri",
                             style: TextStyle(
-                              fontSize: 56,
-                              fontWeight: FontWeight.w800,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
                               color: Colors.white,
-                              letterSpacing: -1.0,
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                          TextSpan(
-                            text: 'Fit',
+                          const SizedBox(height: 8),
+                          const Text(
+                            "Berapa target konsumsi kalori harianmu?",
                             style: TextStyle(
-                              fontSize: 56,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF6CC551),
-                              letterSpacing: -1.0,
+                              fontSize: 16,
+                              color: Colors.white70,
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      "Rancang Rencana Kamu Sendiri",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      "Seberapa sering kamu berlatih?",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 48),
+                          const SizedBox(height: 48),
 
-                    // Options
-                    _buildOptionCard("Rendah", "3 hari/minggu"),
-                    _buildOptionCard("Sedang", "4 hari/minggu"),
-                    _buildOptionCard("Tinggi", "5-6 hari/minggu"),
+                          // Options
+                          _buildOptionCard("Rendah", "< 1500 kcal / hari"),
+                          _buildOptionCard("Sedang", "1500 - 2000 kcal / hari"),
+                          _buildOptionCard("Tinggi", "> 2000 kcal / hari"),
                         ],
                       ),
                     ),
@@ -165,11 +164,11 @@ class _OnboardingIntensityPageState extends State<OnboardingIntensityPage> {
                       ),
                     ),
                     TextButton(
-                      onPressed: selectedIntensity.isNotEmpty
-                          ? () => Get.toNamed(AppRoutes.onboardingKalori)
+                      onPressed: selectedKalori.isNotEmpty
+                          ? () => Get.toNamed(AppRoutes.onboardingResult)
                           : null,
                       style: TextButton.styleFrom(
-                        backgroundColor: const Color(0xFF222434),
+                        backgroundColor: selectedKalori.isNotEmpty ? const Color(0xFF6CC551) : const Color(0xFF222434),
                         foregroundColor: Colors.white,
                         disabledBackgroundColor: const Color(0xFF171925),
                         disabledForegroundColor: Colors.white38,
@@ -183,9 +182,9 @@ class _OnboardingIntensityPageState extends State<OnboardingIntensityPage> {
                         ),
                       ),
                       child: const Text(
-                        "Selanjutnya",
+                        "Selesai",
                         style:
-                            TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                            TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                       ),
                     ),
                   ],
@@ -193,7 +192,7 @@ class _OnboardingIntensityPageState extends State<OnboardingIntensityPage> {
 
                 const SizedBox(height: 48),
 
-                // Pagination Dots (assume 8 pages, this is 7th)
+                // Pagination Dots (8th page)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(9, (i) {
@@ -203,7 +202,7 @@ class _OnboardingIntensityPageState extends State<OnboardingIntensityPage> {
                       height: 8,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: i == 6 ? Colors.white : Colors.white24,
+                        color: i == 7 ? Colors.white : Colors.white24,
                       ),
                     );
                   }),

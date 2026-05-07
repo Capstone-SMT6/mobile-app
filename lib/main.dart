@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'firebase_options.dart';
 import 'controllers/auth_controller.dart';
 import 'controllers/user_controller.dart';
@@ -24,10 +25,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Flutter App',
+      title: 'Smart Coach',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF4FFFB0),
+          brightness: Brightness.dark,
+        ),
+        textTheme: GoogleFonts.outfitTextTheme(Theme.of(context).textTheme).apply(
+          bodyColor: const Color(0xFFE8EAF2),
+          displayColor: Colors.white,
+        ),
         useMaterial3: true,
       ),
       initialRoute: AppRoutes.login,

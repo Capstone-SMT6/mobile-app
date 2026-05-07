@@ -11,18 +11,29 @@ class ChatbotPage extends StatelessWidget {
     final ChatbotController controller = Get.find<ChatbotController>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1A),
+      backgroundColor: const Color(0xFF0A0C10),
       endDrawer: _buildDrawer(controller),
       appBar: AppBar(
-        backgroundColor: Colors.purple.shade800,
+        backgroundColor: const Color(0xFF161824),
         foregroundColor: Colors.white,
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.purple.shade600,
+                gradient: LinearGradient(
+                  colors: [Colors.purple.shade400, Colors.purple.shade700],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.purple.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: const Icon(Icons.smart_toy_outlined, size: 20),
             ),
@@ -96,7 +107,7 @@ class ChatbotPage extends StatelessWidget {
 
   Widget _buildDrawer(ChatbotController controller) {
     return Drawer(
-      backgroundColor: const Color(0xFF1E1E2E),
+      backgroundColor: const Color(0xFF161824),
       child: Column(
         children: [
           DrawerHeader(
@@ -196,21 +207,24 @@ class ChatbotPage extends StatelessWidget {
               alignment: WrapAlignment.center,
               children: [
                 _SuggestionChip(
-                    label: '💪  Proper push-up form',
+                    icon: Icons.fitness_center,
+                    label: 'Proper push-up form',
                     onTap: () {
                       controller.textController.text =
                           'How do I maintain proper push-up form?';
                       controller.send();
                     }),
                 _SuggestionChip(
-                    label: '🥗  Post-workout meal?',
+                    icon: Icons.restaurant_menu,
+                    label: 'Post-workout meal?',
                     onTap: () {
                       controller.textController.text =
                           'What is a good post-workout meal?';
                       controller.send();
                     }),
                 _SuggestionChip(
-                    label: '🏃  Beginner cardio routine',
+                    icon: Icons.directions_run,
+                    label: 'Beginner cardio routine',
                     onTap: () {
                       controller.textController.text =
                           'Can you suggest a beginner cardio routine?';
@@ -237,13 +251,24 @@ class ChatbotPage extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.purple.shade700,
+                gradient: LinearGradient(
+                  colors: [Colors.purple.shade600, Colors.purple.shade800],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                  bottomLeft: Radius.circular(16),
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                  bottomLeft: Radius.circular(20),
                   bottomRight: Radius.circular(4),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.purple.shade900.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Text(msg.text,
                   style: const TextStyle(
@@ -300,14 +325,21 @@ class ChatbotPage extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E1E2E),
+              color: const Color(0xFF161824),
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
                 bottomLeft: Radius.circular(4),
-                bottomRight: Radius.circular(16),
+                bottomRight: Radius.circular(20),
               ),
-              border: Border.all(color: Colors.white12),
+              border: Border.all(color: const Color(0xFF262A3D)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -393,14 +425,21 @@ class ChatbotPage extends StatelessWidget {
         padding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E1E2E),
+          color: const Color(0xFF161824),
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(16),
-            topRight: Radius.circular(16),
-            bottomRight: Radius.circular(16),
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+            bottomRight: Radius.circular(20),
             bottomLeft: Radius.circular(4),
           ),
-          border: Border.all(color: Colors.white12),
+          border: Border.all(color: const Color(0xFF262A3D)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -419,8 +458,8 @@ class ChatbotPage extends StatelessWidget {
         bottom: MediaQuery.of(context).viewInsets.bottom + 12,
       ),
       decoration: const BoxDecoration(
-        color: Color(0xFF1A1A2E),
-        border: Border(top: BorderSide(color: Colors.white12)),
+        color: Color(0xFF161824),
+        border: Border(top: BorderSide(color: Color(0xFF262A3D))),
       ),
       child: Row(
         children: [
@@ -436,7 +475,7 @@ class ChatbotPage extends StatelessWidget {
                 hintStyle: const TextStyle(
                     color: Colors.white38, fontSize: 14),
                 filled: true,
-                fillColor: const Color(0xFF0F0F1A),
+                fillColor: const Color(0xFF0A0C10),
                 contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16, vertical: 10),
                 border: OutlineInputBorder(
@@ -523,8 +562,9 @@ class ChatbotPage extends StatelessWidget {
 class _SuggestionChip extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
+  final IconData? icon;
 
-  const _SuggestionChip({required this.label, required this.onTap});
+  const _SuggestionChip({required this.label, required this.onTap, this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -537,8 +577,17 @@ class _SuggestionChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.purple.shade700, width: 1),
         ),
-        child: Text(label,
-            style: TextStyle(color: Colors.purple.shade200, fontSize: 12)),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[  
+              Icon(icon, size: 14, color: Colors.purple.shade300),
+              const SizedBox(width: 6),
+            ],
+            Text(label,
+                style: TextStyle(color: Colors.purple.shade200, fontSize: 12)),
+          ],
+        ),
       ),
     );
   }

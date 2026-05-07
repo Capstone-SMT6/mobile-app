@@ -10,7 +10,7 @@ import '../pages/onboarding/onboarding_height.dart';
 import '../pages/onboarding/onboarding_weight.dart';
 import '../pages/onboarding/onboarding_expertise.dart';
 import '../pages/onboarding/onboarding_intensity.dart';
-import '../pages/onboarding/onboarding_equipment.dart';
+import '../pages/onboarding/onboarding_kalori.dart';
 import '../pages/onboarding/onboarding_result.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/chatbot_binding.dart';
@@ -83,8 +83,8 @@ abstract class AppPages {
       transitionDuration: const Duration(milliseconds: 350),
     ),
     GetPage(
-      name: AppRoutes.onboardingEquipment,
-      page: () => const OnboardingEquipmentPage(),
+      name: AppRoutes.onboardingKalori,
+      page: () => const OnboardingKaloriPage(),
       customTransition: _carousel,
       transitionDuration: const Duration(milliseconds: 350),
     ),
