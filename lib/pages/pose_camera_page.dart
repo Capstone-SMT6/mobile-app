@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import '../services/pose_detector_service.dart';
 import 'warmup_page.dart';
 
@@ -29,22 +32,90 @@ class _PoseCameraPageState extends State<PoseCameraPage>
   bool _isFrontCamera = false;
 
   // ── ML Kit ────────────────────────────────────────────────
-  final _service = PoseDetectorService();
-  bool _isProcessing = false;  // throttle: skip frame jika masih proses
-  PushUpAnalysis? _lastAnalysis;
+  final _pushUpService = PoseDetectorService();
+  final _sitUpService  = SitUpDetectorService();
+  final _squatService  = SquatDetectorService();
+  bool _isProcessing = false;
+
+  // Union result — hanya satu yang non-null sesuai exerciseType
+  PushUpAnalysis? _pushUpAnalysis;
+  SitUpAnalysis?  _sitUpAnalysis;
+  SquatAnalysis?  _squatAnalysis;
+
+  // ── Shortcut getters (Dart switch expression — 3-way dispatch) ──
+  int get _repCount => switch (widget.exercise.exerciseType) {
+    'situp' => _sitUpAnalysis?.repCount ?? 0,
+    'squat' => _squatAnalysis?.repCount ?? 0,
+    _       => _pushUpAnalysis?.repCount ?? 0,
+  };
+  String get _stage => switch (widget.exercise.exerciseType) {
+    'situp' => _sitUpAnalysis?.stage ?? 'down',
+    'squat' => _squatAnalysis?.stage ?? 'up',
+    _       => _pushUpAnalysis?.stage ?? 'up',
+  };
+  String get _feedback => switch (widget.exercise.exerciseType) {
+    'situp' => _sitUpAnalysis?.feedback ?? 'Mendeteksi pose...',
+    'squat' => _squatAnalysis?.feedback ?? 'Mendeteksi pose...',
+    _       => _pushUpAnalysis?.feedback ?? 'Mendeteksi pose...',
+  };
+  bool get _isGoodPosture => switch (widget.exercise.exerciseType) {
+    'situp' => _sitUpAnalysis?.isGoodPosture ?? false,
+    'squat' => _squatAnalysis?.isGoodPosture ?? false,
+    _       => _pushUpAnalysis?.isGoodPosture ?? false,
+  };
+  // Squat adalah gerakan berdiri — tidak ada cek horizontal,
+  // selalu true agar overlay "Silakan berbaring" tidak muncul.
+  bool get _isHorizontal => switch (widget.exercise.exerciseType) {
+    'situp' => _sitUpAnalysis?.isHorizontal ?? false,
+    'squat' => true,   // squat = standing, skip horizontal guard
+    _       => _pushUpAnalysis?.isHorizontal ?? false,
+  };
+  List<Pose> get _poses => switch (widget.exercise.exerciseType) {
+    'situp' => _sitUpAnalysis?.poses ?? [],
+    'squat' => _squatAnalysis?.poses ?? [],
+    _       => _pushUpAnalysis?.poses ?? [],
+  };
+  bool get _hasAnalysis => switch (widget.exercise.exerciseType) {
+    'situp' => _sitUpAnalysis != null,
+    'squat' => _squatAnalysis != null,
+    _       => _pushUpAnalysis != null,
+  };
 
   // ── Image dimensions (untuk pose overlay) ─────────────────
   Size _imageSize = Size.zero;
 
+  // ── Gyroscope / Accelerometer ─────────────────────────────
+  StreamSubscription<AccelerometerEvent>? _accelSub;
+  bool _isDeviceLandscape = false; // deteksi dari sensor
+
   // ── Animations ────────────────────────────────────────────
   late AnimationController _feedbackCtrl;
   late Animation<double> _feedbackScale;
+  late AnimationController _rotateHintCtrl;
+  late Animation<double> _rotateHintAnim;
 
   @override
   void initState() {
     super.initState();
-    _service.init();
-    _service.reset(); // reset counter tiap buka page
+
+    // Inisialisasi service sesuai tipe latihan
+    switch (widget.exercise.exerciseType) {
+      case 'situp':
+        _sitUpService.init();
+        _sitUpService.reset();
+      case 'squat':
+        _squatService.init();
+        _squatService.reset();
+      default:
+        _pushUpService.init();
+        _pushUpService.reset();
+    }
+
+    // Lock ke landscape — optimal untuk push-up / plank dari samping
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
 
     _feedbackCtrl = AnimationController(
       vsync: this,
@@ -53,6 +124,26 @@ class _PoseCameraPageState extends State<PoseCameraPage>
     _feedbackScale = Tween(begin: 0.9, end: 1.0).animate(
       CurvedAnimation(parent: _feedbackCtrl, curve: Curves.elasticOut),
     );
+
+    // Animasi hint putar layar (bounce)
+    _rotateHintCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+    _rotateHintAnim = Tween(begin: -0.12, end: 0.12).animate(
+      CurvedAnimation(parent: _rotateHintCtrl, curve: Curves.easeInOut),
+    );
+
+    // Subscribe accelerometer untuk deteksi orientasi real-time
+    _accelSub = accelerometerEventStream(
+      samplingPeriod: const Duration(milliseconds: 300),
+    ).listen((AccelerometerEvent event) {
+      // |x| > |y| berarti device sedang landscape
+      final landscape = event.x.abs() > event.y.abs();
+      if (landscape != _isDeviceLandscape && mounted) {
+        setState(() => _isDeviceLandscape = landscape);
+      }
+    });
 
     _initCamera();
   }
@@ -115,38 +206,43 @@ class _PoseCameraPageState extends State<PoseCameraPage>
 
   // ─── PROCESS SETIAP FRAME KAMERA → ML Kit ─────────────────
   Future<void> _processFrame(CameraImage image) async {
-    // Throttle: lewati frame jika masih memproses
     if (_isProcessing || !mounted) return;
     _isProcessing = true;
 
     try {
-      final sensorOrientation =
-          _cameraCtrl!.description.sensorOrientation;
+      final sensorOrientation = _cameraCtrl!.description.sensorOrientation;
 
-      // Simpan ukuran image untuk koordinat overlay
       if (_imageSize == Size.zero) {
         _imageSize = Size(image.width.toDouble(), image.height.toDouble());
       }
 
-      // Konversi CameraImage → InputImage
       final inputImage = cameraImageToInputImage(
-        image,
-        sensorOrientation,
-        _isFrontCamera,
-      );
+        image, sensorOrientation, _isFrontCamera);
       if (inputImage == null) return;
 
-      // Jalankan pose detection on-device
-      final analysis = await _service.processImage(inputImage);
-
-      if (mounted && analysis != null) {
-        final prevReps = _lastAnalysis?.repCount ?? 0;
-        setState(() => _lastAnalysis = analysis);
-
-        // Animasi feedback saat rep baru
-        if (analysis.repCount > prevReps) {
-          _feedbackCtrl.forward(from: 0);
-        }
+      // Dispatch ke service yang sesuai
+      switch (widget.exercise.exerciseType) {
+        case 'situp':
+          final analysis = await _sitUpService.processImage(inputImage);
+          if (mounted && analysis != null) {
+            final prev = _sitUpAnalysis?.repCount ?? 0;
+            setState(() => _sitUpAnalysis = analysis);
+            if (analysis.repCount > prev) _feedbackCtrl.forward(from: 0);
+          }
+        case 'squat':
+          final analysis = await _squatService.processImage(inputImage);
+          if (mounted && analysis != null) {
+            final prev = _squatAnalysis?.repCount ?? 0;
+            setState(() => _squatAnalysis = analysis);
+            if (analysis.repCount > prev) _feedbackCtrl.forward(from: 0);
+          }
+        default:
+          final analysis = await _pushUpService.processImage(inputImage);
+          if (mounted && analysis != null) {
+            final prev = _pushUpAnalysis?.repCount ?? 0;
+            setState(() => _pushUpAnalysis = analysis);
+            if (analysis.repCount > prev) _feedbackCtrl.forward(from: 0);
+          }
       }
     } finally {
       _isProcessing = false;
@@ -160,9 +256,18 @@ class _PoseCameraPageState extends State<PoseCameraPage>
 
   @override
   void dispose() {
+    // Kembalikan orientasi ke semua arah saat keluar
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    _accelSub?.cancel();
     _cameraCtrl?.stopImageStream();
     _cameraCtrl?.dispose();
     _feedbackCtrl.dispose();
+    _rotateHintCtrl.dispose();
     super.dispose();
   }
 
@@ -177,7 +282,7 @@ class _PoseCameraPageState extends State<PoseCameraPage>
           _buildCameraLayer(),
 
           // ── LAYER 2: Pose skeleton overlay ──────────────
-          if (_cameraReady && _lastAnalysis != null)
+          if (_cameraReady && _hasAnalysis)
             _buildPoseOverlay(),
 
           // ── LAYER 3: Top gradient ────────────────────────
@@ -215,6 +320,9 @@ class _PoseCameraPageState extends State<PoseCameraPage>
             alignment: Alignment.bottomCenter,
             child: _buildBottomPanel(),
           ),
+
+          // ── LAYER 7: Rotate hint (sensor-driven) ─────────
+          if (!_isDeviceLandscape) _buildRotateHint(),
         ],
       ),
     );
@@ -256,19 +364,19 @@ class _PoseCameraPageState extends State<PoseCameraPage>
   Widget _buildPoseOverlay() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final screenSize =
-            Size(constraints.maxWidth, constraints.maxHeight);
+        final screenSize = Size(constraints.maxWidth, constraints.maxHeight);
         return CustomPaint(
           size: screenSize,
           painter: PosePainter(
-            poses: _lastAnalysis!.poses,
+            poses: _poses,
             imageSize: _imageSize,
             screenSize: screenSize,
             isFrontCamera: _isFrontCamera,
             sensorOrientation:
                 _cameraCtrl?.description.sensorOrientation ?? 90,
-            feedback: _lastAnalysis!.feedback,
-            isGoodPosture: _lastAnalysis!.isGoodPosture,
+            feedback: _feedback,
+            isGoodPosture: _isGoodPosture,
+            exerciseType: widget.exercise.exerciseType,
           ),
         );
       },
@@ -342,8 +450,6 @@ class _PoseCameraPageState extends State<PoseCameraPage>
 
   // ─── BOTTOM PANEL ──────────────────────────────────────────
   Widget _buildBottomPanel() {
-    final analysis = _lastAnalysis;
-
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
@@ -364,39 +470,62 @@ class _PoseCameraPageState extends State<PoseCameraPage>
                   // REPS counter
                   _StatBox(
                     label: 'REPS',
-                    value: '${analysis?.repCount ?? 0}',
+                    value: '$_repCount',
                     color: const Color(0xFF6CC551),
                     large: true,
                   ),
-                  // Divider
-                  Container(
-                      width: 1, height: 48, color: Colors.white12),
+                  Container(width: 1, height: 48, color: Colors.white12),
                   // STAGE
                   _StatBox(
                     label: 'STAGE',
-                    value: (analysis?.stage ?? 'up').toUpperCase(),
-                    color: analysis?.stage == 'down'
+                    value: _stage.toUpperCase(),
+                    color: _stage == 'down'
                         ? const Color(0xFFF76A6A)
                         : Colors.white,
                   ),
-                  Container(
-                      width: 1, height: 48, color: Colors.white12),
-                  // Elbow angle
-                  _StatBox(
-                    label: 'SIKU',
-                    value:
-                        '${analysis?.elbowAngle.toStringAsFixed(0) ?? '--'}°',
-                    color: Colors.white70,
-                  ),
-                  Container(
-                      width: 1, height: 48, color: Colors.white12),
-                  // Hip angle
-                  _StatBox(
-                    label: 'PINGGUL',
-                    value:
-                        '${analysis?.hipAngle.toStringAsFixed(0) ?? '--'}°',
-                    color: Colors.white70,
-                  ),
+                   Container(width: 1, height: 48, color: Colors.white12),
+                  // Sudut primer: adaptive per exercise type
+                  if (widget.exercise.exerciseType == 'situp') ...[
+                    _StatBox(
+                      label: 'BADAN',
+                      value: '${_sitUpAnalysis?.bodyAngle.toStringAsFixed(0) ?? '--'}°',
+                      color: Colors.white70,
+                    ),
+                    Container(width: 1, height: 48, color: Colors.white12),
+                    _StatBox(
+                      label: 'LEHER',
+                      value: '${_sitUpAnalysis?.neckAngle.toStringAsFixed(0) ?? '--'}°',
+                      color: (_sitUpAnalysis?.neckAngle ?? 99) < 35
+                          ? const Color(0xFFF0A500)
+                          : Colors.white70,
+                    ),
+                  ] else if (widget.exercise.exerciseType == 'squat') ...[
+                    _StatBox(
+                      label: 'LUTUT',
+                      value: '${_squatAnalysis?.kneeAngle.toStringAsFixed(0) ?? '--'}°',
+                      color: Colors.white70,
+                    ),
+                    Container(width: 1, height: 48, color: Colors.white12),
+                    _StatBox(
+                      label: 'PUNGGUNG',
+                      value: '${_squatAnalysis?.backAngle.toStringAsFixed(0) ?? '--'}°',
+                      color: (_squatAnalysis?.backAngle ?? 180) < 130
+                          ? const Color(0xFFF0A500)
+                          : Colors.white70,
+                    ),
+                  ] else ...[
+                    _StatBox(
+                      label: 'SIKU',
+                      value: '${_pushUpAnalysis?.elbowAngle.toStringAsFixed(0) ?? '--'}°',
+                      color: Colors.white70,
+                    ),
+                    Container(width: 1, height: 48, color: Colors.white12),
+                    _StatBox(
+                      label: 'PINGGUL',
+                      value: '${_pushUpAnalysis?.hipAngle.toStringAsFixed(0) ?? '--'}°',
+                      color: Colors.white70,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -412,29 +541,32 @@ class _PoseCameraPageState extends State<PoseCameraPage>
                 padding: const EdgeInsets.symmetric(
                     horizontal: 20, vertical: 12),
                 decoration: BoxDecoration(
-                  color: analysis == null
+                  color: !_hasAnalysis
                       ? Colors.black54
-                      : analysis.isGoodPosture
-                          ? const Color(0xFF6CC551).withValues(alpha:0.85)
-                          : const Color(0xFFF76A6A).withValues(alpha:0.85),
+                      : !_isHorizontal
+                          ? const Color(0xFFF0A500).withValues(alpha: 0.9)
+                          : _isGoodPosture
+                              ? const Color(0xFF6CC551).withValues(alpha: 0.85)
+                              : const Color(0xFFF76A6A).withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      analysis == null
+                      !_hasAnalysis
                           ? Icons.sensors_rounded
-                          : analysis.isGoodPosture
-                              ? Icons.check_circle_rounded
-                              : Icons.warning_rounded,
+                          : !_isHorizontal
+                              ? Icons.accessibility_new_rounded
+                              : _isGoodPosture
+                                  ? Icons.check_circle_rounded
+                                  : Icons.warning_rounded,
                       color: Colors.white,
                       size: 18,
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      analysis?.feedback ??
-                          'Mendeteksi pose...',
+                      _hasAnalysis ? _feedback : 'Mendeteksi pose...',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 15,
@@ -470,8 +602,17 @@ class _PoseCameraPageState extends State<PoseCameraPage>
                 const SizedBox(width: 10),
                 GestureDetector(
                   onTap: () {
-                    _service.reset();
-                    setState(() => _lastAnalysis = null);
+                    switch (widget.exercise.exerciseType) {
+                      case 'situp':
+                        _sitUpService.reset();
+                        setState(() => _sitUpAnalysis = null);
+                      case 'squat':
+                        _squatService.reset();
+                        setState(() => _squatAnalysis = null);
+                      default:
+                        _pushUpService.reset();
+                        setState(() => _pushUpAnalysis = null);
+                    }
                   },
                   child: Container(
                     padding: const EdgeInsets.all(12),
@@ -500,6 +641,65 @@ class _PoseCameraPageState extends State<PoseCameraPage>
       ),
     );
   }
+
+  // ─── ROTATE HINT OVERLAY (sensor-driven) ──────────────────
+  Widget _buildRotateHint() {
+    return AnimatedOpacity(
+      opacity: _isDeviceLandscape ? 0.0 : 1.0,
+      duration: const Duration(milliseconds: 400),
+      child: Container(
+        color: Colors.black.withValues(alpha: 0.72),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Ikon putar dengan animasi bounce
+              AnimatedBuilder(
+                animation: _rotateHintAnim,
+                builder: (_, __) => Transform.rotate(
+                  angle: _rotateHintAnim.value,
+                  child: const Icon(
+                    Icons.screen_rotation_rounded,
+                    color: Color(0xFF7C6AF7),
+                    size: 64,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Putar layar ke Landscape',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Untuk deteksi push-up/plank yang akurat,\ngunakan mode Landscape.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white60,
+                  fontSize: 13,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 28),
+              // Indikator horizontal / vertikal
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _OrientDot(active: false, label: 'Portrait'),
+                  const SizedBox(width: 12),
+                  _OrientDot(active: true, label: 'Landscape'),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -514,6 +714,7 @@ class PosePainter extends CustomPainter {
   final int sensorOrientation;
   final String feedback;
   final bool isGoodPosture;
+  final String exerciseType; // 'pushup' | 'situp' | ...
 
   PosePainter({
     required this.poses,
@@ -523,6 +724,7 @@ class PosePainter extends CustomPainter {
     required this.sensorOrientation,
     required this.feedback,
     required this.isGoodPosture,
+    this.exerciseType = 'pushup',
   });
 
   @override
@@ -575,14 +777,31 @@ class PosePainter extends CustomPainter {
         );
       }
 
-      // ── Highlight joint kunci (shoulder, elbow, wrist, hip, ankle) ──
-      final keyLandmarks = [
-        lm[PoseLandmarkType.leftShoulder],
-        lm[PoseLandmarkType.leftElbow],
-        lm[PoseLandmarkType.leftWrist],
-        lm[PoseLandmarkType.leftHip],
-        lm[PoseLandmarkType.leftAnkle],
-      ];
+      // ── Highlight joint kunci ───────────────────────────
+      // Sit-up: LEFT shoulder, hip, knee, ear
+      // Squat:  RIGHT shoulder, hip, knee, ankle (Python: RIGHT side)
+      // Push-up: LEFT shoulder, elbow, wrist, hip, ankle
+      final keyLandmarks = switch (exerciseType) {
+        'situp' => [
+            lm[PoseLandmarkType.leftShoulder],
+            lm[PoseLandmarkType.leftHip],
+            lm[PoseLandmarkType.leftKnee],
+            lm[PoseLandmarkType.leftEar],
+          ],
+        'squat' => [
+            lm[PoseLandmarkType.rightShoulder],
+            lm[PoseLandmarkType.rightHip],
+            lm[PoseLandmarkType.rightKnee],
+            lm[PoseLandmarkType.rightAnkle],
+          ],
+        _ => [
+            lm[PoseLandmarkType.leftShoulder],
+            lm[PoseLandmarkType.leftElbow],
+            lm[PoseLandmarkType.leftWrist],
+            lm[PoseLandmarkType.leftHip],
+            lm[PoseLandmarkType.leftAnkle],
+          ],
+      };
 
       for (final landmark in keyLandmarks) {
         if (landmark == null || landmark.likelihood < 0.5) continue;
@@ -674,27 +893,43 @@ class PosePainter extends CustomPainter {
     Size size,
     Color color,
   ) {
-    final elbow = lm[PoseLandmarkType.leftElbow];
-    final hip = lm[PoseLandmarkType.leftHip];
-
-    // Label di titik siku
-    if (elbow != null && elbow.likelihood > 0.5) {
-      _drawTextLabel(
-        canvas,
-        _toScreen(elbow, size).translate(10, -20),
-        'Siku',
-        color,
-      );
-    }
-
-    // Label di titik pinggul
-    if (hip != null && hip.likelihood > 0.5) {
-      _drawTextLabel(
-        canvas,
-        _toScreen(hip, size).translate(10, -20),
-        'Pinggul',
-        color,
-      );
+    if (exerciseType == 'situp') {
+      // Sit-up: label di pinggul (body angle) dan bahu (neck angle)
+      final hip = lm[PoseLandmarkType.leftHip];
+      final shoulder = lm[PoseLandmarkType.leftShoulder];
+      if (hip != null && hip.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(hip, size).translate(10, -20),
+            'Badan', color);
+      }
+      if (shoulder != null && shoulder.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(shoulder, size).translate(10, -20),
+            'Leher', color);
+      }
+    } else if (exerciseType == 'squat') {
+      // Squat: label di lutut (knee angle) dan pinggul (back angle)
+      // Python: RIGHT side landmarks
+      final knee = lm[PoseLandmarkType.rightKnee];
+      final hip  = lm[PoseLandmarkType.rightHip];
+      if (knee != null && knee.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(knee, size).translate(10, -20),
+            'Lutut', color);
+      }
+      if (hip != null && hip.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(hip, size).translate(10, -20),
+            'Punggung', color);
+      }
+    } else {
+      // Push-up: label di siku dan pinggul
+      final elbow = lm[PoseLandmarkType.leftElbow];
+      final hip = lm[PoseLandmarkType.leftHip];
+      if (elbow != null && elbow.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(elbow, size).translate(10, -20),
+            'Siku', color);
+      }
+      if (hip != null && hip.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(hip, size).translate(10, -20),
+            'Pinggul', color);
+      }
     }
   }
 
@@ -720,7 +955,8 @@ class PosePainter extends CustomPainter {
   bool shouldRepaint(PosePainter old) =>
       old.poses != poses ||
       old.isGoodPosture != isGoodPosture ||
-      old.feedback != feedback;
+      old.feedback != feedback ||
+      old.exerciseType != exerciseType;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -785,6 +1021,45 @@ class _StatBox extends StatelessWidget {
             fontSize: 10,
             fontWeight: FontWeight.bold,
             letterSpacing: 1,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// HELPER: Indikator orientasi di rotate-hint overlay
+// ─────────────────────────────────────────────────────────────
+class _OrientDot extends StatelessWidget {
+  final bool active;
+  final String label;
+
+  const _OrientDot({required this.active, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: active ? 36 : 16,
+          height: 16,
+          decoration: BoxDecoration(
+            color: active
+                ? const Color(0xFF7C6AF7)
+                : Colors.white24,
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          style: TextStyle(
+            color: active ? const Color(0xFF7C6AF7) : Colors.white38,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],

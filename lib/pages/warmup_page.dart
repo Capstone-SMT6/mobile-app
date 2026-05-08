@@ -12,7 +12,8 @@ class WorkoutExercise {
   final int sets;
   final int reps;
   final String muscleGroup;
-  final String poseAngle; // 'side', 'front', 'back'
+  final String poseAngle;    // 'side', 'front', 'back'
+  final String exerciseType; // 'pushup' | 'situp' | 'squat' | 'plank' | 'other'
 
   const WorkoutExercise({
     required this.name,
@@ -21,6 +22,7 @@ class WorkoutExercise {
     required this.reps,
     required this.muscleGroup,
     required this.poseAngle,
+    this.exerciseType = 'other',
   });
 }
 
@@ -33,6 +35,16 @@ const defaultWorkoutPlan = [
     reps: 15,
     muscleGroup: 'Chest · Shoulder · Triceps',
     poseAngle: 'side',
+    exerciseType: 'pushup',
+  ),
+  WorkoutExercise(
+    name: 'Sit Up',
+    description: 'Angkat badan sampai siku menyentuh lutut, jaga leher tetap netral.',
+    sets: 3,
+    reps: 15,
+    muscleGroup: 'Abs · Core · Hip Flexors',
+    poseAngle: 'side',
+    exerciseType: 'situp',
   ),
   WorkoutExercise(
     name: 'Squat',
@@ -41,6 +53,7 @@ const defaultWorkoutPlan = [
     reps: 12,
     muscleGroup: 'Quads · Glutes · Hamstring',
     poseAngle: 'side',
+    exerciseType: 'squat',
   ),
   WorkoutExercise(
     name: 'Plank',
@@ -49,6 +62,7 @@ const defaultWorkoutPlan = [
     reps: 30, // detik
     muscleGroup: 'Core · Lower Back',
     poseAngle: 'side',
+    exerciseType: 'plank',
   ),
 ];
 
@@ -298,7 +312,7 @@ class _WarmupPageState extends State<WarmupPage>
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7C6AF7).withOpacity(0.2),
+                    color: const Color(0xFF7C6AF7).withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.self_improvement_rounded,
@@ -388,7 +402,7 @@ class _WarmupPageState extends State<WarmupPage>
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: Colors.white24),
             ),
@@ -428,9 +442,9 @@ class _PillBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
