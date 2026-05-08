@@ -35,44 +35,51 @@ class _PoseCameraPageState extends State<PoseCameraPage>
   final _pushUpService = PoseDetectorService();
   final _sitUpService  = SitUpDetectorService();
   final _squatService  = SquatDetectorService();
+  final _plankService  = PlankDetectorService();
   bool _isProcessing = false;
 
   // Union result — hanya satu yang non-null sesuai exerciseType
   PushUpAnalysis? _pushUpAnalysis;
   SitUpAnalysis?  _sitUpAnalysis;
   SquatAnalysis?  _squatAnalysis;
+  PlankAnalysis?  _plankAnalysis;
 
-  // ── Shortcut getters (Dart switch expression — 3-way dispatch) ──
+  // ── Shortcut getters (4-way switch) ──────────────────────
+  // Plank: _repCount = formScore (dipakai di plank stats row)
   int get _repCount => switch (widget.exercise.exerciseType) {
-    'situp' => _sitUpAnalysis?.repCount ?? 0,
-    'squat' => _squatAnalysis?.repCount ?? 0,
+    'situp' => _sitUpAnalysis?.repCount  ?? 0,
+    'squat' => _squatAnalysis?.repCount  ?? 0,
+    'plank' => _plankAnalysis?.formScore ?? 0,
     _       => _pushUpAnalysis?.repCount ?? 0,
   };
   String get _stage => switch (widget.exercise.exerciseType) {
-    'situp' => _sitUpAnalysis?.stage ?? 'down',
-    'squat' => _squatAnalysis?.stage ?? 'up',
+    'situp' => _sitUpAnalysis?.stage  ?? 'down',
+    'squat' => _squatAnalysis?.stage  ?? 'up',
+    'plank' => _plankAnalysis?.stage  ?? 'paused',
     _       => _pushUpAnalysis?.stage ?? 'up',
   };
   String get _feedback => switch (widget.exercise.exerciseType) {
-    'situp' => _sitUpAnalysis?.feedback ?? 'Mendeteksi pose...',
-    'squat' => _squatAnalysis?.feedback ?? 'Mendeteksi pose...',
+    'situp' => _sitUpAnalysis?.feedback  ?? 'Mendeteksi pose...',
+    'squat' => _squatAnalysis?.feedback  ?? 'Mendeteksi pose...',
+    'plank' => _plankAnalysis?.feedback  ?? 'Mendeteksi pose...',
     _       => _pushUpAnalysis?.feedback ?? 'Mendeteksi pose...',
   };
   bool get _isGoodPosture => switch (widget.exercise.exerciseType) {
-    'situp' => _sitUpAnalysis?.isGoodPosture ?? false,
-    'squat' => _squatAnalysis?.isGoodPosture ?? false,
+    'situp' => _sitUpAnalysis?.isGoodPosture  ?? false,
+    'squat' => _squatAnalysis?.isGoodPosture  ?? false,
+    'plank' => _plankAnalysis?.isGoodPosture  ?? false,
     _       => _pushUpAnalysis?.isGoodPosture ?? false,
   };
-  // Squat adalah gerakan berdiri — tidak ada cek horizontal,
-  // selalu true agar overlay "Silakan berbaring" tidak muncul.
   bool get _isHorizontal => switch (widget.exercise.exerciseType) {
-    'situp' => _sitUpAnalysis?.isHorizontal ?? false,
-    'squat' => true,   // squat = standing, skip horizontal guard
+    'situp' => _sitUpAnalysis?.isHorizontal  ?? false,
+    'squat' => true,   // standing — skip horizontal guard
+    'plank' => _plankAnalysis?.isHorizontal  ?? false,
     _       => _pushUpAnalysis?.isHorizontal ?? false,
   };
   List<Pose> get _poses => switch (widget.exercise.exerciseType) {
-    'situp' => _sitUpAnalysis?.poses ?? [],
-    'squat' => _squatAnalysis?.poses ?? [],
+    'situp' => _sitUpAnalysis?.poses  ?? [],
+    'squat' => _squatAnalysis?.poses  ?? [],
+    'plank' => _plankAnalysis?.poses  ?? [],
     _       => _pushUpAnalysis?.poses ?? [],
   };
   bool get _hasAnalysis => switch (widget.exercise.exerciseType) {
@@ -106,6 +113,9 @@ class _PoseCameraPageState extends State<PoseCameraPage>
       case 'squat':
         _squatService.init();
         _squatService.reset();
+      case 'plank':
+        _plankService.init();
+        _plankService.reset();
       default:
         _pushUpService.init();
         _pushUpService.reset();
@@ -235,6 +245,14 @@ class _PoseCameraPageState extends State<PoseCameraPage>
             final prev = _squatAnalysis?.repCount ?? 0;
             setState(() => _squatAnalysis = analysis);
             if (analysis.repCount > prev) _feedbackCtrl.forward(from: 0);
+          }
+        case 'plank':
+          final analysis = await _plankService.processImage(inputImage);
+          if (mounted && analysis != null) {
+            // Animate when plank transitions to good form
+            final wasGood = _plankAnalysis?.isGoodPosture ?? false;
+            setState(() => _plankAnalysis = analysis);
+            if (!wasGood && analysis.isGoodPosture) _feedbackCtrl.forward(from: 0);
           }
         default:
           final analysis = await _pushUpService.processImage(inputImage);
@@ -375,8 +393,9 @@ class _PoseCameraPageState extends State<PoseCameraPage>
             sensorOrientation:
                 _cameraCtrl?.description.sensorOrientation ?? 90,
             feedback: _feedback,
-            isGoodPosture: _isGoodPosture,
+             isGoodPosture: _isGoodPosture,
             exerciseType: widget.exercise.exerciseType,
+            plankSide: _plankAnalysis?.side ?? 'left',
           ),
         );
       },
@@ -475,14 +494,23 @@ class _PoseCameraPageState extends State<PoseCameraPage>
                     large: true,
                   ),
                   Container(width: 1, height: 48, color: Colors.white12),
-                  // STAGE
-                  _StatBox(
-                    label: 'STAGE',
-                    value: _stage.toUpperCase(),
-                    color: _stage == 'down'
-                        ? const Color(0xFFF76A6A)
-                        : Colors.white,
-                  ),
+                  // STAGE — for plank show running/paused instead of up/down
+                  if (widget.exercise.exerciseType == 'plank')
+                    _StatBox(
+                      label: 'STATUS',
+                      value: _stage.toUpperCase(),
+                      color: _stage == 'running'
+                          ? const Color(0xFF6CC551)
+                          : Colors.white54,
+                    )
+                  else
+                    _StatBox(
+                      label: 'STAGE',
+                      value: _stage.toUpperCase(),
+                      color: _stage == 'down'
+                          ? const Color(0xFFF76A6A)
+                          : Colors.white,
+                    ),
                    Container(width: 1, height: 48, color: Colors.white12),
                   // Sudut primer: adaptive per exercise type
                   if (widget.exercise.exerciseType == 'situp') ...[
@@ -512,6 +540,26 @@ class _PoseCameraPageState extends State<PoseCameraPage>
                       color: (_squatAnalysis?.backAngle ?? 180) < 130
                           ? const Color(0xFFF0A500)
                           : Colors.white70,
+                    ),
+                  ] else if (widget.exercise.exerciseType == 'plank') ...[
+                    _StatBox(
+                      label: 'HIP',
+                      value: '${_plankAnalysis?.hipAngle.toStringAsFixed(0) ?? '--'}°',
+                      color: (_plankAnalysis?.hipAngle ?? 0) >= 165
+                          ? const Color(0xFF6CC551)
+                          : (_plankAnalysis?.hipAngle ?? 0) >= 150
+                              ? const Color(0xFFF0A500)
+                              : Colors.white70,
+                    ),
+                    Container(width: 1, height: 48, color: Colors.white12),
+                    _StatBox(
+                      label: 'FORM',
+                      value: '${_plankAnalysis?.formScore ?? '--'}%',
+                      color: (_plankAnalysis?.formScore ?? 0) >= 80
+                          ? const Color(0xFF6CC551)
+                          : (_plankAnalysis?.formScore ?? 0) >= 50
+                              ? const Color(0xFFF0A500)
+                              : const Color(0xFFF76A6A),
                     ),
                   ] else ...[
                     _StatBox(
@@ -609,6 +657,9 @@ class _PoseCameraPageState extends State<PoseCameraPage>
                       case 'squat':
                         _squatService.reset();
                         setState(() => _squatAnalysis = null);
+                      case 'plank':
+                        _plankService.reset();
+                        setState(() => _plankAnalysis = null);
                       default:
                         _pushUpService.reset();
                         setState(() => _pushUpAnalysis = null);
@@ -714,7 +765,8 @@ class PosePainter extends CustomPainter {
   final int sensorOrientation;
   final String feedback;
   final bool isGoodPosture;
-  final String exerciseType; // 'pushup' | 'situp' | ...
+  final String exerciseType; // 'pushup' | 'situp' | 'squat' | 'plank'
+  final String plankSide;   // 'left' | 'right' — used only for plank
 
   PosePainter({
     required this.poses,
@@ -725,6 +777,7 @@ class PosePainter extends CustomPainter {
     required this.feedback,
     required this.isGoodPosture,
     this.exerciseType = 'pushup',
+    this.plankSide = 'left',
   });
 
   @override
@@ -778,9 +831,11 @@ class PosePainter extends CustomPainter {
       }
 
       // ── Highlight joint kunci ───────────────────────────
-      // Sit-up: LEFT shoulder, hip, knee, ear
-      // Squat:  RIGHT shoulder, hip, knee, ankle (Python: RIGHT side)
+      // Sit-up: LEFT  shoulder, hip, knee, ear
+      // Squat:  RIGHT shoulder, hip, knee, ankle
+      // Plank:  auto side (plankSide) shoulder, elbow, hip, knee, ankle, ear
       // Push-up: LEFT shoulder, elbow, wrist, hip, ankle
+      final isPlankLeft = plankSide == 'left';
       final keyLandmarks = switch (exerciseType) {
         'situp' => [
             lm[PoseLandmarkType.leftShoulder],
@@ -793,6 +848,14 @@ class PosePainter extends CustomPainter {
             lm[PoseLandmarkType.rightHip],
             lm[PoseLandmarkType.rightKnee],
             lm[PoseLandmarkType.rightAnkle],
+          ],
+        'plank' => [
+            lm[isPlankLeft ? PoseLandmarkType.leftShoulder : PoseLandmarkType.rightShoulder],
+            lm[isPlankLeft ? PoseLandmarkType.leftElbow    : PoseLandmarkType.rightElbow],
+            lm[isPlankLeft ? PoseLandmarkType.leftHip      : PoseLandmarkType.rightHip],
+            lm[isPlankLeft ? PoseLandmarkType.leftKnee     : PoseLandmarkType.rightKnee],
+            lm[isPlankLeft ? PoseLandmarkType.leftAnkle    : PoseLandmarkType.rightAnkle],
+            lm[isPlankLeft ? PoseLandmarkType.leftEar      : PoseLandmarkType.rightEar],
           ],
         _ => [
             lm[PoseLandmarkType.leftShoulder],
@@ -907,7 +970,6 @@ class PosePainter extends CustomPainter {
       }
     } else if (exerciseType == 'squat') {
       // Squat: label di lutut (knee angle) dan pinggul (back angle)
-      // Python: RIGHT side landmarks
       final knee = lm[PoseLandmarkType.rightKnee];
       final hip  = lm[PoseLandmarkType.rightHip];
       if (knee != null && knee.likelihood > 0.5) {
@@ -917,6 +979,19 @@ class PosePainter extends CustomPainter {
       if (hip != null && hip.likelihood > 0.5) {
         _drawTextLabel(canvas, _toScreen(hip, size).translate(10, -20),
             'Punggung', color);
+      }
+    } else if (exerciseType == 'plank') {
+      // Plank: label di pinggul (hip angle) dan bahu (neck angle)
+      final isLeft = plankSide == 'left';
+      final hip      = lm[isLeft ? PoseLandmarkType.leftHip      : PoseLandmarkType.rightHip];
+      final shoulder = lm[isLeft ? PoseLandmarkType.leftShoulder : PoseLandmarkType.rightShoulder];
+      if (hip != null && hip.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(hip, size).translate(10, -20),
+            'Hip', color);
+      }
+      if (shoulder != null && shoulder.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(shoulder, size).translate(10, -20),
+            'Leher', color);
       }
     } else {
       // Push-up: label di siku dan pinggul

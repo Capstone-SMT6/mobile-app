@@ -470,6 +470,223 @@ class SquatDetectorService extends _PoseServiceBase {
   }
 }
 
+// ═════════════════════════════════════════════════════════════
+// ④ PLANK
+// Auto side-selection: side with better hip visibility
+// hip_angle  = calculateAngle(shoulder, hip, ankle)
+// neck_angle = calculateAngle(ear, shoulder, hip)
+//
+// Thresholds (Python):
+//   HIP_GOOD   = 165  perfect hip alignment
+//   HIP_WARN   = 150  acceptable (below = form break)
+//   ELBOW_ALIGN= 0.08 |shoulder.x − elbow.x| max
+//   KNEE_GROUND= 0.03 knee.y < ankle.y − 0.03 → knees off ground
+//   HORIZONTAL = 0.15 |shoulder.y − ankle.y| max (y-diff check)
+//   STABILITY  = 4.5  std dev of hip buffer
+//   NECK_GOOD  = 140  neck_angle > 140
+//
+// Form score: 100 − deductions (hip<150:−30, elbow:−15, knee:−20, neck:−10, stability:−15)
+// Timer: only ticks while good_form is true
+// ═════════════════════════════════════════════════════════════
+class PlankAnalysis {
+  final double hipAngle;
+  final double neckAngle;
+  final double duration;      // total seconds in good form
+  final int    formScore;     // 0-100
+  final double stability;     // std dev of hip buffer (lower = steadier)
+  final String stage;         // 'running' | 'paused'
+  final String feedback;
+  final bool   isGoodPosture; // == good_form
+  final bool   isHorizontal;
+  final String side;          // 'left' | 'right' (auto-selected)
+  final List<Pose> poses;
+
+  const PlankAnalysis({
+    required this.hipAngle,
+    required this.neckAngle,
+    required this.duration,
+    required this.formScore,
+    required this.stability,
+    required this.stage,
+    required this.feedback,
+    required this.isGoodPosture,
+    required this.isHorizontal,
+    required this.side,
+    required this.poses,
+  });
+}
+
+class PlankDetectorService extends _PoseServiceBase {
+  static final PlankDetectorService _i = PlankDetectorService._();
+  factory PlankDetectorService() => _i;
+  PlankDetectorService._();
+
+  // Thresholds
+  static const double _hipGood        = 165.0;
+  static const double _hipWarning     = 150.0;
+  static const double _elbowLimit     = 0.08;
+  static const double _kneeLimit      = 0.03;
+  static const double _horizontalLim  = 0.15;
+  static const double _stabilityLim   = 4.5;
+  static const double _neckMin        = 140.0;
+  static const double _visThresh      = 0.5;
+  static const int    _kWindow        = 10;
+
+  final Queue<double> _hipBuf = Queue();
+  double    _accDuration = 0.0;
+  DateTime? _plankStart;           // non-null while actively planking
+
+  // Standard deviation (stability metric)
+  double _stdDev(Queue<double> buf) {
+    if (buf.length < 2) return 0.0;
+    final mean = buf.reduce((a, b) => a + b) / buf.length;
+    final variance = buf
+        .map((v) => math.pow(v - mean, 2).toDouble())
+        .reduce((a, b) => a + b) / buf.length;
+    return math.sqrt(variance);
+  }
+
+  Future<PlankAnalysis?> processImage(InputImage inputImage) async {
+    if (!_initialized) init();
+
+    final poses = await _detector.processImage(inputImage);
+    if (poses.isEmpty) return null;
+
+    final lm = poses.first.landmarks;
+
+    // ── Auto side selection ──────────────────────────────────
+    final leftVis  = lm[PoseLandmarkType.leftHip]?.likelihood  ?? 0.0;
+    final rightVis = lm[PoseLandmarkType.rightHip]?.likelihood ?? 0.0;
+    final isLeft   = leftVis >= rightVis;
+    final side     = isLeft ? 'left' : 'right';
+
+    final lmShoulder = lm[isLeft ? PoseLandmarkType.leftShoulder  : PoseLandmarkType.rightShoulder];
+    final lmElbow    = lm[isLeft ? PoseLandmarkType.leftElbow     : PoseLandmarkType.rightElbow];
+    final lmHip      = lm[isLeft ? PoseLandmarkType.leftHip       : PoseLandmarkType.rightHip];
+    final lmKnee     = lm[isLeft ? PoseLandmarkType.leftKnee      : PoseLandmarkType.rightKnee];
+    final lmAnkle    = lm[isLeft ? PoseLandmarkType.leftAnkle     : PoseLandmarkType.rightAnkle];
+    final lmEar      = lm[isLeft ? PoseLandmarkType.leftEar       : PoseLandmarkType.rightEar];
+
+    if (lmShoulder == null || lmHip == null ||
+        lmKnee == null     || lmAnkle == null) { return null; }
+
+    // Visibility check on important landmarks
+    if ([lmShoulder, lmHip, lmKnee, lmAnkle]
+        .any((l) => l.likelihood < _visThresh)) { return null; }
+
+    final shoulder = _pt(lmShoulder);
+    final hip      = _pt(lmHip);
+    final knee     = _pt(lmKnee);
+    final ankle    = _pt(lmAnkle);
+    final elbow    = lmElbow != null ? _pt(lmElbow) : null;
+    final ear      = lmEar   != null ? _pt(lmEar)   : null;
+
+    // ── Angles ───────────────────────────────────────────────
+    final rawHip    = calculateAngle(shoulder, hip, ankle);
+    final neckAngle = ear != null
+        ? calculateAngle(ear, shoulder, hip)
+        : 180.0; // assume neutral if ear not visible
+    final hipAngle  = _smooth(_hipBuf, rawHip, _kWindow);
+    final stability = _stdDev(_hipBuf);
+
+    // ── Form checks ─────────────────────────────────────────
+    // Python: horizontal_diff = abs(shoulder[1] - ankle[1]) < 0.15
+    final isHorizontal = (shoulder[1] - ankle[1]).abs() < _horizontalLim;
+    // Python: elbow_alignment = abs(shoulder[0] - elbow[0]) < 0.08
+    final elbowGood = elbow == null ||
+        (shoulder[0] - elbow[0]).abs() < _elbowLimit;
+    // Python: knee[1] < ankle[1] - 0.03  (smaller y = higher in image)
+    final kneesLifted = knee[1] < (ankle[1] - _kneeLimit);
+    // Python: neck_angle > 140
+    final neckGood  = neckAngle > _neckMin;
+
+    // ── Form score (100 − deductions) ────────────────────────
+    int score = 100;
+    if (hipAngle < _hipWarning)       score -= 30;
+    if (!elbowGood)                   score -= 15;
+    if (!kneesLifted)                 score -= 20;
+    if (!neckGood)                    score -= 10;
+    if (stability > _stabilityLim)    score -= 15;
+    final formScore = score.clamp(0, 100);
+
+    // ── Good form gate ───────────────────────────────────────
+    final goodForm = hipAngle >= _hipWarning &&
+        isHorizontal && elbowGood && kneesLifted && neckGood;
+
+    // ── Timer (only ticks while good_form) ───────────────────
+    final now = DateTime.now();
+    if (goodForm) {
+      _plankStart ??= now;
+    } else {
+      if (_plankStart != null) {
+        _accDuration +=
+            now.difference(_plankStart!).inMilliseconds / 1000.0;
+        _plankStart = null;
+      }
+    }
+    final currentDuration = _accDuration +
+        (_plankStart != null
+            ? now.difference(_plankStart!).inMilliseconds / 1000.0
+            : 0.0);
+
+    // ── Feedback (Python priority order) ─────────────────────
+    late final String feedback;
+    late final bool   isGoodPosture;
+
+    if (!isHorizontal) {
+      feedback      = 'Tubuh Belum Horizontal!';
+      isGoodPosture = false;
+    } else if (!kneesLifted) {
+      feedback      = 'Angkat Lututmu!';
+      isGoodPosture = false;
+    } else if (!elbowGood) {
+      feedback      = 'Sejajarkan Siku di Bawah Bahu!';
+      isGoodPosture = false;
+    } else if (!neckGood) {
+      feedback      = 'Jaga Leher Tetap Netral!';
+      isGoodPosture = false;
+    } else if (stability > _stabilityLim) {
+      feedback      = 'Tahan Posisi!';
+      isGoodPosture = false;
+    } else if (hipAngle >= _hipGood) {
+      feedback      = 'Plank Sempurna!';
+      isGoodPosture = true;
+    } else if (hipAngle >= _hipWarning) {
+      // Cek apakah pinggul terlalu rendah atau terlalu tinggi
+      final midY = (shoulder[1] + ankle[1]) / 2;
+      if (hip[1] > midY) {
+        feedback = 'Angkat Pinggulmu!';
+      } else {
+        feedback = 'Turunkan Pinggulmu!';
+      }
+      isGoodPosture = false;
+    } else {
+      feedback      = 'Perbaiki Posturmu!';
+      isGoodPosture = false;
+    }
+
+    return PlankAnalysis(
+      hipAngle:     hipAngle,
+      neckAngle:    neckAngle,
+      duration:     currentDuration,
+      formScore:    formScore,
+      stability:    stability,
+      stage:        goodForm ? 'running' : 'paused',
+      feedback:     feedback,
+      isGoodPosture: isGoodPosture,
+      isHorizontal: isHorizontal,
+      side:         side,
+      poses:        poses,
+    );
+  }
+
+  void reset() {
+    _hipBuf.clear();
+    _accDuration = 0.0;
+    _plankStart  = null;
+  }
+}
+
 // ─────────────────────────────────────────────────────────────
 // HELPER: CameraImage → InputImage untuk ML Kit
 // ─────────────────────────────────────────────────────────────
