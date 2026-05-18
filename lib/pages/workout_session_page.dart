@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'warmup_page.dart';
 import 'pose_camera_page.dart';
+import 'calibration_page.dart';
 
 // ─────────────────────────────────────────────────────────────
 // WORKOUT SESSION PAGE
@@ -111,7 +112,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
 
   void _openCamera() {
     Get.to(
-      () => PoseCameraPage(exercise: _currentExercise),
+      () => CalibrationPage(exercise: _currentExercise),
       transition: Transition.downToUp,
       duration: const Duration(milliseconds: 400),
     );
@@ -307,7 +308,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
                   onPressed: _openCamera,
                   icon: const Icon(Icons.camera_alt_rounded,
                       color: Color(0xFF7C6AF7)),
-                  label: const Text('Cek Postur',
+                  label: const Text('Mulai Latihan',
                       style: TextStyle(color: Color(0xFF7C6AF7))),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(

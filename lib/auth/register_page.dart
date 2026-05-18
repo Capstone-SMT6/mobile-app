@@ -36,81 +36,77 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _handleRegister() async {
-    // if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) return;
 
-    // _isLoading.value = true;
-    // try {
-    //   final response = await http.post(
-    //     Uri.parse(AppConfig.usersEndpoint),
-    //     headers: {'Content-Type': 'application/json'},
-    //     body: jsonEncode({
-    //       'username': _nameController.text.trim(),
-    //       'email': _emailController.text.trim(),
-    //       'password': _passwordController.text,
-    //     }),
-    //   );
+    _isLoading.value = true;
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.usersEndpoint),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'username': _nameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text,
+        }),
+      );
 
-    //   if (response.statusCode == 200 || response.statusCode == 201) {
-    //     Get.snackbar('Success', 'Registration successful!',
-    //         backgroundColor: Colors.green, colorText: Colors.white);
-    //     Get.offAllNamed(AppRoutes.onboardingGoal);
-    //   } else {
-    //     Get.snackbar('Failed', 'Registration failed, email might be taken',
-    //         backgroundColor: Colors.red, colorText: Colors.white);
-    //   }
-    // } catch (e) {
-    //   Get.snackbar('Network Error', e.toString(),
-    //       backgroundColor: Colors.red, colorText: Colors.white);
-    // } finally {
-    //   _isLoading.value = false;
-    // }
-    
-    // For testing: bypass server and navigate straight to onboarding
-    Get.offAllNamed(AppRoutes.onboardingGoal);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Get.snackbar('Berhasil', 'Registrasi berhasil! Silahkan masuk.',
+            backgroundColor: Colors.green, colorText: Colors.white);
+        Get.offAllNamed(AppRoutes.login);
+      } else {
+        Get.snackbar('Gagal', 'Registrasi gagal, email mungkin sudah dipakai',
+            backgroundColor: Colors.red, colorText: Colors.white);
+      }
+    } catch (e) {
+      Get.snackbar('Error Jaringan', e.toString(),
+          backgroundColor: Colors.red, colorText: Colors.white);
+    } finally {
+      _isLoading.value = false;
+    }
   }
 
   Future<void> _handleGoogleRegister() async {
-    // _isLoading.value = true;
-    // try {
-    //   final GoogleSignIn googleSignIn = GoogleSignIn(
-    //     clientId: AppConfig.googleClientId,
-    //   );
-    //   final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+    _isLoading.value = true;
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        clientId: GetPlatform.isAndroid ? null : AppConfig.googleClientId,
+      );
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
-    //   if (googleUser != null) {
-    //     final response = await http.post(
-    //       Uri.parse(AppConfig.googleLoginEndpoint),
-    //       headers: {'Content-Type': 'application/json'},
-    //       body: jsonEncode({
-    //         'email': googleUser.email,
-    //         'username': googleUser.displayName ?? 'Google User',
-    //         'google_id': googleUser.id,
-    //       }),
-    //     );
+      if (googleUser != null) {
+        final response = await http.post(
+          Uri.parse(AppConfig.googleLoginEndpoint),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'email': googleUser.email,
+            'username': googleUser.displayName ?? 'Google User',
+            'google_id': googleUser.id,
+            'photo_url': googleUser.photoUrl,
+          }),
+        );
 
-    //     if (response.statusCode == 200) {
-    //       final data = jsonDecode(response.body);
-    //       final token = data['access_token'];
-    //       if (token != null) {
-    //         await _authController.saveToken(token);
-    //       }
-    //       Get.snackbar('Success', 'Registration with Google successful!',
-    //           backgroundColor: Colors.green, colorText: Colors.white);
-    //       Get.offAllNamed(AppRoutes.onboardingGoal);
-    //     } else {
-    //       Get.snackbar('Failed', 'Server rejected Google Registration',
-    //           backgroundColor: Colors.red, colorText: Colors.white);
-    //     }
-    //   }
-    // } catch (e) {
-    //   Get.snackbar('Google Registration Error', e.toString(),
-    //       backgroundColor: Colors.red, colorText: Colors.white);
-    // } finally {
-    //   _isLoading.value = false;
-    // }
-
-    // For testing: bypass server and navigate straight to onboarding
-    Get.offAllNamed(AppRoutes.onboardingGoal);
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final accessToken = data['access_token'];
+          final refreshToken = data['refresh_token'];
+          if (accessToken != null && refreshToken != null) {
+            await _authController.saveTokens(accessToken, refreshToken);
+          }
+          Get.snackbar('Berhasil', 'Registrasi via Google berhasil!',
+              backgroundColor: Colors.green, colorText: Colors.white);
+          Get.offAllNamed(AppRoutes.onboardingGoal);
+        } else {
+          Get.snackbar('Gagal', 'Server menolak registrasi Google',
+              backgroundColor: Colors.red, colorText: Colors.white);
+        }
+      }
+    } catch (e) {
+      Get.snackbar('Error Google Auth', e.toString(),
+          backgroundColor: Colors.red, colorText: Colors.white);
+    } finally {
+      _isLoading.value = false;
+    }
   }
 
   @override

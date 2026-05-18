@@ -8,9 +8,10 @@ class AppConfig {
   static const String apiBaseUrl =
       String.fromEnvironment('API_BASE_URL', defaultValue: 'http://127.0.0.1:8000');
 
-  static String get usersEndpoint => '$apiBaseUrl/api/users';
+  static String get usersEndpoint => '$apiBaseUrl/api/users/';
   static String get loginEndpoint => '$apiBaseUrl/api/users/login';
   static String get googleLoginEndpoint => '$apiBaseUrl/api/users/google-login';
+  static String get refreshEndpoint => '$apiBaseUrl/api/users/refresh';
   static String get meEndpoint => '$apiBaseUrl/api/users/me';
   static String get meStatsEndpoint => '$apiBaseUrl/api/users/me/stats';
   static String get meFitnessProfileEndpoint => '$apiBaseUrl/api/users/me/fitness-profile';

@@ -47,9 +47,10 @@ class _LoginPageState extends State<LoginPage> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final token = data['access_token'];
-        if (token != null) {
-          await _authController.saveToken(token);
+        final accessToken = data['access_token'];
+        final refreshToken = data['refresh_token'];
+        if (accessToken != null && refreshToken != null) {
+          await _authController.saveTokens(accessToken, refreshToken);
         }
         Get.snackbar('Success', 'Login successful!',
             backgroundColor: Colors.green, colorText: Colors.white);
@@ -88,9 +89,10 @@ class _LoginPageState extends State<LoginPage> {
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
-          final token = data['access_token'];
-          if (token != null) {
-            await _authController.saveToken(token);
+          final accessToken = data['access_token'];
+          final refreshToken = data['refresh_token'];
+          if (accessToken != null && refreshToken != null) {
+            await _authController.saveTokens(accessToken, refreshToken);
           }
           Get.snackbar('Success', 'Google Login successful!',
               backgroundColor: Colors.green, colorText: Colors.white);
