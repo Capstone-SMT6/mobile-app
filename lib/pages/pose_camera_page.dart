@@ -88,6 +88,7 @@ class _PoseCameraPageState extends State<PoseCameraPage>
   bool get _hasAnalysis => switch (widget.exercise.exerciseType) {
     'situp' => _sitUpAnalysis != null,
     'squat' => _squatAnalysis != null,
+    'plank' => _plankAnalysis != null,
     _       => _pushUpAnalysis != null,
   };
 
@@ -109,6 +110,9 @@ class _PoseCameraPageState extends State<PoseCameraPage>
   int _frameSkip = 2; // Process setiap 3 frame (0, 3, 6, ...)
   DateTime? _lastProcessTime;
   final List<int> _processingTimes = []; // Track performance
+  
+  // Resolusi kamera — disinkronkan dengan kalibrasi
+  ResolutionPreset _cameraResolution = ResolutionPreset.medium;
   
   // Auto-adjust frame skip berdasarkan device performance
   bool _isAutoTuning = true;
@@ -143,8 +147,10 @@ class _PoseCameraPageState extends State<PoseCameraPage>
         _pushUpService.reset();
     }
 
-    // Lock ke landscape — optimal untuk push-up / plank dari samping
+    // Biarkan aplikasi bisa berputar (portrait/landscape) agar kamera bisa menyesuaikan orientasi layar fisik
     SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
@@ -192,13 +198,20 @@ class _PoseCameraPageState extends State<PoseCameraPage>
       await _memoryProfiler.start();
     }
     
-    // Apply recommended settings
+    // Apply recommended settings — SAMA dengan yang dipakai di CalibrationPage
     final settings = _diagnostics.getRecommendedSettings();
     if (mounted) {
       setState(() {
         _frameSkip = settings['frameSkip'] as int;
+        _cameraResolution = settings['resolution'] as ResolutionPreset;
         _isAutoTuning = false; // Use device-specific settings
       });
+    }
+    
+    // Restart kamera dengan resolusi yang sudah dikalibrasi
+    // (hanya jika kamera sudah berjalan dan resolusinya berbeda)
+    if (_cameraReady && _cameraResolution != ResolutionPreset.medium) {
+      await _startCamera(_isFrontCamera);
     }
   }
   
@@ -300,7 +313,7 @@ class _PoseCameraPageState extends State<PoseCameraPage>
 
     final ctrl = CameraController(
       selectedCamera,
-      ResolutionPreset.medium, // medium = 480p, lebih ringan untuk ML Kit
+      _cameraResolution, // Gunakan resolusi dari kalibrasi (bukan hardcode medium)
       enableAudio: false,
       imageFormatGroup: ImageFormatGroup.nv21, // Android format untuk ML Kit
     );
@@ -386,6 +399,25 @@ class _PoseCameraPageState extends State<PoseCameraPage>
   final int _maxConsecutiveErrors = 5;
   String? _persistentError;
 
+  // ─── SET COMPLETION CHECK ────────────────────────────────
+  void _checkCompletion() {
+    bool isDone = false;
+    if (widget.exercise.exerciseType == 'plank') {
+      if ((_plankAnalysis?.duration ?? 0) >= widget.exercise.reps) {
+        isDone = true;
+      }
+    } else {
+      if (_repCount >= widget.exercise.reps) {
+        isDone = true;
+      }
+    }
+
+    if (isDone && mounted) {
+      HapticFeedback.heavyImpact();
+      Get.back(result: true);
+    }
+  }
+
   Future<void> _processImageWithErrorHandling(InputImage inputImage) async {
     try {
       switch (widget.exercise.exerciseType) {
@@ -404,8 +436,10 @@ class _PoseCameraPageState extends State<PoseCameraPage>
             if (analysis.repCount > prev) {
               HapticFeedback.mediumImpact(); // Haptic feedback!
               _feedbackCtrl.forward(from: 0);
+              _checkCompletion();
             }
           }
+          break;
           
         case 'squat':
           final analysis = await _squatService.processImage(inputImage)
@@ -422,8 +456,10 @@ class _PoseCameraPageState extends State<PoseCameraPage>
             if (analysis.repCount > prev) {
               HapticFeedback.mediumImpact();
               _feedbackCtrl.forward(from: 0);
+              _checkCompletion();
             }
           }
+          break;
           
         case 'plank':
           final analysis = await _plankService.processImage(inputImage)
@@ -441,7 +477,9 @@ class _PoseCameraPageState extends State<PoseCameraPage>
               HapticFeedback.lightImpact();
               _feedbackCtrl.forward(from: 0);
             }
+            _checkCompletion(); // Plank is time-based, check every frame
           }
+          break;
           
         default:
           final analysis = await _pushUpService.processImage(inputImage)
@@ -458,8 +496,10 @@ class _PoseCameraPageState extends State<PoseCameraPage>
             if (analysis.repCount > prev) {
               HapticFeedback.mediumImpact();
               _feedbackCtrl.forward(from: 0);
+              _checkCompletion();
             }
           }
+          break;
       }
       
     } on TimeoutException {
@@ -815,7 +855,19 @@ class _PoseCameraPageState extends State<PoseCameraPage>
                         _StatBox(
                           label: 'PINGGUL',
                           value: '${_pushUpAnalysis?.hipAngle.toStringAsFixed(0) ?? '--'}°',
-                          color: Colors.white70,
+                          color: (_pushUpAnalysis?.hipAngle ?? 0) < 130
+                              ? const Color(0xFFF76A6A)   // pinggul turun
+                              : (_pushUpAnalysis?.hipAngle ?? 0) > 170
+                                  ? const Color(0xFFF0A500) // pinggul naik
+                                  : const Color(0xFF6CC551),
+                        ),
+                        VerticalDivider(color: Colors.white12, width: 1, thickness: 1),
+                        _StatBox(
+                          label: 'POSISI',
+                          value: (_pushUpAnalysis?.isHorizontal ?? false) ? 'OK ✓' : 'BERDIRI',
+                          color: (_pushUpAnalysis?.isHorizontal ?? false)
+                              ? const Color(0xFF6CC551)
+                              : const Color(0xFFF76A6A),
                         ),
                       ],
                     ],

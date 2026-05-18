@@ -91,10 +91,10 @@ class PoseDetectorService extends _PoseServiceBase {
   // Thresholds
   static const double _downThreshold  = 100.0; // elbow < 100 → down
   static const double _upThreshold    = 150.0; // elbow > 150 → up
-  static const double _bodyThreshold  = 150.0; // hip  > 150 → valid body
-  static const double _hipLowWarn     = 140.0; // hip  < 140 → pinggul turun
-  static const double _hipHighWarn    = 165.0; // hip  > 165 → pinggul naik
-  static const double _horizontalRatio = 1.5;
+  static const double _bodyThreshold  = 130.0; // hip  > 130 → valid body (longgar)
+  static const double _hipLowWarn     = 130.0; // hip  < 130 → pinggul turun
+  static const double _hipHighWarn    = 170.0; // hip  > 170 → pinggul naik
+  static const double _horizontalRatio = 1.2;  // lebih sensitif
   static const int    _kWindow        = 5;
 
   // Expose calculateAngle secara static untuk dipakai service lain
@@ -129,7 +129,9 @@ class PoseDetectorService extends _PoseServiceBase {
 
     if (lShoulder == null || lElbow == null || lWrist == null ||
         lHip == null    || lAnkle == null) { return null; }
-    if (lElbow.likelihood < 0.5) { return null; }
+    // Cek visibility semua landmark penting (threshold lebih rendah agar lebih toleran)
+    if (lShoulder.likelihood < 0.4 || lElbow.likelihood < 0.4 ||
+        lHip.likelihood < 0.35    || lAnkle.likelihood < 0.3) { return null; }
 
     final shoulder = _pt(lShoulder);
     final elbow    = _pt(lElbow);
@@ -142,10 +144,21 @@ class PoseDetectorService extends _PoseServiceBase {
     final hipAngle   = _smooth(_hipBuf,
         calculateAngle(shoulder, hip, ankle),   _kWindow);
 
-    // Deteksi horizontal: saat plank/push-up selisih X >> selisih Y
+    // Deteksi horizontal: robust untuk landscape & portrait kamera
+    // ML Kit mengembalikan koordinat normalized (0..1) dalam sensor space
+    // Saat kamera landscape (sensor portrait 90°), tubuh push-up yang
+    // sebenarnya HORIZONTAL di layar akan tampak VERTIKAL di sensor space.
+    // Solusi: tubuh dianggap "horizontal" (berbaring) jika:
+    //  - xDiff besar (sensor portrait, layar portrait) — kasus normal
+    //  - ATAU yDiff besar (sensor portrait, layar landscape) — push-up landscape
+    //  - ATAU total jarak cukup jauh (shoulder ke ankle jauh tapi kemiringan rendah)
     final xDiff = (shoulder[0] - ankle[0]).abs();
     final yDiff = (shoulder[1] - ankle[1]).abs();
-    final isHorizontal = xDiff > (yDiff * _horizontalRatio);
+    final totalDist = math.sqrt(xDiff * xDiff + yDiff * yDiff);
+    // Jika salah satu sumbu mendominasi atau jarak total cukup besar
+    final isHorizontal = xDiff > (yDiff * _horizontalRatio) || // layar portrait
+        yDiff > (xDiff * _horizontalRatio) ||                   // layar landscape
+        (totalDist > 0.15 && yDiff < 0.4);                    // kasus umum
 
     // Feedback
     late final String feedback;

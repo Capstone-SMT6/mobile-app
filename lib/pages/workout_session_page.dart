@@ -110,12 +110,17 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
     );
   }
 
-  void _openCamera() {
-    Get.to(
+  Future<void> _openCamera() async {
+    final result = await Get.to(
       () => CalibrationPage(exercise: _currentExercise),
       transition: Transition.downToUp,
       duration: const Duration(milliseconds: 400),
     );
+    
+    // Jika kamera direturn dengan 'true' (target rep tercapai)
+    if (result == true && mounted) {
+      _onSetDone();
+    }
   }
 
   @override

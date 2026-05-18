@@ -7,6 +7,7 @@ import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import '../services/pose_detector_service.dart';
 import '../utils/device_diagnostics.dart';
 import 'pose_camera_page.dart';
+import 'warmup_page.dart' show WorkoutExercise;
 
 class CalibrationPage extends StatefulWidget {
   final WorkoutExercise exercise;
@@ -167,7 +168,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
             };
             
             final allDetected = requiredLandmarks.every(
-              (type) => pose.landmarks[type]?.likelihood ?? 0 > 0.7,
+              (type) => (pose.landmarks[type]?.likelihood ?? 0) > 0.7,
             );
             
             setState(() {
@@ -196,7 +197,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
       }
       
     } catch (e) {
-      debugPrint('❌ Calibration frame error: $e');
+      debugPrint(' Calibration frame error: $e');
     } finally {
       _isProcessing = false;
     }
@@ -250,6 +251,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xFF0D0F14),
       body: Stack(
         children: [
@@ -257,8 +259,13 @@ class _CalibrationPageState extends State<CalibrationPage> {
           if (_cameraReady && _cameraCtrl != null)
             Positioned.fill(
               child: Opacity(
-                opacity: 0.4,
-                child: CameraPreview(_cameraCtrl!),
+                opacity: 0.85, // Buat kamera jauh lebih terang agar objek terlihat jelas
+                child: Center(
+                  child: AspectRatio(
+                    aspectRatio: _cameraCtrl!.value.aspectRatio,
+                    child: CameraPreview(_cameraCtrl!),
+                  ),
+                ),
               ),
             ),
           
@@ -270,9 +277,9 @@ class _CalibrationPageState extends State<CalibrationPage> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    const Color(0xFF0D0F14).withValues(alpha:0.95),
-                    const Color(0xFF0D0F14).withValues(alpha:0.85),
-                    const Color(0xFF0D0F14).withValues(alpha:0.95),
+                    const Color(0xFF0D0F14).withValues(alpha:0.90),
+                    const Color(0xFF0D0F14).withValues(alpha:0.70),
+                    const Color(0xFF0D0F14).withValues(alpha:0.92),
                   ],
                 ),
               ),
@@ -285,19 +292,19 @@ class _CalibrationPageState extends State<CalibrationPage> {
               children: [
                 // Header
                 _buildHeader(),
-                
-                const SizedBox(height: 40),
-                
+
+                const SizedBox(height: 16),
+
                 // Steps indicator
                 _buildStepsIndicator(),
-                
-                const SizedBox(height: 60),
-                
+
+                const SizedBox(height: 24),
+
                 // Current step content
                 Expanded(
                   child: _buildStepContent(),
                 ),
-                
+
                 // Bottom actions
                 _buildBottomActions(),
               ],
@@ -742,7 +749,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
   
   Widget _buildBottomActions() {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       child: Row(
         children: [
           // Skip button
@@ -751,7 +758,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
               child: OutlinedButton(
                 onPressed: _proceedToWorkout,
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                   side: const BorderSide(color: Colors.white38),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -761,7 +768,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
                   'Lewati',
                   style: TextStyle(
                     color: Colors.white70,
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -776,7 +783,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
             child: ElevatedButton(
               onPressed: _currentStep == 3 ? _proceedToWorkout : null,
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 backgroundColor: const Color(0xFF7C6AF7),
                 disabledBackgroundColor: Colors.white24,
                 shape: RoundedRectangleBorder(
@@ -787,7 +794,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
                 _currentStep == 3 ? 'Mulai Latihan' : 'Menunggu...',
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -798,6 +805,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
     );
   }
 }
+
 
 // ═════════════════════════════════════════════════════════════
 // POSITION GUIDE PAINTER
