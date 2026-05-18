@@ -1,22 +1,22 @@
-# 🏋️‍♂️ AI Fitness Capstone Mobile App
+# AI Fitness Capstone Mobile App
 
-Aplikasi mobile fitness cerdas berbasis **Flutter** yang dilengkapi dengan teknologi **AI Pose Detection** (Pendeteksi Pose Cerdas). Aplikasi ini dirancang untuk memandu pengguna dalam melakukan latihan fisik dengan benar melalui analisis gerakan secara *real-time*, kalibrasi cerdas, sesi latihan terstruktur, dan asisten chatbot.
-
----
-
-## ✨ Fitur Utama
-
-- **🤖 AI Pose Detection & Analysis**: Menggunakan `google_mlkit_pose_detection` dan `tflite_flutter` untuk mendeteksi, melacak, dan menganalisis postur tubuh pengguna secara *real-time* melalui kamera.
-- **🎯 Smart Calibration**: Fitur kalibrasi untuk memastikan jarak dan pencahayaan optimal sebelum pengguna memulai sesi latihan (`calibration_page.dart`).
-- **📅 Pelacakan Latihan & Kalender**: Melacak riwayat latihan harian dan menampilkannya secara interaktif menggunakan kalender dan grafik (`calendar_page.dart` & `laporan_page.dart`).
-- **💬 AI Chatbot Assistant**: Chatbot terintegrasi yang berfungsi sebagai asisten kebugaran pintar (`chatbot_page.dart`).
-- **🏃‍♂️ Sesi Workout & Warmup**: Alur terstruktur untuk pemanasan dan eksekusi latihan fisik (`workout_session_page.dart` & `warmup_page.dart`).
-- **🔐 Firebase Authentication**: Login dan registrasi yang aman, mendukung otentikasi Google Sign-In (`firebase_auth` & `google_sign_in`).
-- **📊 Laporan & Analitik**: Visualisasi progres latihan pengguna dengan grafik komprehensif.
+Aplikasi mobile fitness cerdas berbasis Flutter yang dilengkapi dengan teknologi AI Pose Detection (Pendeteksi Pose Cerdas). Aplikasi ini dirancang untuk memandu pengguna dalam melakukan latihan fisik dengan benar melalui analisis gerakan secara *real-time*, kalibrasi presisi, sesi latihan terstruktur, dan asisten virtual (chatbot).
 
 ---
 
-## 🛠️ Teknologi yang Digunakan
+## Fitur Utama
+
+- **AI Pose Detection & Analysis**: Menggunakan `google_mlkit_pose_detection` dan `tflite_flutter` untuk mendeteksi, melacak, dan menganalisis postur tubuh pengguna secara *real-time* melalui umpan kamera.
+- **Smart Calibration**: Fungsionalitas kalibrasi untuk memastikan jarak dan kondisi pencahayaan optimal sebelum pengguna memulai sesi latihan (`calibration_page.dart`).
+- **Pelacakan Latihan & Kalender**: Melacak riwayat latihan harian dan menampilkannya secara interaktif menggunakan komponen kalender dan grafik (`calendar_page.dart` & `laporan_page.dart`).
+- **AI Chatbot Assistant**: Sistem chatbot terintegrasi yang berfungsi sebagai asisten kebugaran untuk memberikan informasi dan panduan (`chatbot_page.dart`).
+- **Sesi Workout & Warmup**: Alur aplikasi yang terstruktur untuk pemanasan dan eksekusi latihan fisik (`workout_session_page.dart` & `warmup_page.dart`).
+- **Firebase Authentication**: Sistem login dan registrasi yang aman, serta mendukung otentikasi Single Sign-On (SSO) melalui Google Sign-In (`firebase_auth` & `google_sign_in`).
+- **Laporan & Analitik**: Visualisasi progres latihan pengguna dengan grafik data yang komprehensif.
+
+---
+
+## Teknologi yang Digunakan
 
 - **Framework**: [Flutter](https://flutter.dev/) (SDK ^3.9.2)
 - **State Management & Routing**: [GetX](https://pub.dev/packages/get)
@@ -25,81 +25,81 @@ Aplikasi mobile fitness cerdas berbasis **Flutter** yang dilengkapi dengan tekno
   - `tflite_flutter`
 - **Backend & Authentication**: Firebase Core, Firebase Auth, Secure Storage.
 - **UI & Sensor Components**: 
-  - `camera` & `video_player` (Untuk sesi pose-camera)
-  - `fl_chart` (Untuk grafik analitik)
-  - `table_calendar` (Untuk riwayat latihan)
-  - `sensors_plus` (Akses sensor perangkat)
-  - `body_part_selector` (UI pemilih bagian tubuh interaktif)
+  - `camera` & `video_player` (Untuk pengelolaan sesi kamera pose)
+  - `fl_chart` (Untuk visualisasi analitik)
+  - `table_calendar` (Untuk manajemen riwayat kalender)
+  - `sensors_plus` (Untuk akses pembacaan sensor perangkat keras)
+  - `body_part_selector` (Komponen antarmuka pemilih bagian tubuh)
 
 ---
 
-## 📂 Struktur Proyek
+## Struktur Proyek
 
-Proyek ini menggunakan pola arsitektur berbasis fitur / modul dengan GetX.
+Proyek ini menggunakan pola arsitektur berbasis fitur (feature-based architecture) dengan integrasi GetX.
 
 ```text
 lib/
-├── auth/          # Logika autentikasi dan layanan login (Google Sign-In)
+├── auth/          # Logika autentikasi dan layanan login
 ├── bindings/      # Dependency injection untuk GetX Controllers
-├── controllers/   # GetX Controllers (State Management untuk kamera, sesi, dll)
-├── models/        # Representasi data (Data models)
-├── pages/         # Tampilan UI (Screens/Pages)
-│   ├── analysis_page.dart      # Halaman analisis pose
-│   ├── beranda_page.dart       # Beranda / Dashboard aplikasi
-│   ├── calibration_page.dart   # Kamera kalibrasi AI
-│   ├── chatbot_page.dart       # UI Chatbot
-│   ├── pose_camera_page.dart   # Kamera deteksi pose inti
-│   ├── workout_session_page.dart # Layar utama sesi olahraga
+├── controllers/   # GetX Controllers (State Management)
+├── models/        # Representasi entitas data (Data models)
+├── pages/         # Tampilan Antarmuka (UI/Screens)
+│   ├── analysis_page.dart      # Modul analisis pose
+│   ├── beranda_page.dart       # Dasbor utama aplikasi
+│   ├── calibration_page.dart   # Modul kalibrasi AI
+│   ├── chatbot_page.dart       # Antarmuka Chatbot
+│   ├── pose_camera_page.dart   # Modul deteksi pose inti
+│   ├── workout_session_page.dart # Modul utama sesi olahraga
 │   └── ...
-├── routes/        # Definisi rute aplikasi (GetX Routing)
-├── services/      # Komunikasi dengan API external / layanan backend
-├── utils/         # Fungsi utilitas, konstanta, dan helper
-├── config.dart    # Konfigurasi aplikasi (API Base URLs)
+├── routes/        # Definisi rute navigasi aplikasi
+├── services/      # Integrasi API eksternal dan layanan backend
+├── utils/         # Fungsi utilitas dan pembantu (helpers)
+├── config.dart    # Konfigurasi aplikasi (API Base URLs, dll)
 └── main.dart      # Entry point aplikasi Flutter
 ```
 
 ---
 
-## 🚀 Persyaratan Sistem
+## Persyaratan Sistem
 
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) terinstal di sistem Anda.
-- **Android Studio** (untuk emulator dan Android toolchain) atau **Xcode** (untuk iOS).
-- Perangkat fisik sangat disarankan untuk pengujian kamera dan deteksi pose secara optimal.
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) terinstal dan terkonfigurasi.
+- **Android Studio** (untuk manajemen Android toolchain/emulator) atau **Xcode** (untuk lingkungan iOS).
+- Perangkat fisik sangat direkomendasikan untuk pengujian optimalisasi kamera dan pemrosesan deteksi pose.
 
 ---
 
-## 💻 Cara Instalasi & Menjalankan Aplikasi
+## Panduan Instalasi dan Penggunaan
 
-1. **Clone Repositori & Masuk ke Direktori**
-   Pastikan Anda berada di dalam folder `mobile-app`.
+1. **Kloning Repositori**
+   Pastikan terminal Anda berada di dalam direktori `mobile-app`.
 
-2. **Unduh Dependensi**
-   Jalankan perintah berikut di terminal:
+2. **Instalasi Dependensi**
+   Jalankan perintah berikut pada terminal:
    ```bash
    flutter pub get
    ```
 
-3. **Pengaturan Kredensial Sensitif (Firebase)**
-   Demi keamanan, *API keys* tidak dimasukkan ke dalam version control. Anda perlu meminta file berikut kepada maintainer proyek dan meletakkannya di lokasi yang tepat:
-   - File `google-services.json` diletakkan di `android/app/google-services.json`
-   - File `firebase_options.dart` diletakkan di `lib/firebase_options.dart`
+3. **Konfigurasi Kredensial Sensitif**
+   Untuk menjaga keamanan, kredensial API tidak disertakan dalam *version control*. Anda perlu menambahkan file konfigurasi berikut yang didapatkan dari maintainer proyek:
+   - Tempatkan `google-services.json` di dalam `android/app/google-services.json`
+   - Tempatkan `firebase_options.dart` di dalam `lib/firebase_options.dart`
 
-4. **Menjalankan Aplikasi (Development)**
-   Aplikasi membutuhkan koneksi ke backend lokal atau server API. Gunakan flag `--dart-define` untuk menyuntikkan base URL ke dalam aplikasi.
+4. **Menjalankan Aplikasi (Lingkungan Development)**
+   Aplikasi membutuhkan koneksi ke server backend. Gunakan argumen `--dart-define` untuk menetapkan parameter *Base URL* secara dinamis.
    
-   Jika menggunakan Emulator Android (backend di localhost komputer):
+   Untuk pengujian menggunakan Emulator Android:
    ```bash
    flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
    ```
    
-   Jika menggunakan Perangkat Fisik (sambungkan dalam satu jaringan WiFi):
+   Untuk pengujian menggunakan Perangkat Fisik (pastikan berada di jaringan lokal yang sama):
    ```bash
-   flutter run --dart-define=API_BASE_URL=http://<IP_WIFI_KOMPUTER_ANDA>:8000
+   flutter run --dart-define=API_BASE_URL=http://<IP_ADDRESS_KOMPUTER>:8000
    ```
-   *Tip: Konfigurasi flag `--dart-define` ini dapat disimpan secara permanen di Run/Debug Configurations pada IDE (VS Code / Android Studio).*
+   *Catatan: Konfigurasi argumen `--dart-define` dapat diatur secara permanen melalui pengaturan Run/Debug Configurations pada IDE Anda.*
 
 ---
 
-## 📝 Catatan Tambahan Pengembangan
-- **Performa Kamera AI**: Proses *Pose Detection* menggunakan ML Kit dapat memakan daya komputasi yang tinggi. Pengujian di atas perangkat keras (HP fisik) jauh lebih akurat dan stabil dibandingkan dengan emulator, dan disarankan untuk mengetes frame-rate deteksi.
-- **State Management**: Karena aplikasi menggunakan **GetX**, pastikan setiap *Controller* telah di-*binding* secara tepat di dalam direktori `routes/` atau `bindings/` agar tidak terjadi *memory leak* selama pindah halaman.
+## Catatan Pengembangan
+- **Performa Pemrosesan AI**: Proses *Pose Detection* melalui ML Kit membutuhkan daya komputasi yang signifikan. Pengujian pada perangkat keras fisik (smartphone) memberikan hasil akurasi dan stabilitas yang lebih representatif dibandingkan dengan emulator, khususnya untuk evaluasi *frame-rate*.
+- **Manajemen Memori (State Management)**: Mengingat penggunaan **GetX**, pastikan setiap siklus hidup *Controller* dikelola (di-*binding*) dengan benar pada direktori `routes/` atau `bindings/` untuk mencegah terjadinya kebocoran memori (*memory leak*) selama navigasi antar halaman.
