@@ -85,10 +85,6 @@ class OnboardingResultPage extends StatelessWidget {
                         _buildResultRow("Keahlian", "Pemula"),
                         const Divider(color: Colors.white12, height: 24),
                         _buildResultRow("Intensitas", "Sedang"),
-                        const Divider(color: Colors.white12, height: 24),
-                        _buildResultRow("Cedera", "Tidak Ada"),
-                        const Divider(color: Colors.white12, height: 24),
-                        _buildResultRow("Target Kalori", "Sedang"),
                         
                         const SizedBox(height: 32),
                         const Text(

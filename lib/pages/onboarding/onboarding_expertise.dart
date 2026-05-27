@@ -182,7 +182,7 @@ class _OnboardingExpertisePageState extends State<OnboardingExpertisePage> {
                 // Pagination Dots (assume 8 pages, this is 6th)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(9, (i) {
+                  children: List.generate(8, (i) {
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       width: 8,

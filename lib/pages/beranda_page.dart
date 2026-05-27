@@ -85,7 +85,7 @@ class HeaderSection extends StatelessWidget {
                 Text(
                   "Let's crush some weight today",
                   style: TextStyle(
-                    color: const Color(0xFF6CC551).withOpacity(0.9),
+                    color: const Color(0xFF6CC551).withValues(alpha: 0.9),
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -104,7 +104,7 @@ class HeaderSection extends StatelessWidget {
             const SizedBox(width: 12),
             _buildIconButton(Icons.notifications_none_rounded),
           ],
-        )
+        ),
       ],
     );
   }
@@ -157,12 +157,12 @@ class ProgressCard extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: const Color(0xFF6CC551).withOpacity(0.3),
+            color: const Color(0xFF6CC551).withValues(alpha: 0.3),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6CC551).withOpacity(0.1),
+              color: const Color(0xFF6CC551).withValues(alpha: 0.1),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -222,8 +222,11 @@ class ProgressCard extends StatelessWidget {
                   // Tampilkan streak nyata
                   Row(
                     children: [
-                      const Icon(Icons.local_fire_department,
-                          color: Colors.orangeAccent, size: 16),
+                      const Icon(
+                        Icons.local_fire_department,
+                        color: Colors.orangeAccent,
+                        size: 16,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '$streak day streak',
@@ -251,7 +254,9 @@ class ProgressCard extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 24),
+                          vertical: 10,
+                          horizontal: 24,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFF6CC551),
                           borderRadius: BorderRadius.circular(12),
@@ -266,10 +271,10 @@ class ProgressCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       );
@@ -325,10 +330,12 @@ class TodayMenu extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          ...menuItems.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _buildMenuItem(item[0], item[1], item[2] as IconData),
-              )),
+          ...menuItems.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildMenuItem(item[0], item[1], item[2] as IconData),
+            ),
+          ),
         ],
       );
     });
@@ -371,7 +378,7 @@ class TodayMenu extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF6CC551).withOpacity(0.15),
+              color: const Color(0xFF6CC551).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: const Color(0xFF6CC551), size: 24),
@@ -392,10 +399,7 @@ class TodayMenu extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    color: Colors.white54,
-                    fontSize: 13,
-                  ),
+                  style: const TextStyle(color: Colors.white54, fontSize: 13),
                 ),
               ],
             ),
@@ -418,8 +422,7 @@ class WorkoutAnalysis extends StatelessWidget {
     return GestureDetector(
       onTap: () => Get.to(() => const AnalysisPage()),
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [Color(0xFF7C6AF7), Color(0xFF5A49D3)],
@@ -429,7 +432,7 @@ class WorkoutAnalysis extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF7C6AF7).withOpacity(0.3),
+              color: const Color(0xFF7C6AF7).withValues(alpha: 0.3),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -452,21 +455,20 @@ class WorkoutAnalysis extends StatelessWidget {
                 SizedBox(height: 6),
                 Text(
                   "Check your daily progress",
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(color: Colors.white70, fontSize: 13),
                 ),
               ],
             ),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child:
-                  const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+              child: const Icon(
+                Icons.arrow_forward_rounded,
+                color: Colors.white,
+              ),
             ),
           ],
         ),

@@ -42,7 +42,12 @@ class _CalendarPageState extends State<CalendarPage> {
         children: [
           // CALENDAR
           Container(
-            margin: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 12),
+            margin: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 4,
+              bottom: 12,
+            ),
             padding: const EdgeInsets.only(bottom: 12, left: 8, right: 8),
             decoration: BoxDecoration(
               color: const Color(0xFF222434),
@@ -59,22 +64,32 @@ class _CalendarPageState extends State<CalendarPage> {
                   today = selectedDay;
                 });
               },
-              sixWeekMonthsEnforced: true, // Mencegah kalender melompat-lompat saat ganti bulan
-              availableGestures: AvailableGestures.horizontalSwipe, // Mencegah format berantakan
+              sixWeekMonthsEnforced:
+                  true, // Mencegah kalender melompat-lompat saat ganti bulan
+              availableGestures: AvailableGestures
+                  .horizontalSwipe, // Mencegah format berantakan
               eventLoader: (day) => getWorkoutForDay(day),
               headerStyle: const HeaderStyle(
                 formatButtonVisible: false,
                 titleCentered: true,
-                titleTextStyle: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                titleTextStyle: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
                 leftChevronIcon: Icon(Icons.chevron_left, color: Colors.white),
-                rightChevronIcon: Icon(Icons.chevron_right, color: Colors.white),
+                rightChevronIcon: Icon(
+                  Icons.chevron_right,
+                  color: Colors.white,
+                ),
                 headerPadding: EdgeInsets.symmetric(vertical: 8),
               ),
               daysOfWeekStyle: const DaysOfWeekStyle(
                 weekdayStyle: TextStyle(color: Colors.white70, fontSize: 13),
                 weekendStyle: TextStyle(color: Colors.redAccent, fontSize: 13),
               ),
-              rowHeight: 46, // Sedikit mengecilkan tinggi sel agar tidak makan tempat
+              rowHeight:
+                  46, // Sedikit mengecilkan tinggi sel agar tidak makan tempat
               calendarStyle: const CalendarStyle(
                 defaultTextStyle: TextStyle(color: Colors.white),
                 weekendTextStyle: TextStyle(color: Colors.redAccent),
@@ -82,14 +97,18 @@ class _CalendarPageState extends State<CalendarPage> {
                 todayDecoration: BoxDecoration(
                   color: Color(0xFF222434),
                   shape: BoxShape.circle,
-                  border: Border.fromBorderSide(BorderSide(color: Color(0xFF6CC551), width: 1.5)),
+                  border: Border.fromBorderSide(
+                    BorderSide(color: Color(0xFF6CC551), width: 1.5),
+                  ),
                 ),
                 selectedDecoration: BoxDecoration(
                   color: Color(0xFF6CC551),
                   shape: BoxShape.circle,
                 ),
                 markerDecoration: BoxDecoration(
-                  color: Color(0xFF7C6AF7), // Marker ungu untuk hari yang ada latihannya
+                  color: Color(
+                    0xFF7C6AF7,
+                  ), // Marker ungu untuk hari yang ada latihannya
                   shape: BoxShape.circle,
                 ),
                 markersMaxCount: 1,
@@ -123,11 +142,18 @@ class _CalendarPageState extends State<CalendarPage> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: const [
-                                Icon(Icons.event_busy, size: 56, color: Colors.white24),
+                                Icon(
+                                  Icons.event_busy,
+                                  size: 56,
+                                  color: Colors.white24,
+                                ),
                                 SizedBox(height: 16),
                                 Text(
                                   "Tidak ada latihan untuk hari ini",
-                                  style: TextStyle(color: Colors.white54, fontSize: 15),
+                                  style: TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 15,
+                                  ),
                                 ),
                               ],
                             ),
@@ -135,11 +161,15 @@ class _CalendarPageState extends State<CalendarPage> {
                         : ListView.separated(
                             padding: const EdgeInsets.only(bottom: 24),
                             itemCount: getWorkoutForDay(today).length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 12),
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
                             itemBuilder: (context, index) {
                               final item = getWorkoutForDay(today)[index];
                               return Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 14,
+                                ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF222434),
                                   borderRadius: BorderRadius.circular(16),
@@ -150,10 +180,16 @@ class _CalendarPageState extends State<CalendarPage> {
                                     Container(
                                       padding: const EdgeInsets.all(10),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF6CC551).withOpacity(0.15),
+                                        color: const Color(
+                                          0xFF6CC551,
+                                        ).withValues(alpha: 0.15),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
-                                      child: const Icon(Icons.fitness_center, color: Color(0xFF6CC551), size: 20),
+                                      child: const Icon(
+                                        Icons.fitness_center,
+                                        color: Color(0xFF6CC551),
+                                        size: 20,
+                                      ),
                                     ),
                                     const SizedBox(width: 16),
                                     Expanded(
@@ -166,7 +202,11 @@ class _CalendarPageState extends State<CalendarPage> {
                                         ),
                                       ),
                                     ),
-                                    const Icon(Icons.play_circle_fill, color: Colors.white24, size: 28),
+                                    const Icon(
+                                      Icons.play_circle_fill,
+                                      color: Colors.white24,
+                                      size: 28,
+                                    ),
                                   ],
                                 ),
                               );
@@ -176,7 +216,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     );

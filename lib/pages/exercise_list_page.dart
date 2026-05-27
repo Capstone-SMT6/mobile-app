@@ -26,18 +26,36 @@ class ExerciseListPage extends StatelessWidget {
     Exercise(
       name: "Push Up",
       gif: "https://media.giphy.com/media/XIqCQx02E1U9W/giphy.gif",
-      desc: "Latihan fundamental untuk membangun kekuatan tubuh bagian atas, khususnya otot dada, bahu, dan triceps.",
+      desc:
+          "Latihan fundamental untuk membangun kekuatan tubuh bagian atas, khususnya otot dada, bahu, dan triceps.",
       muscle: "Chest, Shoulder, Triceps",
-      tips: ["Jaga punggung lurus seperti papan", "Turun perlahan dengan terkontrol", "Posisi tangan sedikit lebih lebar dari bahu"],
-      mistakes: ["Pinggul turun menyentuh lantai", "Gerakan terlalu cepat", "Leher mendongak ke depan"],
+      tips: [
+        "Jaga punggung lurus seperti papan",
+        "Turun perlahan dengan terkontrol",
+        "Posisi tangan sedikit lebih lebar dari bahu",
+      ],
+      mistakes: [
+        "Pinggul turun menyentuh lantai",
+        "Gerakan terlalu cepat",
+        "Leher mendongak ke depan",
+      ],
     ),
     Exercise(
       name: "Squat",
       gif: "https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif",
-      desc: "Latihan utama untuk membangun kekuatan lower body, khususnya otot kaki dan glutes.",
+      desc:
+          "Latihan utama untuk membangun kekuatan lower body, khususnya otot kaki dan glutes.",
       muscle: "Legs, Glutes",
-      tips: ["Turun sampai pinggul sejajar dengan lutut", "Jaga lutut tetap stabil dan terbuka", "Berat badan bertumpu pada tumit"],
-      mistakes: ["Lutut menekuk ke dalam", "Kedalaman squat kurang (half squat)", "Punggung terlalu membungkuk"],
+      tips: [
+        "Turun sampai pinggul sejajar dengan lutut",
+        "Jaga lutut tetap stabil dan terbuka",
+        "Berat badan bertumpu pada tumit",
+      ],
+      mistakes: [
+        "Lutut menekuk ke dalam",
+        "Kedalaman squat kurang (half squat)",
+        "Punggung terlalu membungkuk",
+      ],
     ),
   ];
 
@@ -56,7 +74,8 @@ class ExerciseListPage extends StatelessWidget {
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        automaticallyImplyLeading: false, // Dihilangkan karena menempel di Bottom Nav
+        automaticallyImplyLeading:
+            false, // Dihilangkan karena menempel di Bottom Nav
       ),
       body: SafeArea(
         child: ListView.builder(
@@ -91,7 +110,10 @@ class ExerciseListPage extends StatelessWidget {
                         child: Image.network(
                           e.gif,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Icon(Icons.fitness_center, color: Colors.white38),
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.fitness_center,
+                            color: Colors.white38,
+                          ),
                         ),
                       ),
                     ),
@@ -123,11 +145,15 @@ class ExerciseListPage extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
+                        color: Colors.white.withValues(alpha: 0.05),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white54, size: 16),
-                    )
+                      child: const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        color: Colors.white54,
+                        size: 16,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -173,7 +199,7 @@ class ExerciseDetailPage extends StatelessWidget {
               border: Border.all(color: Colors.white10),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -185,7 +211,11 @@ class ExerciseDetailPage extends StatelessWidget {
                 exercise.gif,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => const Center(
-                  child: Icon(Icons.broken_image, color: Colors.white38, size: 64),
+                  child: Icon(
+                    Icons.broken_image,
+                    color: Colors.white38,
+                    size: 64,
+                  ),
                 ),
               ),
             ),
@@ -200,7 +230,11 @@ class ExerciseDetailPage extends StatelessWidget {
             iconColor: const Color(0xFF29B6F6),
             child: Text(
               exercise.desc,
-              style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.5),
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 15,
+                height: 1.5,
+              ),
             ),
           ),
 
@@ -213,7 +247,11 @@ class ExerciseDetailPage extends StatelessWidget {
             iconColor: const Color(0xFF7C6AF7), // Ungu
             child: Text(
               exercise.muscle,
-              style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
 
@@ -227,20 +265,34 @@ class ExerciseDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: exercise.tips
-                  .map((e) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.only(top: 4.0),
-                              child: Icon(Icons.circle, color: Color(0xFF6CC551), size: 6),
+                  .map(
+                    (e) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4.0),
+                            child: Icon(
+                              Icons.circle,
+                              color: Color(0xFF6CC551),
+                              size: 6,
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(child: Text(e, style: const TextStyle(color: Colors.white70, fontSize: 14))),
-                          ],
-                        ),
-                      ))
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              e,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                   .toList(),
             ),
           ),
@@ -255,20 +307,34 @@ class ExerciseDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: exercise.mistakes
-                  .map((e) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.only(top: 4.0),
-                              child: Icon(Icons.close, color: Color(0xFFF76A6A), size: 12),
+                  .map(
+                    (e) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4.0),
+                            child: Icon(
+                              Icons.close,
+                              color: Color(0xFFF76A6A),
+                              size: 12,
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(child: Text(e, style: const TextStyle(color: Colors.white70, fontSize: 14))),
-                          ],
-                        ),
-                      ))
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              e,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                   .toList(),
             ),
           ),
@@ -287,7 +353,7 @@ class ExerciseDetailPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 8,
-                shadowColor: const Color(0xFF6CC551).withOpacity(0.4),
+                shadowColor: const Color(0xFF6CC551).withValues(alpha: 0.4),
               ),
               onPressed: () {
                 Get.snackbar(
@@ -297,26 +363,31 @@ class ExerciseDetailPage extends StatelessWidget {
                   colorText: Colors.white,
                   snackPosition: SnackPosition.BOTTOM,
                   margin: const EdgeInsets.all(16),
-                  icon: const Icon(Icons.check_circle, color: Color(0xFF6CC551)),
+                  icon: const Icon(
+                    Icons.check_circle,
+                    color: Color(0xFF6CC551),
+                  ),
                 );
               },
               child: const Text(
                 "Add to Workout",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
           ),
-          
+
           const SizedBox(height: 24),
         ],
       ),
     );
   }
 
-  Widget _card({required String title, required IconData icon, required Color iconColor, required Widget child}) {
+  Widget _card({
+    required String title,
+    required IconData icon,
+    required Color iconColor,
+    required Widget child,
+  }) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -342,7 +413,7 @@ class ExerciseDetailPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          child
+          child,
         ],
       ),
     );

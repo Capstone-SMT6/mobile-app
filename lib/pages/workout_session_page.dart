@@ -31,16 +31,21 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
   @override
   void initState() {
     super.initState();
-    _progressCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
-    _progressAnim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _progressCtrl, curve: Curves.easeOut),
+    _progressCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
     );
+    _progressAnim = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _progressCtrl, curve: Curves.easeOut));
     _updateProgress();
   }
 
   void _updateProgress() {
     final total = widget.workoutPlan.length;
-    final progress = (_currentIndex + (_currentSet - 1) / _currentExercise.sets) / total;
+    final progress =
+        (_currentIndex + (_currentSet - 1) / _currentExercise.sets) / total;
     _progressCtrl.animateTo(progress.clamp(0.0, 1.0));
   }
 
@@ -243,20 +248,24 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF6CC551).withOpacity(0.15),
+                        color: const Color(0xFF6CC551).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.fitness_center,
-                          color: Color(0xFF6CC551), size: 22),
+                      child: const Icon(
+                        Icons.fitness_center,
+                        color: Color(0xFF6CC551),
+                        size: 22,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         exercise.muscleGroup,
                         style: const TextStyle(
-                            color: Color(0xFF6CC551),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600),
+                          color: Color(0xFF6CC551),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
@@ -275,7 +284,10 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
                 Text(
                   exercise.description,
                   style: const TextStyle(
-                      color: Colors.white60, fontSize: 14, height: 1.5),
+                    color: Colors.white60,
+                    fontSize: 14,
+                    height: 1.5,
+                  ),
                 ),
               ],
             ),
@@ -305,16 +317,23 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _openCamera,
-                  icon: const Icon(Icons.camera_alt_rounded,
-                      color: Color(0xFF7C6AF7)),
-                  label: const Text('Cek Postur',
-                      style: TextStyle(color: Color(0xFF7C6AF7))),
+                  icon: const Icon(
+                    Icons.camera_alt_rounded,
+                    color: Color(0xFF7C6AF7),
+                  ),
+                  label: const Text(
+                    'Cek Postur',
+                    style: TextStyle(color: Color(0xFF7C6AF7)),
+                  ),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(
-                        color: Color(0xFF7C6AF7), width: 1.5),
+                      color: Color(0xFF7C6AF7),
+                      width: 1.5,
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                 ),
               ),
@@ -329,7 +348,8 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
                     foregroundColor: const Color(0xFF0A0C10),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     elevation: 0,
                   ),
                   child: Text(
@@ -337,7 +357,9 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
                         ? 'Selesai Workout'
                         : 'Set $_currentSet Selesai',
                     style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w800),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ),
@@ -363,8 +385,8 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
                 color: done
                     ? const Color(0xFF6CC551)
                     : current
-                        ? const Color(0xFF6CC551).withOpacity(0.4)
-                        : Colors.white12,
+                    ? const Color(0xFF6CC551).withValues(alpha: 0.4)
+                    : Colors.white12,
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
@@ -408,9 +430,10 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
               Text(
                 exercise.name == 'Plank' ? 'detik' : 'reps',
                 style: const TextStyle(
-                    color: Colors.white54,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w500),
+                  color: Colors.white54,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
@@ -429,21 +452,28 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
         const Text(
           'SELANJUTNYA',
           style: TextStyle(
-              color: Colors.white38,
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.5),
+            color: Colors.white38,
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
         ),
         const SizedBox(height: 10),
-        ...upcoming.take(2).map(
+        ...upcoming
+            .take(2)
+            .map(
               (e) => Container(
                 margin: const EdgeInsets.only(bottom: 8),
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 12),
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF161824),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.white.withOpacity(0.05)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.05),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -451,22 +481,27 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
                       width: 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF7C6AF7).withOpacity(0.6),
+                        color: const Color(0xFF7C6AF7).withValues(alpha: 0.6),
                         shape: BoxShape.circle,
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(e.name,
-                          style: const TextStyle(
-                              color: Colors.white60,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500)),
+                      child: Text(
+                        e.name,
+                        style: const TextStyle(
+                          color: Colors.white60,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                     Text(
                       '${e.sets} set × ${e.reps}',
                       style: const TextStyle(
-                          color: Colors.white38, fontSize: 12),
+                        color: Colors.white38,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -500,7 +535,8 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
                       strokeWidth: 6,
                       backgroundColor: Colors.white10,
                       valueColor: const AlwaysStoppedAnimation(
-                          Color(0xFF7C6AF7)),
+                        Color(0xFF7C6AF7),
+                      ),
                       strokeCap: StrokeCap.round,
                     ),
                   ),
@@ -517,8 +553,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
                       ),
                       const Text(
                         'detik',
-                        style:
-                            TextStyle(color: Colors.white54, fontSize: 14),
+                        style: TextStyle(color: Colors.white54, fontSize: 14),
                       ),
                     ],
                   ),
@@ -539,7 +574,10 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
               'Set $_currentSet selesai! Ambil napas\nsebelum set berikutnya.',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                  color: Colors.white54, fontSize: 14, height: 1.5),
+                color: Colors.white54,
+                fontSize: 14,
+                height: 1.5,
+              ),
             ),
             const SizedBox(height: 32),
             TextButton(
@@ -547,9 +585,10 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
               child: const Text(
                 'Lewati Istirahat',
                 style: TextStyle(
-                    color: Color(0xFF6CC551),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15),
+                  color: Color(0xFF6CC551),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
               ),
             ),
           ],

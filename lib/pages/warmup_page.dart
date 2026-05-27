@@ -28,7 +28,8 @@ class WorkoutExercise {
 const defaultWorkoutPlan = [
   WorkoutExercise(
     name: 'Push Up',
-    description: 'Jaga punggung lurus seperti papan, turun perlahan dan terkontrol.',
+    description:
+        'Jaga punggung lurus seperti papan, turun perlahan dan terkontrol.',
     sets: 3,
     reps: 15,
     muscleGroup: 'Chest · Shoulder · Triceps',
@@ -36,7 +37,8 @@ const defaultWorkoutPlan = [
   ),
   WorkoutExercise(
     name: 'Squat',
-    description: 'Turun sampai paha sejajar lantai, lutut tidak melewati jari kaki.',
+    description:
+        'Turun sampai paha sejajar lantai, lutut tidak melewati jari kaki.',
     sets: 3,
     reps: 12,
     muscleGroup: 'Quads · Glutes · Hamstring',
@@ -58,10 +60,7 @@ const defaultWorkoutPlan = [
 class WarmupPage extends StatefulWidget {
   final List<WorkoutExercise> workoutPlan;
 
-  const WarmupPage({
-    super.key,
-    this.workoutPlan = defaultWorkoutPlan,
-  });
+  const WarmupPage({super.key, this.workoutPlan = defaultWorkoutPlan});
 
   @override
   State<WarmupPage> createState() => _WarmupPageState();
@@ -97,9 +96,7 @@ class _WarmupPageState extends State<WarmupPage>
   }
 
   Future<void> _initVideo() async {
-    _videoCtrl = VideoPlayerController.networkUrl(
-      Uri.parse(_warmupVideoUrl),
-    );
+    _videoCtrl = VideoPlayerController.networkUrl(Uri.parse(_warmupVideoUrl));
 
     try {
       await _videoCtrl.initialize();
@@ -183,7 +180,9 @@ class _WarmupPageState extends State<WarmupPage>
                     onTap: _goToSession,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white12,
                         borderRadius: BorderRadius.circular(20),
@@ -192,9 +191,10 @@ class _WarmupPageState extends State<WarmupPage>
                       child: const Text(
                         'Lewati',
                         style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600),
+                          color: Colors.white70,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -263,7 +263,9 @@ class _WarmupPageState extends State<WarmupPage>
                         child: const Text(
                           'Mulai Workout Sekarang',
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w800),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
                     ),
@@ -298,11 +300,14 @@ class _WarmupPageState extends State<WarmupPage>
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7C6AF7).withOpacity(0.2),
+                    color: const Color(0xFF7C6AF7).withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.self_improvement_rounded,
-                      size: 40, color: Color(0xFF7C6AF7)),
+                  child: const Icon(
+                    Icons.self_improvement_rounded,
+                    size: 40,
+                    color: Color(0xFF7C6AF7),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -388,16 +393,17 @@ class _WarmupPageState extends State<WarmupPage>
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: Colors.white24),
             ),
             child: Text(
               e.name,
               style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500),
+                color: Colors.white70,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         );
@@ -428,9 +434,9 @@ class _PillBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -440,7 +446,10 @@ class _PillBadge extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-                color: color, fontSize: 12, fontWeight: FontWeight.w700),
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
