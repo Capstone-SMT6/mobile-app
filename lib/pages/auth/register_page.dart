@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:get/get.dart';
-import '../controllers/auth_controller.dart';
-import '../config.dart';
-import '../routes/app_routes.dart';
+import '../../controllers/auth_controller.dart';
+import '../../config.dart';
+import '../../routes/app_routes.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});

@@ -200,7 +200,7 @@ class _OnboardingGoalPageState extends State<OnboardingGoalPage> {
                 // Pagination Dots
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(9, (index) {
+                  children: List.generate(8, (index) {
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       width: 8,

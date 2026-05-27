@@ -64,14 +64,28 @@ class _AnalysisPageState extends State<AnalysisPage> {
                         child: DropdownButton<String>(
                           value: selectedRange,
                           dropdownColor: const Color(0xFF222434),
-                          icon: const Icon(Icons.arrow_drop_down, color: Colors.white54),
-                          style: const TextStyle(color: Colors.white, fontSize: 14),
-                          items: [
-                            "Last week",
-                            "Last month",
-                            "Last 4 Months",
-                            "Last year"
-                          ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                          icon: const Icon(
+                            Icons.arrow_drop_down,
+                            color: Colors.white54,
+                          ),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                          items:
+                              [
+                                    "Last week",
+                                    "Last month",
+                                    "Last 4 Months",
+                                    "Last year",
+                                  ]
+                                  .map(
+                                    (e) => DropdownMenuItem(
+                                      value: e,
+                                      child: Text(e),
+                                    ),
+                                  )
+                                  .toList(),
                           onChanged: (val) {
                             setState(() {
                               selectedRange = val!;
@@ -79,7 +93,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
                           },
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
 
@@ -100,7 +114,8 @@ class _AnalysisPageState extends State<AnalysisPage> {
                             showTitles: true,
                             getTitlesWidget: (value, meta) {
                               const months = ["Aug", "Sep", "Oct", "Nov"];
-                              if (value.toInt() >= 0 && value.toInt() < months.length) {
+                              if (value.toInt() >= 0 &&
+                                  value.toInt() < months.length) {
                                 return Padding(
                                   padding: const EdgeInsets.only(top: 8.0),
                                   child: Text(
@@ -133,16 +148,18 @@ class _AnalysisPageState extends State<AnalysisPage> {
                             },
                           ),
                         ),
-                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
                       ),
                       gridData: FlGridData(
                         show: true,
                         drawVerticalLine: false,
-                        getDrawingHorizontalLine: (value) => FlLine(
-                          color: Colors.white10,
-                          strokeWidth: 1,
-                        ),
+                        getDrawingHorizontalLine: (value) =>
+                            FlLine(color: Colors.white10, strokeWidth: 1),
                       ),
                       borderData: FlBorderData(show: false),
                       barGroups: [
@@ -163,13 +180,19 @@ class _AnalysisPageState extends State<AnalysisPage> {
                   children: const [
                     Icon(Icons.circle, color: Color(0xFF6CC551), size: 12),
                     SizedBox(width: 8),
-                    Text("Good", style: TextStyle(color: Colors.white70, fontSize: 14)),
+                    Text(
+                      "Good",
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
                     SizedBox(width: 24),
                     Icon(Icons.circle, color: Color(0xFFF76A6A), size: 12),
                     SizedBox(width: 8),
-                    Text("Bad", style: TextStyle(color: Colors.white70, fontSize: 14)),
+                    Text(
+                      "Bad",
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -220,23 +243,43 @@ class _AnalysisPageState extends State<AnalysisPage> {
       ),
       child: Column(
         children: [
-          _buildSummaryRow(Icons.local_fire_department, "Calories Burned", "320 kcal", const Color(0xFFFFA726)),
+          _buildSummaryRow(
+            Icons.local_fire_department,
+            "Calories Burned",
+            "320 kcal",
+            const Color(0xFFFFA726),
+          ),
           const Divider(color: Colors.white10, height: 32),
-          _buildSummaryRow(Icons.timer, "Time Under Tension", "12 min", const Color(0xFF29B6F6)),
+          _buildSummaryRow(
+            Icons.timer,
+            "Time Under Tension",
+            "12 min",
+            const Color(0xFF29B6F6),
+          ),
           const Divider(color: Colors.white10, height: 32),
-          _buildSummaryRow(Icons.fitness_center, "Total Reps", "120", const Color(0xFFAB47BC)),
+          _buildSummaryRow(
+            Icons.fitness_center,
+            "Total Reps",
+            "120",
+            const Color(0xFFAB47BC),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSummaryRow(IconData icon, String label, String value, Color iconColor) {
+  Widget _buildSummaryRow(
+    IconData icon,
+    String label,
+    String value,
+    Color iconColor,
+  ) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.15),
+            color: iconColor.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: iconColor, size: 20),
@@ -265,9 +308,11 @@ class _AnalysisPageState extends State<AnalysisPage> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFFF76A6A).withOpacity(0.1),
+        color: const Color(0xFFF76A6A).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFF76A6A).withOpacity(0.3)),
+        border: Border.all(
+          color: const Color(0xFFF76A6A).withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

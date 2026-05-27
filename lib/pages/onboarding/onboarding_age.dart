@@ -261,7 +261,7 @@ class _OnboardingAgePageState extends State<OnboardingAgePage> {
                 // Pagination Dots (3rd dot active = index 2)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(9, (index) {
+                  children: List.generate(8, (index) {
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       width: 8,

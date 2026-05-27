@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import '../auth/auth_service.dart';
+import '../services/auth_service.dart';
 import '../routes/app_routes.dart';
 
 class AuthController extends GetxController {

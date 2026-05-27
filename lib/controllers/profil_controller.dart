@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../controllers/auth_controller.dart';
@@ -33,14 +34,17 @@ class ProfilController extends GetxController {
         final userController = Get.find<UserController>();
         final user = userController.user.value;
         if (user != null) {
-          final updatedUser = await UserService.uploadAvatar(user.id, image.path);
+          final updatedUser = await UserService.uploadAvatar(
+            user.id,
+            image.path,
+          );
           userController.user.value = updatedUser;
           Get.snackbar('Berhasil', 'Foto profil berhasil diperbarui');
         }
       }
     } catch (e) {
       Get.snackbar('Error', 'Gagal memperbarui foto profil');
-      print('Error updating avatar: $e');
+      debugPrint('Error updating avatar: $e');
     }
   }
 }
