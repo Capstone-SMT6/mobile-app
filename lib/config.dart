@@ -17,6 +17,7 @@ class AppConfig {
   static String get chatbotSessionsEndpoint => '$apiBaseUrl/chatbot/sessions';
   static String chatbotChatEndpoint(String sessionId) => '$apiBaseUrl/chatbot/sessions/$sessionId/chat';
   static String chatbotStreamEndpoint(String sessionId) => '$apiBaseUrl/chatbot/sessions/$sessionId/stream';
+  static String get trendingEndpoint => '$apiBaseUrl/api/trends';
   // ---------------------------------------------------------------------------
   // Google OAuth
   // ---------------------------------------------------------------------------
