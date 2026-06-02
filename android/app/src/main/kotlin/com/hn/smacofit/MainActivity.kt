@@ -1,4 +1,4 @@
-package com.hn.smafit
+package com.hn.smacofit
 
 import io.flutter.embedding.android.FlutterActivity
 
