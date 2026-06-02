@@ -24,15 +24,6 @@ class WorkoutExercise {
     required this.poseAngle,
     this.exerciseType = 'other',
   });
-
-  String get exerciseType {
-    final n = name.toLowerCase().replaceAll(' ', '').replaceAll('-', '');
-    if (n.contains('pushup')) return 'pushup';
-    if (n.contains('situp')) return 'situp';
-    if (n.contains('squat')) return 'squat';
-    if (n.contains('plank')) return 'plank';
-    return n;
-  }
 }
 
 // Default workout plan — bisa dikembangkan dari goal user
