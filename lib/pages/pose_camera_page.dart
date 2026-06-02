@@ -1,8 +1,14 @@
+import 'dart:async';
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import '../services/pose_detector_service.dart';
+import '../utils/device_diagnostics.dart';
+import '../utils/memory_profiler.dart';
 import 'warmup_page.dart';
 
 // ─────────────────────────────────────────────────────────────
@@ -29,22 +35,125 @@ class _PoseCameraPageState extends State<PoseCameraPage>
   bool _isFrontCamera = false;
 
   // ── ML Kit ────────────────────────────────────────────────
-  final _service = PoseDetectorService();
-  bool _isProcessing = false;  // throttle: skip frame jika masih proses
-  PushUpAnalysis? _lastAnalysis;
+  final _pushUpService = PoseDetectorService();
+  final _sitUpService  = SitUpDetectorService();
+  final _squatService  = SquatDetectorService();
+  final _plankService  = PlankDetectorService();
+  bool _isProcessing = false;
+
+  // Union result — hanya satu yang non-null sesuai exerciseType
+  PushUpAnalysis? _pushUpAnalysis;
+  SitUpAnalysis?  _sitUpAnalysis;
+  SquatAnalysis?  _squatAnalysis;
+  PlankAnalysis?  _plankAnalysis;
+
+  // ── Shortcut getters (4-way switch) ──────────────────────
+  // Plank: _repCount = formScore (dipakai di plank stats row)
+  int get _repCount => switch (widget.exercise.exerciseType) {
+    'situp' => _sitUpAnalysis?.repCount  ?? 0,
+    'squat' => _squatAnalysis?.repCount  ?? 0,
+    'plank' => _plankAnalysis?.formScore ?? 0,
+    _       => _pushUpAnalysis?.repCount ?? 0,
+  };
+  String get _stage => switch (widget.exercise.exerciseType) {
+    'situp' => _sitUpAnalysis?.stage  ?? 'down',
+    'squat' => _squatAnalysis?.stage  ?? 'up',
+    'plank' => _plankAnalysis?.stage  ?? 'paused',
+    _       => _pushUpAnalysis?.stage ?? 'up',
+  };
+  String get _feedback => switch (widget.exercise.exerciseType) {
+    'situp' => _sitUpAnalysis?.feedback  ?? 'Mendeteksi pose...',
+    'squat' => _squatAnalysis?.feedback  ?? 'Mendeteksi pose...',
+    'plank' => _plankAnalysis?.feedback  ?? 'Mendeteksi pose...',
+    _       => _pushUpAnalysis?.feedback ?? 'Mendeteksi pose...',
+  };
+  bool get _isGoodPosture => switch (widget.exercise.exerciseType) {
+    'situp' => _sitUpAnalysis?.isGoodPosture  ?? false,
+    'squat' => _squatAnalysis?.isGoodPosture  ?? false,
+    'plank' => _plankAnalysis?.isGoodPosture  ?? false,
+    _       => _pushUpAnalysis?.isGoodPosture ?? false,
+  };
+  bool get _isHorizontal => switch (widget.exercise.exerciseType) {
+    'situp' => _sitUpAnalysis?.isHorizontal  ?? false,
+    'squat' => true,   // standing — skip horizontal guard
+    'plank' => _plankAnalysis?.isHorizontal  ?? false,
+    _       => _pushUpAnalysis?.isHorizontal ?? false,
+  };
+  List<Pose> get _poses => switch (widget.exercise.exerciseType) {
+    'situp' => _sitUpAnalysis?.poses  ?? [],
+    'squat' => _squatAnalysis?.poses  ?? [],
+    'plank' => _plankAnalysis?.poses  ?? [],
+    _       => _pushUpAnalysis?.poses ?? [],
+  };
+  bool get _hasAnalysis => switch (widget.exercise.exerciseType) {
+    'situp' => _sitUpAnalysis != null,
+    'squat' => _squatAnalysis != null,
+    'plank' => _plankAnalysis != null,
+    _       => _pushUpAnalysis != null,
+  };
 
   // ── Image dimensions (untuk pose overlay) ─────────────────
   Size _imageSize = Size.zero;
 
+  // ── Gyroscope / Accelerometer ─────────────────────────────
+  StreamSubscription<AccelerometerEvent>? _accelSub;
+  bool _isDeviceLandscape = false; // deteksi dari sensor
+
   // ── Animations ────────────────────────────────────────────
   late AnimationController _feedbackCtrl;
   late Animation<double> _feedbackScale;
+  late AnimationController _rotateHintCtrl;
+  late Animation<double> _rotateHintAnim;
+
+  // ══════════ PERFORMANCE OPTIMIZATION ══════════
+  int _frameCounter = 0;
+  int _frameSkip = 2; // Process setiap 3 frame (0, 3, 6, ...)
+  DateTime? _lastProcessTime;
+  final List<int> _processingTimes = []; // Track performance
+  
+  // Resolusi kamera — disinkronkan dengan kalibrasi
+  ResolutionPreset _cameraResolution = ResolutionPreset.medium;
+  
+  // Auto-adjust frame skip berdasarkan device performance
+  bool _isAutoTuning = true;
+  Timer? _performanceMonitor;
+  
+  // Tambahkan properties baru
+  final _diagnostics = DeviceDiagnostics();
+  final _memoryProfiler = MemoryProfiler();
+  
+  // FPS monitoring
+  int _fps = 0;
+  int _fpsCounter = 0;
+  DateTime _fpsTimestamp = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    _service.init();
-    _service.reset(); // reset counter tiap buka page
+
+    // Inisialisasi service sesuai tipe latihan
+    switch (widget.exercise.exerciseType) {
+      case 'situp':
+        _sitUpService.init();
+        _sitUpService.reset();
+      case 'squat':
+        _squatService.init();
+        _squatService.reset();
+      case 'plank':
+        _plankService.init();
+        _plankService.reset();
+      default:
+        _pushUpService.init();
+        _pushUpService.reset();
+    }
+
+    // Biarkan aplikasi bisa berputar (portrait/landscape) agar kamera bisa menyesuaikan orientasi layar fisik
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
 
     _feedbackCtrl = AnimationController(
       vsync: this,
@@ -54,7 +163,122 @@ class _PoseCameraPageState extends State<PoseCameraPage>
       CurvedAnimation(parent: _feedbackCtrl, curve: Curves.elasticOut),
     );
 
+    // Animasi hint putar layar (bounce)
+    _rotateHintCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+    _rotateHintAnim = Tween(begin: -0.12, end: 0.12).animate(
+      CurvedAnimation(parent: _rotateHintCtrl, curve: Curves.easeInOut),
+    );
+
+    // Subscribe accelerometer untuk deteksi orientasi real-time
+    _accelSub = accelerometerEventStream(
+      samplingPeriod: const Duration(milliseconds: 300),
+    ).listen((AccelerometerEvent event) {
+      // |x| > |y| berarti device sedang landscape
+      final landscape = event.x.abs() > event.y.abs();
+      if (landscape != _isDeviceLandscape && mounted) {
+        setState(() => _isDeviceLandscape = landscape);
+      }
+    });
+
     _initCamera();
+    
+    // Initialize diagnostics & profiling
+    _initializeDiagnostics();
+    _startPerformanceMonitoring();
+  }
+
+  Future<void> _initializeDiagnostics() async {
+    await _diagnostics.initialize();
+    
+    // Start memory profiling in debug mode
+    if (kDebugMode) {
+      await _memoryProfiler.start();
+    }
+    
+    // Apply recommended settings — SAMA dengan yang dipakai di CalibrationPage
+    final settings = _diagnostics.getRecommendedSettings();
+    if (mounted) {
+      setState(() {
+        _frameSkip = settings['frameSkip'] as int;
+        _cameraResolution = settings['resolution'] as ResolutionPreset;
+        _isAutoTuning = false; // Use device-specific settings
+      });
+    }
+    
+    // Restart kamera dengan resolusi yang sudah dikalibrasi
+    // (hanya jika kamera sudah berjalan dan resolusinya berbeda)
+    if (_cameraReady && _cameraResolution != ResolutionPreset.medium) {
+      await _startCamera(_isFrontCamera);
+    }
+  }
+  
+  // ─── PERFORMANCE MONITORING ─────────────────────────────
+  void _startPerformanceMonitoring() {
+    _performanceMonitor = Timer.periodic(
+      const Duration(seconds: 5),
+      (_) => _analyzePerformance(),
+    );
+  }
+  
+  void _analyzePerformance() {
+    if (_processingTimes.isEmpty) return;
+    
+    final avgTime = _processingTimes.reduce((a, b) => a + b) / 
+                    _processingTimes.length;
+    
+    debugPrint('Avg processing time: ${avgTime.toStringAsFixed(1)}ms | FPS: $_fps');
+    
+    // Auto-tune frame skip jika terlalu lambat
+    if (_isAutoTuning) {
+      if (avgTime > 150 && _frameSkip < 4) {
+        if (mounted) setState(() => _frameSkip++);
+        debugPrint('Performance low, increasing frame skip to $_frameSkip');
+      } else if (avgTime < 50 && _frameSkip > 1) {
+        if (mounted) setState(() => _frameSkip--);
+        debugPrint('Performance good, decreasing frame skip to $_frameSkip');
+      }
+    }
+    
+    // Clear untuk next interval
+    _processingTimes.clear();
+  }
+
+  // ─── FPS COUNTER ───────────────────────────────────────
+  void _updateFPS() {
+    _fpsCounter++;
+    final now = DateTime.now();
+    
+    if (now.difference(_fpsTimestamp).inMilliseconds >= 1000) {
+      if (mounted) setState(() => _fps = _fpsCounter);
+      _fpsCounter = 0;
+      _fpsTimestamp = now;
+    }
+  }
+
+  void _handleProcessingError(dynamic error) {
+    _consecutiveErrors++;
+    
+    debugPrint('Processing error #$_consecutiveErrors: $error');
+    
+    // Jika error terus-menerus, tampilkan ke user
+    if (_consecutiveErrors >= _maxConsecutiveErrors && mounted) {
+      setState(() {
+        _persistentError = 'Deteksi pose gagal. Coba ubah posisi kamera.';
+      });
+      
+      // Auto-reset setelah 3 detik
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted && _consecutiveErrors >= _maxConsecutiveErrors) {
+          setState(() {
+            _consecutiveErrors = 0;
+            _persistentError = null;
+          });
+        }
+      });
+    }
   }
 
   // ─── INISIALISASI KAMERA ───────────────────────────────────
@@ -89,7 +313,7 @@ class _PoseCameraPageState extends State<PoseCameraPage>
 
     final ctrl = CameraController(
       selectedCamera,
-      ResolutionPreset.medium, // medium = 480p, lebih ringan untuk ML Kit
+      _cameraResolution, // Gunakan resolusi dari kalibrasi (bukan hardcode medium)
       enableAudio: false,
       imageFormatGroup: ImageFormatGroup.nv21, // Android format untuk ML Kit
     );
@@ -113,43 +337,185 @@ class _PoseCameraPageState extends State<PoseCameraPage>
     }
   }
 
-  // ─── PROCESS SETIAP FRAME KAMERA → ML Kit ─────────────────
+  // ─── OPTIMIZED FRAME PROCESSING ────────────────────────
   Future<void> _processFrame(CameraImage image) async {
-    // Throttle: lewati frame jika masih memproses
     if (_isProcessing || !mounted) return;
+    
+    // ══════════ FRAME SKIPPING ══════════
+    if (_frameCounter++ % (_frameSkip + 1) != 0) {
+      _updateFPS();
+      return;
+    }
+    
     _isProcessing = true;
-
+    final startTime = DateTime.now();
+    
     try {
-      final sensorOrientation =
-          _cameraCtrl!.description.sensorOrientation;
+      final sensorOrientation = _cameraCtrl?.description.sensorOrientation ?? 90;
 
-      // Simpan ukuran image untuk koordinat overlay
       if (_imageSize == Size.zero) {
         _imageSize = Size(image.width.toDouble(), image.height.toDouble());
       }
 
-      // Konversi CameraImage → InputImage
       final inputImage = cameraImageToInputImage(
-        image,
-        sensorOrientation,
+        image, 
+        sensorOrientation, 
         _isFrontCamera,
       );
-      if (inputImage == null) return;
-
-      // Jalankan pose detection on-device
-      final analysis = await _service.processImage(inputImage);
-
-      if (mounted && analysis != null) {
-        final prevReps = _lastAnalysis?.repCount ?? 0;
-        setState(() => _lastAnalysis = analysis);
-
-        // Animasi feedback saat rep baru
-        if (analysis.repCount > prevReps) {
-          _feedbackCtrl.forward(from: 0);
-        }
+      
+      if (inputImage == null) {
+        debugPrint('Failed to convert camera image');
+        return;
       }
+
+      // ══════════ ML KIT PROCESSING WITH ERROR HANDLING ══════════
+      await _processImageWithErrorHandling(inputImage);
+      
+      // Track processing time
+      final processingTime = DateTime.now().difference(startTime).inMilliseconds;
+      _processingTimes.add(processingTime);
+      
+      // Keep last 20 measurements only
+      if (_processingTimes.length > 20) {
+        _processingTimes.removeAt(0);
+      }
+      
+      _lastProcessTime = DateTime.now();
+      
+    } catch (e, stackTrace) {
+      debugPrint('Frame processing error: $e');
+      debugPrint(stackTrace.toString());
+      
+      _handleProcessingError(e);
+      
     } finally {
       _isProcessing = false;
+      _updateFPS();
+    }
+  }
+
+  // ─── ML KIT ERROR HANDLING ─────────────────────────────
+  int _consecutiveErrors = 0;
+  final int _maxConsecutiveErrors = 5;
+  String? _persistentError;
+
+  // ─── SET COMPLETION CHECK ────────────────────────────────
+  void _checkCompletion() {
+    bool isDone = false;
+    if (widget.exercise.exerciseType == 'plank') {
+      if ((_plankAnalysis?.duration ?? 0) >= widget.exercise.reps) {
+        isDone = true;
+      }
+    } else {
+      if (_repCount >= widget.exercise.reps) {
+        isDone = true;
+      }
+    }
+
+    if (isDone && mounted) {
+      HapticFeedback.heavyImpact();
+      Get.back(result: true);
+    }
+  }
+
+  Future<void> _processImageWithErrorHandling(InputImage inputImage) async {
+    try {
+      switch (widget.exercise.exerciseType) {
+        case 'situp':
+          final analysis = await _sitUpService.processImage(inputImage)
+              .timeout(const Duration(milliseconds: 500));
+          
+          if (mounted && analysis != null) {
+            final prev = _sitUpAnalysis?.repCount ?? 0;
+            setState(() {
+              _sitUpAnalysis = analysis;
+              _consecutiveErrors = 0; // Reset error counter
+              _persistentError = null;
+            });
+            
+            if (analysis.repCount > prev) {
+              HapticFeedback.mediumImpact(); // Haptic feedback!
+              _feedbackCtrl.forward(from: 0);
+              _checkCompletion();
+            }
+          }
+          break;
+          
+        case 'squat':
+          final analysis = await _squatService.processImage(inputImage)
+              .timeout(const Duration(milliseconds: 500));
+          
+          if (mounted && analysis != null) {
+            final prev = _squatAnalysis?.repCount ?? 0;
+            setState(() {
+              _squatAnalysis = analysis;
+              _consecutiveErrors = 0;
+              _persistentError = null;
+            });
+            
+            if (analysis.repCount > prev) {
+              HapticFeedback.mediumImpact();
+              _feedbackCtrl.forward(from: 0);
+              _checkCompletion();
+            }
+          }
+          break;
+          
+        case 'plank':
+          final analysis = await _plankService.processImage(inputImage)
+              .timeout(const Duration(milliseconds: 500));
+          
+          if (mounted && analysis != null) {
+            final wasGood = _plankAnalysis?.isGoodPosture ?? false;
+            setState(() {
+              _plankAnalysis = analysis;
+              _consecutiveErrors = 0;
+              _persistentError = null;
+            });
+            
+            if (!wasGood && analysis.isGoodPosture) {
+              HapticFeedback.lightImpact();
+              _feedbackCtrl.forward(from: 0);
+            }
+            _checkCompletion(); // Plank is time-based, check every frame
+          }
+          break;
+          
+        default:
+          final analysis = await _pushUpService.processImage(inputImage)
+              .timeout(const Duration(milliseconds: 500));
+          
+          if (mounted && analysis != null) {
+            final prev = _pushUpAnalysis?.repCount ?? 0;
+            setState(() {
+              _pushUpAnalysis = analysis;
+              _consecutiveErrors = 0;
+              _persistentError = null;
+            });
+            
+            if (analysis.repCount > prev) {
+              HapticFeedback.mediumImpact();
+              _feedbackCtrl.forward(from: 0);
+              _checkCompletion();
+            }
+          }
+          break;
+      }
+      
+    } on TimeoutException {
+      _handleProcessingError('ML Kit timeout - device too slow');
+      
+    } on PlatformException catch (e) {
+      if (e.code == 'INVALID_IMAGE') {
+        _handleProcessingError('Invalid camera image format');
+      } else if (e.code == 'MODEL_NOT_LOADED') {
+        _handleProcessingError('ML Kit model not loaded');
+      } else {
+        _handleProcessingError('ML Kit error: ${e.message}');
+      }
+      
+    } catch (e) {
+      _handleProcessingError('Unknown error: $e');
     }
   }
 
@@ -160,9 +526,24 @@ class _PoseCameraPageState extends State<PoseCameraPage>
 
   @override
   void dispose() {
+    // Stop profiling & print report
+    if (kDebugMode) {
+      _memoryProfiler.stop();
+    }
+    
+    _performanceMonitor?.cancel();
+    // Kembalikan orientasi ke semua arah saat keluar
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    _accelSub?.cancel();
     _cameraCtrl?.stopImageStream();
     _cameraCtrl?.dispose();
     _feedbackCtrl.dispose();
+    _rotateHintCtrl.dispose();
     super.dispose();
   }
 
@@ -177,31 +558,31 @@ class _PoseCameraPageState extends State<PoseCameraPage>
           _buildCameraLayer(),
 
           // ── LAYER 2: Pose skeleton overlay ──────────────
-          if (_cameraReady && _lastAnalysis != null)
+          if (_cameraReady && _hasAnalysis)
             _buildPoseOverlay(),
 
-          // ── LAYER 3: Top gradient ────────────────────────
+          // ── LAYER 3: Top gradient (slim) ─────────────────
           Container(
-            height: 140,
+            height: 90,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xDD000000), Colors.transparent],
+                colors: [Color(0xCC000000), Colors.transparent],
               ),
             ),
           ),
 
-          // ── LAYER 4: Bottom gradient ─────────────────────
+          // ── LAYER 4: Bottom gradient (slim) ──────────────
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              height: 260,
+              height: 140,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: [Color(0xEE000000), Colors.transparent],
+                  colors: [Color(0xDD000000), Colors.transparent],
                 ),
               ),
             ),
@@ -215,6 +596,9 @@ class _PoseCameraPageState extends State<PoseCameraPage>
             alignment: Alignment.bottomCenter,
             child: _buildBottomPanel(),
           ),
+
+          // ── LAYER 7: Rotate hint (sensor-driven) ─────────
+          if (!_isDeviceLandscape) _buildRotateHint(),
         ],
       ),
     );
@@ -249,26 +633,33 @@ class _PoseCameraPageState extends State<PoseCameraPage>
       );
     }
 
-    return SizedBox.expand(child: CameraPreview(_cameraCtrl!));
+    // Preserve camera's native aspect ratio so preview is never stretched.
+    return Center(
+      child: AspectRatio(
+        aspectRatio: _cameraCtrl!.value.aspectRatio,
+        child: CameraPreview(_cameraCtrl!),
+      ),
+    );
   }
 
   // ─── POSE SKELETON OVERLAY ─────────────────────────────────
   Widget _buildPoseOverlay() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final screenSize =
-            Size(constraints.maxWidth, constraints.maxHeight);
+        final screenSize = Size(constraints.maxWidth, constraints.maxHeight);
         return CustomPaint(
           size: screenSize,
           painter: PosePainter(
-            poses: _lastAnalysis!.poses,
+            poses: _poses,
             imageSize: _imageSize,
             screenSize: screenSize,
             isFrontCamera: _isFrontCamera,
             sensorOrientation:
                 _cameraCtrl?.description.sensorOrientation ?? 90,
-            feedback: _lastAnalysis!.feedback,
-            isGoodPosture: _lastAnalysis!.isGoodPosture,
+            feedback: _feedback,
+             isGoodPosture: _isGoodPosture,
+            exerciseType: widget.exercise.exerciseType,
+            plankSide: _plankAnalysis?.side ?? 'left',
           ),
         );
       },
@@ -334,168 +725,264 @@ class _PoseCameraPageState extends State<PoseCameraPage>
                 icon: Icons.flip_camera_android_rounded,
                 onTap: _toggleCamera,
               ),
+            const SizedBox(width: 8),
+            // Reset counter
+            _CircleButton(
+              icon: Icons.refresh_rounded,
+              onTap: () {
+                switch (widget.exercise.exerciseType) {
+                  case 'situp':
+                    _sitUpService.reset();
+                    setState(() => _sitUpAnalysis = null);
+                  case 'squat':
+                    _squatService.reset();
+                    setState(() => _squatAnalysis = null);
+                  case 'plank':
+                    _plankService.reset();
+                    setState(() => _plankAnalysis = null);
+                  default:
+                    _pushUpService.reset();
+                    setState(() => _pushUpAnalysis = null);
+                }
+              },
+            ),
           ],
         ),
       ),
     );
   }
 
-  // ─── BOTTOM PANEL ──────────────────────────────────────────
+  // ─── BOTTOM PANEL (minimalist) ────────────────────────────
   Widget _buildBottomPanel() {
-    final analysis = _lastAnalysis;
-
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // ── Stats row: REPS + STAGE + angles ───────────
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha:0.7),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  // REPS counter
-                  _StatBox(
-                    label: 'REPS',
-                    value: '${analysis?.repCount ?? 0}',
-                    color: const Color(0xFF6CC551),
-                    large: true,
+            // ── Compact stats pill ──────────────────────────
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                color: Colors.black.withValues(alpha: 0.65),
+                child: IntrinsicHeight(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // REPS counter
+                      _StatBox(
+                        label: 'REPS',
+                        value: '$_repCount',
+                        color: const Color(0xFF6CC551),
+                        large: true,
+                      ),
+                      VerticalDivider(color: Colors.white12, width: 1, thickness: 1),
+                      // STAGE / STATUS
+                      if (widget.exercise.exerciseType == 'plank')
+                        _StatBox(
+                          label: 'STATUS',
+                          value: _stage.toUpperCase(),
+                          color: _stage == 'running'
+                              ? const Color(0xFF6CC551)
+                              : Colors.white54,
+                        )
+                      else
+                        _StatBox(
+                          label: 'STAGE',
+                          value: _stage.toUpperCase(),
+                          color: _stage == 'down'
+                              ? const Color(0xFFF76A6A)
+                              : Colors.white,
+                        ),
+                      VerticalDivider(color: Colors.white12, width: 1, thickness: 1),
+                      // Primary angle — adaptive
+                      if (widget.exercise.exerciseType == 'situp') ...[
+                        _StatBox(
+                          label: 'BADAN',
+                          value: '${_sitUpAnalysis?.bodyAngle.toStringAsFixed(0) ?? '--'}°',
+                          color: Colors.white70,
+                        ),
+                        VerticalDivider(color: Colors.white12, width: 1, thickness: 1),
+                        _StatBox(
+                          label: 'LEHER',
+                          value: '${_sitUpAnalysis?.neckAngle.toStringAsFixed(0) ?? '--'}°',
+                          color: (_sitUpAnalysis?.neckAngle ?? 99) < 35
+                              ? const Color(0xFFF0A500)
+                              : Colors.white70,
+                        ),
+                      ] else if (widget.exercise.exerciseType == 'squat') ...[
+                        _StatBox(
+                          label: 'LUTUT',
+                          value: '${_squatAnalysis?.kneeAngle.toStringAsFixed(0) ?? '--'}°',
+                          color: Colors.white70,
+                        ),
+                        VerticalDivider(color: Colors.white12, width: 1, thickness: 1),
+                        _StatBox(
+                          label: 'PUNGGUNG',
+                          value: '${_squatAnalysis?.backAngle.toStringAsFixed(0) ?? '--'}°',
+                          color: (_squatAnalysis?.backAngle ?? 180) < 130
+                              ? const Color(0xFFF0A500)
+                              : Colors.white70,
+                        ),
+                      ] else if (widget.exercise.exerciseType == 'plank') ...[
+                        _StatBox(
+                          label: 'HIP',
+                          value: '${_plankAnalysis?.hipAngle.toStringAsFixed(0) ?? '--'}°',
+                          color: (_plankAnalysis?.hipAngle ?? 0) >= 165
+                              ? const Color(0xFF6CC551)
+                              : (_plankAnalysis?.hipAngle ?? 0) >= 150
+                                  ? const Color(0xFFF0A500)
+                                  : Colors.white70,
+                        ),
+                        VerticalDivider(color: Colors.white12, width: 1, thickness: 1),
+                        _StatBox(
+                          label: 'FORM',
+                          value: '${_plankAnalysis?.formScore ?? '--'}%',
+                          color: (_plankAnalysis?.formScore ?? 0) >= 80
+                              ? const Color(0xFF6CC551)
+                              : (_plankAnalysis?.formScore ?? 0) >= 50
+                                  ? const Color(0xFFF0A500)
+                                  : const Color(0xFFF76A6A),
+                        ),
+                      ] else ...[
+                        _StatBox(
+                          label: 'SIKU',
+                          value: '${_pushUpAnalysis?.elbowAngle.toStringAsFixed(0) ?? '--'}°',
+                          color: Colors.white70,
+                        ),
+                        VerticalDivider(color: Colors.white12, width: 1, thickness: 1),
+                        _StatBox(
+                          label: 'PINGGUL',
+                          value: '${_pushUpAnalysis?.hipAngle.toStringAsFixed(0) ?? '--'}°',
+                          color: (_pushUpAnalysis?.hipAngle ?? 0) < 130
+                              ? const Color(0xFFF76A6A)   // pinggul turun
+                              : (_pushUpAnalysis?.hipAngle ?? 0) > 170
+                                  ? const Color(0xFFF0A500) // pinggul naik
+                                  : const Color(0xFF6CC551),
+                        ),
+                        VerticalDivider(color: Colors.white12, width: 1, thickness: 1),
+                        _StatBox(
+                          label: 'POSISI',
+                          value: (_pushUpAnalysis?.isHorizontal ?? false) ? 'OK ✓' : 'BERDIRI',
+                          color: (_pushUpAnalysis?.isHorizontal ?? false)
+                              ? const Color(0xFF6CC551)
+                              : const Color(0xFFF76A6A),
+                        ),
+                      ],
+                    ],
                   ),
-                  // Divider
-                  Container(
-                      width: 1, height: 48, color: Colors.white12),
-                  // STAGE
-                  _StatBox(
-                    label: 'STAGE',
-                    value: (analysis?.stage ?? 'up').toUpperCase(),
-                    color: analysis?.stage == 'down'
-                        ? const Color(0xFFF76A6A)
-                        : Colors.white,
-                  ),
-                  Container(
-                      width: 1, height: 48, color: Colors.white12),
-                  // Elbow angle
-                  _StatBox(
-                    label: 'SIKU',
-                    value:
-                        '${analysis?.elbowAngle.toStringAsFixed(0) ?? '--'}°',
-                    color: Colors.white70,
-                  ),
-                  Container(
-                      width: 1, height: 48, color: Colors.white12),
-                  // Hip angle
-                  _StatBox(
-                    label: 'PINGGUL',
-                    value:
-                        '${analysis?.hipAngle.toStringAsFixed(0) ?? '--'}°',
-                    color: Colors.white70,
-                  ),
-                ],
+                ),
               ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
 
-            // ── Feedback banner ─────────────────────────────
+            // ── Slim feedback chip ──────────────────────────
             ScaleTransition(
               scale: _feedbackScale,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: analysis == null
-                      ? Colors.black54
-                      : analysis.isGoodPosture
-                          ? const Color(0xFF6CC551).withValues(alpha:0.85)
-                          : const Color(0xFFF76A6A).withValues(alpha:0.85),
-                  borderRadius: BorderRadius.circular(14),
+                  color: !_hasAnalysis
+                      ? Colors.black45
+                      : !_isHorizontal
+                          ? const Color(0xFFF0A500).withValues(alpha: 0.85)
+                          : _isGoodPosture
+                              ? const Color(0xFF6CC551).withValues(alpha: 0.80)
+                              : const Color(0xFFF76A6A).withValues(alpha: 0.80),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      analysis == null
+                      !_hasAnalysis
                           ? Icons.sensors_rounded
-                          : analysis.isGoodPosture
-                              ? Icons.check_circle_rounded
-                              : Icons.warning_rounded,
+                          : !_isHorizontal
+                              ? Icons.accessibility_new_rounded
+                              : _isGoodPosture
+                                  ? Icons.check_circle_rounded
+                                  : Icons.warning_rounded,
                       color: Colors.white,
-                      size: 18,
+                      size: 14,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Text(
-                      analysis?.feedback ??
-                          'Mendeteksi pose...',
+                      _hasAnalysis ? _feedback : 'Mendeteksi pose...',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-
-            const SizedBox(height: 10),
-
-            // ── Tips & Reset ────────────────────────────────
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.black54,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      widget.exercise.description,
-                      style: const TextStyle(
-                          color: Colors.white60,
-                          fontSize: 11,
-                          height: 1.3),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                GestureDetector(
-                  onTap: () {
-                    _service.reset();
-                    setState(() => _lastAnalysis = null);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.black54,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white12),
-                    ),
-                    child: const Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.refresh_rounded,
-                            color: Colors.white60, size: 22),
-                        SizedBox(height: 4),
-                        Text('Reset',
-                            style: TextStyle(
-                                color: Colors.white38, fontSize: 10)),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // ─── ROTATE HINT OVERLAY (sensor-driven) ──────────────────
+  Widget _buildRotateHint() {
+    return AnimatedOpacity(
+      opacity: _isDeviceLandscape ? 0.0 : 1.0,
+      duration: const Duration(milliseconds: 400),
+      child: Container(
+        color: Colors.black.withValues(alpha: 0.72),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Ikon putar dengan animasi bounce
+              AnimatedBuilder(
+                animation: _rotateHintAnim,
+                builder: (_, __) => Transform.rotate(
+                  angle: _rotateHintAnim.value,
+                  child: const Icon(
+                    Icons.screen_rotation_rounded,
+                    color: Color(0xFF7C6AF7),
+                    size: 64,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Putar layar ke Landscape',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Untuk deteksi push-up/plank yang akurat,\ngunakan mode Landscape.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white60,
+                  fontSize: 13,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 28),
+              // Indikator horizontal / vertikal
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _OrientDot(active: false, label: 'Portrait'),
+                  const SizedBox(width: 12),
+                  _OrientDot(active: true, label: 'Landscape'),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -514,6 +1001,8 @@ class PosePainter extends CustomPainter {
   final int sensorOrientation;
   final String feedback;
   final bool isGoodPosture;
+  final String exerciseType; // 'pushup' | 'situp' | 'squat' | 'plank'
+  final String plankSide;   // 'left' | 'right' — used only for plank
 
   PosePainter({
     required this.poses,
@@ -523,6 +1012,8 @@ class PosePainter extends CustomPainter {
     required this.sensorOrientation,
     required this.feedback,
     required this.isGoodPosture,
+    this.exerciseType = 'pushup',
+    this.plankSide = 'left',
   });
 
   @override
@@ -575,14 +1066,41 @@ class PosePainter extends CustomPainter {
         );
       }
 
-      // ── Highlight joint kunci (shoulder, elbow, wrist, hip, ankle) ──
-      final keyLandmarks = [
-        lm[PoseLandmarkType.leftShoulder],
-        lm[PoseLandmarkType.leftElbow],
-        lm[PoseLandmarkType.leftWrist],
-        lm[PoseLandmarkType.leftHip],
-        lm[PoseLandmarkType.leftAnkle],
-      ];
+      // ── Highlight joint kunci ───────────────────────────
+      // Sit-up: LEFT  shoulder, hip, knee, ear
+      // Squat:  RIGHT shoulder, hip, knee, ankle
+      // Plank:  auto side (plankSide) shoulder, elbow, hip, knee, ankle, ear
+      // Push-up: LEFT shoulder, elbow, wrist, hip, ankle
+      final isPlankLeft = plankSide == 'left';
+      final keyLandmarks = switch (exerciseType) {
+        'situp' => [
+            lm[PoseLandmarkType.leftShoulder],
+            lm[PoseLandmarkType.leftHip],
+            lm[PoseLandmarkType.leftKnee],
+            lm[PoseLandmarkType.leftEar],
+          ],
+        'squat' => [
+            lm[PoseLandmarkType.rightShoulder],
+            lm[PoseLandmarkType.rightHip],
+            lm[PoseLandmarkType.rightKnee],
+            lm[PoseLandmarkType.rightAnkle],
+          ],
+        'plank' => [
+            lm[isPlankLeft ? PoseLandmarkType.leftShoulder : PoseLandmarkType.rightShoulder],
+            lm[isPlankLeft ? PoseLandmarkType.leftElbow    : PoseLandmarkType.rightElbow],
+            lm[isPlankLeft ? PoseLandmarkType.leftHip      : PoseLandmarkType.rightHip],
+            lm[isPlankLeft ? PoseLandmarkType.leftKnee     : PoseLandmarkType.rightKnee],
+            lm[isPlankLeft ? PoseLandmarkType.leftAnkle    : PoseLandmarkType.rightAnkle],
+            lm[isPlankLeft ? PoseLandmarkType.leftEar      : PoseLandmarkType.rightEar],
+          ],
+        _ => [
+            lm[PoseLandmarkType.leftShoulder],
+            lm[PoseLandmarkType.leftElbow],
+            lm[PoseLandmarkType.leftWrist],
+            lm[PoseLandmarkType.leftHip],
+            lm[PoseLandmarkType.leftAnkle],
+          ],
+      };
 
       for (final landmark in keyLandmarks) {
         if (landmark == null || landmark.likelihood < 0.5) continue;
@@ -674,27 +1192,55 @@ class PosePainter extends CustomPainter {
     Size size,
     Color color,
   ) {
-    final elbow = lm[PoseLandmarkType.leftElbow];
-    final hip = lm[PoseLandmarkType.leftHip];
-
-    // Label di titik siku
-    if (elbow != null && elbow.likelihood > 0.5) {
-      _drawTextLabel(
-        canvas,
-        _toScreen(elbow, size).translate(10, -20),
-        'Siku',
-        color,
-      );
-    }
-
-    // Label di titik pinggul
-    if (hip != null && hip.likelihood > 0.5) {
-      _drawTextLabel(
-        canvas,
-        _toScreen(hip, size).translate(10, -20),
-        'Pinggul',
-        color,
-      );
+    if (exerciseType == 'situp') {
+      // Sit-up: label di pinggul (body angle) dan bahu (neck angle)
+      final hip = lm[PoseLandmarkType.leftHip];
+      final shoulder = lm[PoseLandmarkType.leftShoulder];
+      if (hip != null && hip.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(hip, size).translate(10, -20),
+            'Badan', color);
+      }
+      if (shoulder != null && shoulder.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(shoulder, size).translate(10, -20),
+            'Leher', color);
+      }
+    } else if (exerciseType == 'squat') {
+      // Squat: label di lutut (knee angle) dan pinggul (back angle)
+      final knee = lm[PoseLandmarkType.rightKnee];
+      final hip  = lm[PoseLandmarkType.rightHip];
+      if (knee != null && knee.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(knee, size).translate(10, -20),
+            'Lutut', color);
+      }
+      if (hip != null && hip.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(hip, size).translate(10, -20),
+            'Punggung', color);
+      }
+    } else if (exerciseType == 'plank') {
+      // Plank: label di pinggul (hip angle) dan bahu (neck angle)
+      final isLeft = plankSide == 'left';
+      final hip      = lm[isLeft ? PoseLandmarkType.leftHip      : PoseLandmarkType.rightHip];
+      final shoulder = lm[isLeft ? PoseLandmarkType.leftShoulder : PoseLandmarkType.rightShoulder];
+      if (hip != null && hip.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(hip, size).translate(10, -20),
+            'Hip', color);
+      }
+      if (shoulder != null && shoulder.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(shoulder, size).translate(10, -20),
+            'Leher', color);
+      }
+    } else {
+      // Push-up: label di siku dan pinggul
+      final elbow = lm[PoseLandmarkType.leftElbow];
+      final hip = lm[PoseLandmarkType.leftHip];
+      if (elbow != null && elbow.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(elbow, size).translate(10, -20),
+            'Siku', color);
+      }
+      if (hip != null && hip.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(hip, size).translate(10, -20),
+            'Pinggul', color);
+      }
     }
   }
 
@@ -720,7 +1266,8 @@ class PosePainter extends CustomPainter {
   bool shouldRepaint(PosePainter old) =>
       old.poses != poses ||
       old.isGoodPosture != isGoodPosture ||
-      old.feedback != feedback;
+      old.feedback != feedback ||
+      old.exerciseType != exerciseType;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -785,6 +1332,45 @@ class _StatBox extends StatelessWidget {
             fontSize: 10,
             fontWeight: FontWeight.bold,
             letterSpacing: 1,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// HELPER: Indikator orientasi di rotate-hint overlay
+// ─────────────────────────────────────────────────────────────
+class _OrientDot extends StatelessWidget {
+  final bool active;
+  final String label;
+
+  const _OrientDot({required this.active, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: active ? 36 : 16,
+          height: 16,
+          decoration: BoxDecoration(
+            color: active
+                ? const Color(0xFF7C6AF7)
+                : Colors.white24,
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          style: TextStyle(
+            color: active ? const Color(0xFF7C6AF7) : Colors.white38,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],

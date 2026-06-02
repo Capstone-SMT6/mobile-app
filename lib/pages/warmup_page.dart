@@ -12,7 +12,8 @@ class WorkoutExercise {
   final int sets;
   final int reps;
   final String muscleGroup;
-  final String poseAngle; // 'side', 'front', 'back'
+  final String poseAngle;    // 'side', 'front', 'back'
+  final String exerciseType; // 'pushup' | 'situp' | 'squat' | 'plank' | 'other'
 
   const WorkoutExercise({
     required this.name,
@@ -21,6 +22,7 @@ class WorkoutExercise {
     required this.reps,
     required this.muscleGroup,
     required this.poseAngle,
+    this.exerciseType = 'other',
   });
 }
 
@@ -34,6 +36,16 @@ const defaultWorkoutPlan = [
     reps: 15,
     muscleGroup: 'Chest · Shoulder · Triceps',
     poseAngle: 'side',
+    exerciseType: 'pushup',
+  ),
+  WorkoutExercise(
+    name: 'Sit Up',
+    description: 'Angkat badan sampai siku menyentuh lutut, jaga leher tetap netral.',
+    sets: 3,
+    reps: 15,
+    muscleGroup: 'Abs · Core · Hip Flexors',
+    poseAngle: 'side',
+    exerciseType: 'situp',
   ),
   WorkoutExercise(
     name: 'Squat',
@@ -43,6 +55,7 @@ const defaultWorkoutPlan = [
     reps: 12,
     muscleGroup: 'Quads · Glutes · Hamstring',
     poseAngle: 'side',
+    exerciseType: 'squat',
   ),
   WorkoutExercise(
     name: 'Plank',
@@ -51,6 +64,7 @@ const defaultWorkoutPlan = [
     reps: 30, // detik
     muscleGroup: 'Core · Lower Back',
     poseAngle: 'side',
+    exerciseType: 'plank',
   ),
 ];
 

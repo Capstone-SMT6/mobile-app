@@ -32,39 +32,42 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) return;
+    // [DEV] Bypass login - langsung ke onboarding untuk testing
+    Get.offAllNamed(AppRoutes.onboardingGoal);
 
-    _isLoading.value = true;
-    try {
-      final response = await http.post(
-        Uri.parse(AppConfig.loginEndpoint),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': _emailController.text.trim(),
-          'password': _passwordController.text,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final token = data['access_token'];
-        if (token != null) {
-          await _authController.saveToken(token);
-        }
-        Get.snackbar('Success', 'Login successful!',
-            backgroundColor: Colors.green, colorText: Colors.white);
-        Get.offAllNamed(AppRoutes.home);
-      } else {
-        Get.snackbar('Login Failed', 'Invalid email or password',
-            backgroundColor: Colors.red, colorText: Colors.white);
-      }
-    } catch (e) {
-      Get.snackbar('Network Error', e.toString(),
-          backgroundColor: Colors.red, colorText: Colors.white);
-    } finally {
-      _isLoading.value = false;
-    }
+    // if (!_formKey.currentState!.validate()) return;
+    // _isLoading.value = true;
+    // try {
+    //   final response = await http.post(
+    //     Uri.parse(AppConfig.loginEndpoint),
+    //     headers: {'Content-Type': 'application/json'},
+    //     body: jsonEncode({
+    //       'email': _emailController.text.trim(),
+    //       'password': _passwordController.text,
+    //     }),
+    //   );
+    //   if (response.statusCode == 200) {
+    //     final data = jsonDecode(response.body);
+    //     final accessToken = data['access_token'];
+    //     final refreshToken = data['refresh_token'];
+    //     if (accessToken != null && refreshToken != null) {
+    //       await _authController.saveTokens(accessToken, refreshToken);
+    //     }
+    //     Get.snackbar('Success', 'Login successful!',
+    //         backgroundColor: Colors.green, colorText: Colors.white);
+    //     Get.offAllNamed(AppRoutes.home);
+    //   } else {
+    //     Get.snackbar('Login Failed', 'Invalid email or password',
+    //         backgroundColor: Colors.red, colorText: Colors.white);
+    //   }
+    // } catch (e) {
+    //   Get.snackbar('Network Error', e.toString(),
+    //       backgroundColor: Colors.red, colorText: Colors.white);
+    // } finally {
+    //   _isLoading.value = false;
+    // }
   }
+
 
   Future<void> _handleGoogleLogin() async {
     _isLoading.value = true;
@@ -88,9 +91,10 @@ class _LoginPageState extends State<LoginPage> {
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
-          final token = data['access_token'];
-          if (token != null) {
-            await _authController.saveToken(token);
+          final accessToken = data['access_token'];
+          final refreshToken = data['refresh_token'];
+          if (accessToken != null && refreshToken != null) {
+            await _authController.saveTokens(accessToken, refreshToken);
           }
           Get.snackbar('Success', 'Google Login successful!',
               backgroundColor: Colors.green, colorText: Colors.white);
