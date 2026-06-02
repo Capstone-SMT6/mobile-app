@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class User {
   final String id;
   final String username;
@@ -14,13 +16,18 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'] as String,
-      username: json['username'] as String,
-      email: json['email'] as String,
-      photoUrl: json['photoUrl'] as String?,
-      notificationEnabled: json['notificationEnabled'] as bool? ?? true,
-    );
+    try {
+      return User(
+        id: json['id'] as String,
+        username: json['username'] as String,
+        email: json['email'] as String,
+        photoUrl: json['photoUrl'] as String?,
+        notificationEnabled: json['notificationEnabled'] as bool? ?? true,
+      );
+    } catch (e) {
+      debugPrint('DEBUG ERROR: User parsing failed. JSON: $json. Error: $e');
+      rethrow;
+    }
   }
 }
 
@@ -42,14 +49,19 @@ class UserStats {
   });
 
   factory UserStats.fromJson(Map<String, dynamic> json) {
-    return UserStats(
-      id: json['id'] as String,
-      userId: json['user_id'] as String,
-      currentStreak: json['currentStreak'] as int? ?? 0,
-      longestStreak: json['longestStreak'] as int? ?? 0,
-      totalPushUps: json['totalPushUps'] as int? ?? 0,
-      totalSitUps: json['totalSitUps'] as int? ?? 0,
-    );
+    try {
+      return UserStats(
+        id: json['id'] as String,
+        userId: json['user_id'] as String,
+        currentStreak: json['currentStreak'] as int? ?? 0,
+        longestStreak: json['longestStreak'] as int? ?? 0,
+        totalPushUps: json['totalPushUps'] as int? ?? 0,
+        totalSitUps: json['totalSitUps'] as int? ?? 0,
+      );
+    } catch (e) {
+      debugPrint('DEBUG ERROR: UserStats parsing failed. JSON: $json. Error: $e');
+      rethrow;
+    }
   }
 }
 
@@ -77,17 +89,22 @@ class UserFitnessProfile {
   });
 
   factory UserFitnessProfile.fromJson(Map<String, dynamic> json) {
-    return UserFitnessProfile(
-      id: json['id'] as String,
-      userId: json['user_id'] as String,
-      goal: json['goal'] as String,
-      durationTarget: json['durationTarget'] as String,
-      age: json['age'] as int,
-      height: (json['height'] as num).toDouble(),
-      weight: (json['weight'] as num).toDouble(),
-      skillLevel: json['skillLevel'] as String,
-      intensity: json['intensity'] as String,
-    );
+    try {
+      return UserFitnessProfile(
+        id: json['id'] as String,
+        userId: json['user_id'] as String,
+        goal: json['goal'] as String,
+        durationTarget: json['durationTarget'] as String? ?? '',
+        age: json['age'] as int,
+        height: (json['height'] as num).toDouble(),
+        weight: (json['weight'] as num).toDouble(),
+        skillLevel: json['skillLevel'] as String,
+        intensity: json['intensity'] as String,
+      );
+    } catch (e) {
+      debugPrint('DEBUG ERROR: UserFitnessProfile parsing failed. JSON: $json. Error: $e');
+      rethrow;
+    }
   }
 
   String get goalFormatted {

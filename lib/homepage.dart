@@ -5,7 +5,6 @@ import 'pages/laporan_page.dart';
 import 'pages/profil_page.dart';
 import 'pages/exercise_list_page.dart';
 import 'controllers/home_controller.dart';
-import 'controllers/user_controller.dart';
 import 'routes/app_routes.dart';
 
 class HomePage extends StatelessWidget {
@@ -14,7 +13,6 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final HomeController controller = Get.find<HomeController>();
-    final UserController userController = Get.find<UserController>();
 
     const bgColor = Color(0xFF0D0F14);
     const surfaceColor = Color(0xFF1C2030);

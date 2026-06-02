@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/user_controller.dart';
-import '../services/trends_service.dart';
 import 'calendar_page.dart';
 import 'workout_list_page.dart';
 import 'analysis_page.dart';
@@ -25,8 +24,6 @@ class BerandaPage extends StatelessWidget {
               ProgressCard(),
               SizedBox(height: 32),
               TodayMenu(),
-              SizedBox(height: 32),
-              TrendingSection(),
               SizedBox(height: 32),
               WorkoutAnalysis(),
               SizedBox(height: 40),
@@ -107,7 +104,7 @@ class HeaderSection extends StatelessWidget {
             const SizedBox(width: 12),
             _buildIconButton(Icons.notifications_none_rounded),
           ],
-        ),
+        )
       ],
     );
   }
@@ -225,11 +222,8 @@ class ProgressCard extends StatelessWidget {
                   // Tampilkan streak nyata
                   Row(
                     children: [
-                      const Icon(
-                        Icons.local_fire_department,
-                        color: Colors.orangeAccent,
-                        size: 16,
-                      ),
+                      const Icon(Icons.local_fire_department,
+                          color: Colors.orangeAccent, size: 16),
                       const SizedBox(width: 4),
                       Text(
                         '$streak day streak',
@@ -257,9 +251,7 @@ class ProgressCard extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                          vertical: 10,
-                          horizontal: 24,
-                        ),
+                            vertical: 10, horizontal: 24),
                         decoration: BoxDecoration(
                           color: const Color(0xFF6CC551),
                           borderRadius: BorderRadius.circular(12),
@@ -274,10 +266,10 @@ class ProgressCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
+                  )
                 ],
               ),
-            ),
+            )
           ],
         ),
       );
@@ -333,12 +325,10 @@ class TodayMenu extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          ...menuItems.map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _buildMenuItem(item[0], item[1], item[2] as IconData),
-            ),
-          ),
+          ...menuItems.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildMenuItem(item[0], item[1], item[2] as IconData),
+              )),
         ],
       );
     });
@@ -402,152 +392,15 @@ class TodayMenu extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(color: Colors.white54, fontSize: 13),
+                  style: const TextStyle(
+                    color: Colors.white54,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
           ),
           const Icon(Icons.play_circle_fill, color: Colors.white, size: 32),
-        ],
-      ),
-    );
-  }
-}
-
-// ───────────────────────────────────────────────────────────────
-// TRENDING SECTION  — Top topics from Big Data (last 90 days)
-// ───────────────────────────────────────────────────────────────
-class TrendingSection extends StatefulWidget {
-  const TrendingSection({super.key});
-
-  @override
-  State<TrendingSection> createState() => _TrendingSectionState();
-}
-
-class _TrendingSectionState extends State<TrendingSection> {
-  late Future<List<TrendItem>> _future;
-
-  @override
-  void initState() {
-    super.initState();
-    _future = TrendsService.fetchTrending();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Trending Topics 🔥",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-            fontSize: 20,
-          ),
-        ),
-        const SizedBox(height: 4),
-        const Text(
-          "Most researched fitness topics (last 90 days)",
-          style: TextStyle(color: Colors.white54, fontSize: 12),
-        ),
-        const SizedBox(height: 16),
-        FutureBuilder<List<TrendItem>>(
-          future: _future,
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const SizedBox(
-                height: 110,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: Color(0xFF6CC551),
-                    strokeWidth: 2,
-                  ),
-                ),
-              );
-            }
-            if (snap.hasError || !snap.hasData || snap.data!.isEmpty) {
-              return const SizedBox.shrink();
-            }
-            final items = snap.data!;
-            return SizedBox(
-              height: 110,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: items.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (_, i) => _TrendCard(item: items[i]),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class _TrendCard extends StatelessWidget {
-  final TrendItem item;
-  const _TrendCard({required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    final rankColors = [
-      const Color(0xFFFFD700),
-      const Color(0xFFC0C0C0),
-      const Color(0xFFCD7F32),
-    ];
-    final badgeColor = item.rank <= 3
-        ? rankColors[item.rank - 1]
-        : Colors.white24;
-
-    final views = item.views90d;
-    final viewsLabel = views >= 1000000
-        ? '${(views / 1000000).toStringAsFixed(1)}M views'
-        : '${(views / 1000).toStringAsFixed(0)}K views';
-
-    return Container(
-      width: 140,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF222434),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: badgeColor.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              '#${item.rank}',
-              style: TextStyle(
-                color: badgeColor,
-                fontWeight: FontWeight.w800,
-                fontSize: 12,
-              ),
-            ),
-          ),
-          const Spacer(),
-          Text(
-            item.article,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            viewsLabel,
-            style: const TextStyle(color: Colors.white38, fontSize: 11),
-          ),
         ],
       ),
     );
@@ -565,7 +418,8 @@ class WorkoutAnalysis extends StatelessWidget {
     return GestureDetector(
       onTap: () => Get.to(() => const AnalysisPage()),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+        padding:
+            const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [Color(0xFF7C6AF7), Color(0xFF5A49D3)],
@@ -598,7 +452,10 @@ class WorkoutAnalysis extends StatelessWidget {
                 SizedBox(height: 6),
                 Text(
                   "Check your daily progress",
-                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -608,10 +465,8 @@ class WorkoutAnalysis extends StatelessWidget {
                 color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.arrow_forward_rounded,
-                color: Colors.white,
-              ),
+              child:
+                  const Icon(Icons.arrow_forward_rounded, color: Colors.white),
             ),
           ],
         ),

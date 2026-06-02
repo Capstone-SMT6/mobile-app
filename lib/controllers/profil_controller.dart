@@ -1,11 +1,10 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/user_controller.dart';
 import '../routes/app_routes.dart';
 import '../services/user_service.dart';
-import '../models/user_model.dart';
 
 class ProfilController extends GetxController {
   final RxBool notificationsEnabled = true.obs;
@@ -34,10 +33,7 @@ class ProfilController extends GetxController {
         final userController = Get.find<UserController>();
         final user = userController.user.value;
         if (user != null) {
-          final updatedUser = await UserService.uploadAvatar(
-            user.id,
-            image.path,
-          );
+          final updatedUser = await UserService.uploadAvatar(user.id, image.path);
           userController.user.value = updatedUser;
           Get.snackbar('Berhasil', 'Foto profil berhasil diperbarui');
         }

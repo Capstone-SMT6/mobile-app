@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/user_model.dart';
 import '../services/user_service.dart';
@@ -18,7 +18,7 @@ class UserController extends GetxController {
   Future<void> refreshData() async {
     try {
       isLoading.value = true;
-
+      
       // Fetch User Info
       final userData = await UserService.getCurrentUser();
       debugPrint('DEBUG: User Photo URL: ${userData.photoUrl}');
