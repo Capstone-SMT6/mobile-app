@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import '../services/auth_service.dart';
@@ -62,7 +63,7 @@ class AuthController extends GetxController {
         }
       }
     } catch (e) {
-      print('Token refresh failed: $e');
+      debugPrint('Token refresh failed: $e');
     }
 
     // Jika gagal me-refresh, paksa user untuk login kembali

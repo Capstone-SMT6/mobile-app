@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/user_controller.dart';
-import 'workout_list_page.dart';
+import 'workout_list_page.dart'; // Ditambahkan agar tombol "Start Workout" berfungsi
 
-const _bg = Color(0xFF0D0F14);
-const _green = Color(0xFF6CC551);
+const _bg = Color(0xFF0D0F14); // Warna background diselaraskan
+const _green = Color(0xFF6CC551); // Warna hijau diselaraskan
 const _purple = Color(0xFF7C6AF7);
 const _textPrimary = Color(0xFFE8EAF2);
 const _textSecondary = Color(0xFF8B92A5);
@@ -114,27 +114,19 @@ class LaporanPage extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  streak > 0
-                      ? '$streak Day Streak'
-                      : 'Mulai streak kamu hari ini',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  streak > 0 ? '$streak Day Streak' : 'Mulai streak kamu hari ini',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            "Ready for today's workout?",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              height: 1.2,
-            ),
-          ),
+          const Text("Ready for today's workout?",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  height: 1.2)),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
@@ -144,18 +136,14 @@ class LaporanPage extends StatelessWidget {
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                    borderRadius: BorderRadius.circular(16)),
               ),
               onPressed: () {
                 Get.to(() => const WorkoutListPage());
               },
-              child: const Text(
-                "Start Workout",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
+              child: const Text("Start Workout", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ),
-          ),
+          )
         ],
       ),
     );
@@ -171,14 +159,9 @@ class LaporanPage extends StatelessWidget {
             children: [
               Icon(Icons.lightbulb, color: _gold, size: 22),
               SizedBox(width: 8),
-              Text(
-                "AI Insight",
-                style: TextStyle(
-                  color: _textPrimary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
+              Text("AI Insight",
+                  style: TextStyle(
+                      color: _textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
             ],
           ),
           SizedBox(height: 12),
@@ -200,31 +183,16 @@ class LaporanPage extends StatelessWidget {
         children: const [
           Row(
             children: [
-              Icon(
-                Icons.center_focus_strong,
-                color: Colors.orangeAccent,
-                size: 22,
-              ),
+              Icon(Icons.center_focus_strong, color: Colors.orangeAccent, size: 22),
               SizedBox(width: 8),
-              Text(
-                "Focus Today",
-                style: TextStyle(
-                  color: _textPrimary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
+              Text("Focus Today",
+                  style: TextStyle(
+                      color: _textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
             ],
           ),
           SizedBox(height: 12),
-          Text(
-            "• Improve squat depth",
-            style: TextStyle(color: _textSecondary, fontSize: 14, height: 1.5),
-          ),
-          Text(
-            "• Slow down tempo",
-            style: TextStyle(color: _textSecondary, fontSize: 14, height: 1.5),
-          ),
+          Text("• Improve squat depth", style: TextStyle(color: _textSecondary, fontSize: 14, height: 1.5)),
+          Text("• Slow down tempo", style: TextStyle(color: _textSecondary, fontSize: 14, height: 1.5)),
         ],
       ),
     );
@@ -235,15 +203,8 @@ class LaporanPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "PERSONAL BEST",
-          style: TextStyle(
-            color: _textSecondary,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
-        ),
+        const Text("PERSONAL BEST",
+            style: TextStyle(color: _textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
         const SizedBox(height: 12),
         Row(
           children: [
@@ -251,7 +212,7 @@ class LaporanPage extends StatelessWidget {
             const SizedBox(width: 16),
             _pb("Sit Ups", "${stats?.totalSitUps ?? 0}", _green),
           ],
-        ),
+        )
       ],
     );
   }
@@ -264,14 +225,7 @@ class LaporanPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                color: _textSecondary,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            Text(title, style: const TextStyle(color: _textSecondary, fontSize: 14, fontWeight: FontWeight.w500)),
             const SizedBox(height: 8),
             Text(
               value,
@@ -281,13 +235,7 @@ class LaporanPage extends StatelessWidget {
                 fontWeight: FontWeight.w900,
               ),
             ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: const TextStyle(color: _textSecondary, fontSize: 11),
-              ),
-            ],
+            if (subtitle != null) ...[const SizedBox(height: 4), Text(subtitle, style: const TextStyle(color: _textSecondary, fontSize: 11))],
           ],
         ),
       ),
@@ -302,15 +250,8 @@ class LaporanPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "WEEKLY ACTIVITY",
-          style: TextStyle(
-            color: _textSecondary,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
-        ),
+        const Text("WEEKLY ACTIVITY",
+            style: TextStyle(color: _textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
         const SizedBox(height: 12),
         _card(
           child: Row(
@@ -329,10 +270,8 @@ class LaporanPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    days[i],
-                    style: const TextStyle(color: _textSecondary, fontSize: 12),
-                  ),
+                  Text(days[i],
+                      style: const TextStyle(color: _textSecondary, fontSize: 12))
                 ],
               );
             }),
@@ -347,15 +286,8 @@ class LaporanPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "MONTHLY GOALS",
-          style: TextStyle(
-            color: _textSecondary,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
-        ),
+        const Text("MONTHLY GOALS",
+            style: TextStyle(color: _textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
         const SizedBox(height: 12),
         _card(
           child: Column(
@@ -377,20 +309,8 @@ class LaporanPage extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              label,
-              style: const TextStyle(
-                color: _textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Text(
-              "${(val * 100).toInt()}%",
-              style: const TextStyle(
-                color: _green,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text(label, style: const TextStyle(color: _textPrimary, fontWeight: FontWeight.w600)),
+            Text("${(val * 100).toInt()}%", style: const TextStyle(color: _green, fontWeight: FontWeight.bold)),
           ],
         ),
         const SizedBox(height: 8),
@@ -402,7 +322,7 @@ class LaporanPage extends StatelessWidget {
             color: _green,
             backgroundColor: _bg,
           ),
-        ),
+        )
       ],
     );
   }

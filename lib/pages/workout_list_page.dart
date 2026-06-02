@@ -9,17 +9,17 @@ class WorkoutListPage extends StatelessWidget {
     {
       "title": "Push Up",
       "gif": "https://media.giphy.com/media/XIqCQx02E1U9W/giphy.gif",
-      "desc": "Push-up melatih otot dada, bahu, dan triceps.",
+      "desc": "Push-up melatih otot dada, bahu, dan triceps."
     },
     {
       "title": "Squat",
       "gif": "https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif",
-      "desc": "Squat sangat efektif untuk melatih kekuatan kaki dan glutes.",
+      "desc": "Squat sangat efektif untuk melatih kekuatan kaki dan glutes."
     },
     {
       "title": "Plank",
       "gif": "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif",
-      "desc": "Plank melatih core stability dan daya tahan otot perut.",
+      "desc": "Plank melatih core stability dan daya tahan otot perut."
     },
   ];
 
@@ -48,7 +48,7 @@ class WorkoutListPage extends StatelessWidget {
                 ),
               ),
             ),
-
+            
             Text(
               item["title"]!,
               style: const TextStyle(
@@ -58,7 +58,7 @@ class WorkoutListPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-
+            
             // GIF Animation
             Container(
               height: 220,
@@ -84,7 +84,7 @@ class WorkoutListPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-
+            
             // Description
             const Text(
               "Instruction",
@@ -107,8 +107,7 @@ class WorkoutListPage extends StatelessWidget {
           ],
         ),
       ),
-      isScrollControlled:
-          true, // Memungkinkan BottomSheet untuk tampil optimal jika layarnya kecil
+      isScrollControlled: true, // Memungkinkan BottomSheet untuk tampil optimal jika layarnya kecil
     );
   }
 
@@ -136,8 +135,7 @@ class WorkoutListPage extends StatelessWidget {
           final item = workouts[index];
 
           return GestureDetector(
-            onTap: () =>
-                _showDetailBottomSheet(item), // Klik memunculkan dialog bawah
+            onTap: () => _showDetailBottomSheet(item), // Klik memunculkan dialog bawah
             child: Container(
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(20),
@@ -154,11 +152,7 @@ class WorkoutListPage extends StatelessWidget {
                       color: const Color(0xFF6CC551).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: const Icon(
-                      Icons.fitness_center,
-                      color: Color(0xFF6CC551),
-                      size: 28,
-                    ),
+                    child: const Icon(Icons.fitness_center, color: Color(0xFF6CC551), size: 28),
                   ),
                   const SizedBox(width: 20),
                   Expanded(
@@ -171,18 +165,14 @@ class WorkoutListPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Icon(
-                    Icons.info_outline_rounded,
-                    color: Colors.white38,
-                    size: 24,
-                  ),
+                  const Icon(Icons.info_outline_rounded, color: Colors.white38, size: 24),
                 ],
               ),
             ),
           );
         },
       ),
-
+      
       // Tombol Start Workout dipindahkan ke Halaman List
       bottomNavigationBar: SafeArea(
         child: Padding(
@@ -209,7 +199,10 @@ class WorkoutListPage extends StatelessWidget {
               },
               child: const Text(
                 "Start Workout",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
