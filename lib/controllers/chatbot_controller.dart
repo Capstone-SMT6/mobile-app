@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/chatbot_service.dart';
+import '../utils/snackbar_helper.dart';
 
 class DisplayMessage {
   final String role;
@@ -59,9 +60,11 @@ class ChatbotController extends GetxController {
           .toList());
       scrollToBottom();
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load session: $e',
-          backgroundColor: const Color(0xFF1E1E2E),
-          colorText: const Color(0xFFFF6B6B));
+      showCustomSnackbar(
+        title: 'Error',
+        message: 'Failed to load session: $e',
+        backgroundColor: const Color(0xFF1E1E2E),
+      );
     }
   }
 
@@ -97,9 +100,11 @@ class ChatbotController extends GetxController {
       }
       await loadSessions();
     } catch (e) {
-      Get.snackbar('Error', 'Failed to delete session: $e',
-          backgroundColor: const Color(0xFF1E1E2E),
-          colorText: const Color(0xFFFF6B6B));
+      showCustomSnackbar(
+        title: 'Error',
+        message: 'Failed to delete session: $e',
+        backgroundColor: const Color(0xFF1E1E2E),
+      );
     }
   }
 
@@ -109,9 +114,11 @@ class ChatbotController extends GetxController {
       sessionId.value = id;
       await loadSessions();
     } catch (e) {
-      Get.snackbar('Error', 'Failed to initialize chat: $e',
-          backgroundColor: const Color(0xFF1E1E2E),
-          colorText: const Color(0xFFFF6B6B));
+      showCustomSnackbar(
+        title: 'Error',
+        message: 'Failed to initialize chat: $e',
+        backgroundColor: const Color(0xFF1E1E2E),
+      );
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../utils/snackbar_helper.dart';
 
 class Exercise {
   final String name;
@@ -497,17 +498,10 @@ class ExerciseDetailPage extends StatelessWidget {
                 shadowColor: const Color(0xFF6CC551).withValues(alpha: 0.4),
               ),
               onPressed: () {
-                Get.snackbar(
-                  "Added to Workout",
-                  "${exercise.name} berhasil ditambahkan ke jadwal latihan Anda!",
+                showCustomSnackbar(
+                  title: "Added to Workout",
+                  message: "${exercise.name} berhasil ditambahkan ke jadwal latihan Anda!",
                   backgroundColor: const Color(0xFF222434),
-                  colorText: Colors.white,
-                  snackPosition: SnackPosition.BOTTOM,
-                  margin: const EdgeInsets.all(16),
-                  icon: const Icon(
-                    Icons.check_circle,
-                    color: Color(0xFF6CC551),
-                  ),
                 );
               },
               child: const Text(

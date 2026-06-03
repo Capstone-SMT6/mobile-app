@@ -8,6 +8,7 @@ import '../../controllers/auth_controller.dart';
 import '../../controllers/user_controller.dart';
 import '../../config.dart';
 import '../../routes/app_routes.dart';
+import '../../utils/snackbar_helper.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -32,40 +33,48 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _handleLogin() async {
-    // [DEV] Bypass login - langsung ke onboarding untuk testing
-    Get.offAllNamed(AppRoutes.onboardingGoal);
-
-    // if (!_formKey.currentState!.validate()) return;
-    // _isLoading.value = true;
-    // try {
-    //   final response = await http.post(
-    //     Uri.parse(AppConfig.loginEndpoint),
-    //     headers: {'Content-Type': 'application/json'},
-    //     body: jsonEncode({
-    //       'email': _emailController.text.trim(),
-    //       'password': _passwordController.text,
-    //     }),
-    //   );
-    //   if (response.statusCode == 200) {
-    //     final data = jsonDecode(response.body);
-    //     final accessToken = data['access_token'];
-    //     final refreshToken = data['refresh_token'];
-    //     if (accessToken != null && refreshToken != null) {
-    //       await _authController.saveTokens(accessToken, refreshToken);
-    //     }
-    //     Get.snackbar('Success', 'Login successful!',
-    //         backgroundColor: Colors.green, colorText: Colors.white);
-    //     Get.offAllNamed(AppRoutes.home);
-    //   } else {
-    //     Get.snackbar('Login Failed', 'Invalid email or password',
-    //         backgroundColor: Colors.red, colorText: Colors.white);
-    //   }
-    // } catch (e) {
-    //   Get.snackbar('Network Error', e.toString(),
-    //       backgroundColor: Colors.red, colorText: Colors.white);
-    // } finally {
-    //   _isLoading.value = false;
-    // }
+    if (!_formKey.currentState!.validate()) return;
+    _isLoading.value = true;
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.loginEndpoint),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final accessToken = data['access_token'];
+        final refreshToken = data['refresh_token'] ?? '';
+        if (accessToken != null) {
+          await _authController.saveTokens(accessToken, refreshToken);
+        }
+        // Refresh global user data
+        Get.find<UserController>().refreshData();
+        showCustomSnackbar(
+          title: 'Success',
+          message: 'Login successful!',
+          backgroundColor: Colors.green,
+        );
+        Get.offAllNamed(AppRoutes.home);
+      } else {
+        showCustomSnackbar(
+          title: 'Login Failed',
+          message: 'Invalid email or password',
+          backgroundColor: Colors.red,
+        );
+      }
+    } catch (e) {
+      showCustomSnackbar(
+        title: 'Network Error',
+        message: e.toString(),
+        backgroundColor: Colors.red,
+      );
+    } finally {
+      _isLoading.value = false;
+    }
   }
 
 
@@ -100,13 +109,19 @@ class _LoginPageState extends State<LoginPage> {
           Get.find<UserController>().refreshData();
           Get.offAllNamed(AppRoutes.home);
         } else {
-          Get.snackbar('Failed', 'Server rejected Google Login',
-              backgroundColor: Colors.red, colorText: Colors.white);
+          showCustomSnackbar(
+            title: 'Failed',
+            message: 'Server rejected Google Login',
+            backgroundColor: Colors.red,
+          );
         }
       }
     } catch (e) {
-      Get.snackbar('Google Auth Error', e.toString(),
-          backgroundColor: Colors.red, colorText: Colors.white);
+      showCustomSnackbar(
+        title: 'Google Auth Error',
+        message: e.toString(),
+        backgroundColor: Colors.red,
+      );
     } finally {
       _isLoading.value = false;
     }
@@ -299,7 +314,7 @@ class _LoginPageState extends State<LoginPage> {
                             Align(
                               alignment: Alignment.centerRight,
                               child: TextButton(
-                                onPressed: () {},
+                                onPressed: () => Get.toNamed(AppRoutes.forgotPassword),
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
                                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,

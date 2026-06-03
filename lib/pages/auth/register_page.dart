@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import '../../controllers/auth_controller.dart';
 import '../../config.dart';
 import '../../routes/app_routes.dart';
+import '../../utils/snackbar_helper.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -41,26 +42,43 @@ class _RegisterPageState extends State<RegisterPage> {
     _isLoading.value = true;
     try {
       final response = await http.post(
-        Uri.parse(AppConfig.usersEndpoint),
+        Uri.parse('${AppConfig.apiBaseUrl}/api/users/otp/send'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'username': _nameController.text.trim(),
           'email': _emailController.text.trim(),
-          'password': _passwordController.text,
+          'purpose': 'register',
         }),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.snackbar('Berhasil', 'Registrasi berhasil! Silahkan masuk.',
-            backgroundColor: Colors.green, colorText: Colors.white);
-        Get.offAllNamed(AppRoutes.login);
+        showCustomSnackbar(
+          title: 'OTP Terkirim',
+          message: 'Silakan periksa email Anda untuk kode verifikasi.',
+          backgroundColor: Colors.green,
+        );
+        Get.toNamed(
+          AppRoutes.otpVerification,
+          arguments: {
+            'email': _emailController.text.trim(),
+            'username': _nameController.text.trim(),
+            'password': _passwordController.text,
+            'purpose': 'register',
+          },
+        );
       } else {
-        Get.snackbar('Gagal', 'Registrasi gagal, email mungkin sudah dipakai',
-            backgroundColor: Colors.red, colorText: Colors.white);
+        final error = jsonDecode(response.body);
+        showCustomSnackbar(
+          title: 'Gagal',
+          message: error['detail'] ?? 'Registrasi gagal, email mungkin sudah dipakai',
+          backgroundColor: Colors.red,
+        );
       }
     } catch (e) {
-      Get.snackbar('Error Jaringan', e.toString(),
-          backgroundColor: Colors.red, colorText: Colors.white);
+      showCustomSnackbar(
+        title: 'Error Jaringan',
+        message: e.toString(),
+        backgroundColor: Colors.red,
+      );
     } finally {
       _isLoading.value = false;
     }
@@ -93,17 +111,26 @@ class _RegisterPageState extends State<RegisterPage> {
           if (accessToken != null && refreshToken != null) {
             await _authController.saveTokens(accessToken, refreshToken);
           }
-          Get.snackbar('Berhasil', 'Registrasi via Google berhasil!',
-              backgroundColor: Colors.green, colorText: Colors.white);
+          showCustomSnackbar(
+            title: 'Berhasil',
+            message: 'Registrasi via Google berhasil!',
+            backgroundColor: Colors.green,
+          );
           Get.offAllNamed(AppRoutes.onboardingGoal);
         } else {
-          Get.snackbar('Gagal', 'Server menolak registrasi Google',
-              backgroundColor: Colors.red, colorText: Colors.white);
+          showCustomSnackbar(
+            title: 'Gagal',
+            message: 'Server menolak registrasi Google',
+            backgroundColor: Colors.red,
+          );
         }
       }
     } catch (e) {
-      Get.snackbar('Error Google Auth', e.toString(),
-          backgroundColor: Colors.red, colorText: Colors.white);
+      showCustomSnackbar(
+        title: 'Error Google Auth',
+        message: e.toString(),
+        backgroundColor: Colors.red,
+      );
     } finally {
       _isLoading.value = false;
     }

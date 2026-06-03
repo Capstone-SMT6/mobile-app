@@ -240,7 +240,7 @@ class ProfilPage extends StatelessWidget {
                 _menuGroup([
                   _menuItem(Icons.person_outline, 'Account Information', () {}),
                   _menuItem(Icons.history, 'Workout History', () {}),
-                  _menuItem(Icons.lock_outline, 'Privacy & Security', () {}),
+                  _menuItem(Icons.lock_outline, 'Privacy & Security', () => profilController.showChangePasswordDialog(context)),
                 ]),
 
                 const SizedBox(height: 16),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'warmup_page.dart';
 import 'pose_camera_page.dart';
+import '../utils/snackbar_helper.dart';
 
 // ─────────────────────────────────────────────────────────────
 // WORKOUT SESSION PAGE
@@ -97,15 +98,10 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
 
   void _finishWorkout() {
     Get.back(); // kembali ke WorkoutList
-    Get.snackbar(
-      'Workout Selesai',
-      'Mantap! Latihan hari ini sudah tercatat.',
+    showCustomSnackbar(
+      title: 'Workout Selesai',
+      message: 'Mantap! Latihan hari ini sudah tercatat.',
       backgroundColor: const Color(0xFF222434),
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      icon: const Icon(Icons.check_circle, color: Color(0xFF6CC551)),
-      duration: const Duration(seconds: 3),
     );
   }
 

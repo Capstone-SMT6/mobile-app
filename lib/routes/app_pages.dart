@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import '../pages/auth/login_page.dart';
 import '../pages/auth/register_page.dart';
+import '../pages/auth/otp_verification_page.dart';
+import '../pages/auth/forgot_password_page.dart';
 import '../homepage.dart';
 import '../pages/chatbot_page.dart';
 import '../pages/onboarding/onboarding_goal.dart';
@@ -28,6 +30,14 @@ abstract class AppPages {
     GetPage(
       name: AppRoutes.register,
       page: () => const RegisterPage(),
+    ),
+    GetPage(
+      name: AppRoutes.otpVerification,
+      page: () => const OtpVerificationPage(),
+    ),
+    GetPage(
+      name: AppRoutes.forgotPassword,
+      page: () => const ForgotPasswordPage(),
     ),
     GetPage(
       name: AppRoutes.home,

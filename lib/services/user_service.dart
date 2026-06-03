@@ -81,4 +81,21 @@ class UserService {
       throw Exception('Failed to upload avatar: ${response.statusCode}');
     }
   }
+
+  static Future<void> changePassword(String currentPassword, String newPassword) async {
+    final headers = await _getAuthHeaders();
+    final response = await http.post(
+      Uri.parse('${AppConfig.apiBaseUrl}/api/users/change-password'),
+      headers: headers,
+      body: jsonEncode({
+        'current_password': currentPassword,
+        'new_password': newPassword,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      final error = jsonDecode(response.body);
+      throw Exception(error['detail'] ?? 'Failed to update password');
+    }
+  }
 }
