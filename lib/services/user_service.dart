@@ -57,7 +57,22 @@ class UserService {
       // Handle case where profile doesn't exist yet
       throw Exception('Fitness profile not found. Please complete onboarding.');
     } else {
-      throw Exception('Failed to fetch fitness profile: ${response.statusCode}');
+      throw Exception(
+        'Failed to fetch fitness profile: ${response.statusCode}',
+      );
+    }
+  }
+
+  static Future<void> submitOnboarding(Map<String, dynamic> payload) async {
+    final headers = await _getAuthHeaders();
+    final response = await http.post(
+      Uri.parse(AppConfig.meFitnessProfileEndpoint),
+      headers: headers,
+      body: jsonEncode(payload),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Failed to submit onboarding: ${response.statusCode}');
     }
   }
 
@@ -82,7 +97,10 @@ class UserService {
     }
   }
 
-  static Future<void> changePassword(String currentPassword, String newPassword) async {
+  static Future<void> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
     final headers = await _getAuthHeaders();
     final response = await http.post(
       Uri.parse('${AppConfig.apiBaseUrl}/api/users/change-password'),

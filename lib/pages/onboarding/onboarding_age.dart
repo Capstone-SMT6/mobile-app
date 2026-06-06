@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:get/get.dart';
+import '../../controllers/onboarding_controller.dart';
 import '../../routes/app_routes.dart';
 
 class OnboardingAgePage extends StatefulWidget {
@@ -11,16 +12,18 @@ class OnboardingAgePage extends StatefulWidget {
 }
 
 class _OnboardingAgePageState extends State<OnboardingAgePage> {
+  final OnboardingController _controller = Get.find<OnboardingController>();
   static const int minAge = 18;
   static const int maxAge = 65;
   // Start at age 21 by default (index 3 from minAge 18)
-  int selectedAge = 21;
+  late int selectedAge;
 
   late final PageController _pageController;
 
   @override
   void initState() {
     super.initState();
+    selectedAge = _controller.age.value.clamp(minAge, maxAge).toInt();
     _pageController = PageController(
       viewportFraction: 0.2, // Show 5 items: 2 left, center, 2 right
       initialPage: selectedAge - minAge,
@@ -229,6 +232,7 @@ class _OnboardingAgePageState extends State<OnboardingAgePage> {
                     // Next Button — right edge
                     TextButton(
                       onPressed: () {
+                        _controller.age.value = selectedAge;
                         Get.toNamed(AppRoutes.onboardingHeight);
                       },
                       style: TextButton.styleFrom(
@@ -261,7 +265,7 @@ class _OnboardingAgePageState extends State<OnboardingAgePage> {
                 // Pagination Dots (3rd dot active = index 2)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(8, (index) {
+                  children: List.generate(9, (index) {
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       width: 8,

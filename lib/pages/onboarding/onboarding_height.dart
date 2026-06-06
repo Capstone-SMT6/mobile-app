@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:get/get.dart';
+import '../../controllers/onboarding_controller.dart';
 import '../../routes/app_routes.dart';
 
 class OnboardingHeightPage extends StatefulWidget {
@@ -11,17 +12,22 @@ class OnboardingHeightPage extends StatefulWidget {
 }
 
 class _OnboardingHeightPageState extends State<OnboardingHeightPage> {
+  final OnboardingController _controller = Get.find<OnboardingController>();
   static const int minHeight = 100;
   static const int maxHeight = 250;
   static const double pixelsPerCm = 24.0;
   static const double viewportHeight = 280.0;
 
-  int selectedHeight = 170;
+  late int selectedHeight;
   late final ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
+    selectedHeight = _controller.height.value
+        .round()
+        .clamp(minHeight, maxHeight)
+        .toInt();
     _scrollController = ScrollController(
       initialScrollOffset: (selectedHeight - minHeight) * pixelsPerCm,
     );
@@ -32,7 +38,8 @@ class _OnboardingHeightPageState extends State<OnboardingHeightPage> {
     if (!_scrollController.hasClients) return;
     final newH = (minHeight + _scrollController.offset / pixelsPerCm)
         .round()
-        .clamp(minHeight, maxHeight);
+        .clamp(minHeight, maxHeight)
+        .toInt();
     if (newH != selectedHeight) setState(() => selectedHeight = newH);
   }
 
@@ -56,22 +63,24 @@ class _OnboardingHeightPageState extends State<OnboardingHeightPage> {
       final double topOffset =
           viewportHeight / 2 + (v - selectedHeight) * pixelsPerCm - 10;
       if (topOffset < -20 || topOffset > viewportHeight) continue;
-      widgets.add(Positioned(
-        top: topOffset,
-        right: 0,
-        child: Text(
-          '$v',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: v == selectedHeight || (v - selectedHeight).abs() <= 2
-                ? FontWeight.w500
-                : FontWeight.w400,
-            color: (v - selectedHeight).abs() <= 2
-                ? Colors.white70
-                : Colors.white30,
+      widgets.add(
+        Positioned(
+          top: topOffset,
+          right: 0,
+          child: Text(
+            '$v',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: v == selectedHeight || (v - selectedHeight).abs() <= 2
+                  ? FontWeight.w500
+                  : FontWeight.w400,
+              color: (v - selectedHeight).abs() <= 2
+                  ? Colors.white70
+                  : Colors.white30,
+            ),
           ),
         ),
-      ));
+      );
     }
     return widgets;
   }
@@ -113,8 +122,9 @@ class _OnboardingHeightPageState extends State<OnboardingHeightPage> {
                   child: SingleChildScrollView(
                     controller: _scrollController,
                     child: Padding(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: viewportHeight / 2),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: viewportHeight / 2,
+                      ),
                       child: CustomPaint(
                         size: Size(90, (maxHeight - minHeight) * pixelsPerCm),
                         painter: _RulerTicksPainter(
@@ -129,10 +139,7 @@ class _OnboardingHeightPageState extends State<OnboardingHeightPage> {
                 ),
               ),
               // Fixed green center line
-              Container(
-                height: 2,
-                color: const Color(0xFF6CC551),
-              ),
+              Container(height: 2, color: const Color(0xFF6CC551)),
             ],
           ),
         ),
@@ -157,9 +164,9 @@ class _OnboardingHeightPageState extends State<OnboardingHeightPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  children: [
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Column(
+                        children: [
                           const SizedBox(height: 24),
                           RichText(
                             text: const TextSpan(
@@ -222,7 +229,7 @@ class _OnboardingHeightPageState extends State<OnboardingHeightPage> {
                 ),
               ),
             ),
-            
+
             // Bottom section pinned
             Column(
               children: [
@@ -235,7 +242,10 @@ class _OnboardingHeightPageState extends State<OnboardingHeightPage> {
                       style: TextButton.styleFrom(
                         backgroundColor: const Color(0xFF222434),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
                         shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.only(
                             topRight: Radius.circular(12),
@@ -245,17 +255,24 @@ class _OnboardingHeightPageState extends State<OnboardingHeightPage> {
                       ),
                       child: const Text(
                         "Sebelumnya",
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                     TextButton(
                       onPressed: () {
+                        _controller.height.value = selectedHeight.toDouble();
                         Get.toNamed(AppRoutes.onboardingWeight);
                       },
                       style: TextButton.styleFrom(
                         backgroundColor: const Color(0xFF222434),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
                         shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(12),
@@ -265,7 +282,10 @@ class _OnboardingHeightPageState extends State<OnboardingHeightPage> {
                       ),
                       child: const Text(
                         "Selanjutnya",
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ],
@@ -276,7 +296,7 @@ class _OnboardingHeightPageState extends State<OnboardingHeightPage> {
                 // Pagination Dots (4th dot active = index 3)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(8, (i) {
+                  children: List.generate(9, (i) {
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       width: 8,
