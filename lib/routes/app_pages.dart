@@ -12,6 +12,7 @@ import '../pages/onboarding/onboarding_height.dart';
 import '../pages/onboarding/onboarding_weight.dart';
 import '../pages/onboarding/onboarding_expertise.dart';
 import '../pages/onboarding/onboarding_intensity.dart';
+import '../pages/onboarding/onboarding_days.dart';
 import '../pages/onboarding/onboarding_result.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/chatbot_binding.dart';
@@ -23,14 +24,8 @@ final _carousel = OnboardingCarouselTransition();
 
 abstract class AppPages {
   static final pages = [
-    GetPage(
-      name: AppRoutes.login,
-      page: () => const LoginPage(),
-    ),
-    GetPage(
-      name: AppRoutes.register,
-      page: () => const RegisterPage(),
-    ),
+    GetPage(name: AppRoutes.login, page: () => const LoginPage()),
+    GetPage(name: AppRoutes.register, page: () => const RegisterPage()),
     GetPage(
       name: AppRoutes.otpVerification,
       page: () => const OtpVerificationPage(),
@@ -88,6 +83,12 @@ abstract class AppPages {
     GetPage(
       name: AppRoutes.onboardingIntensity,
       page: () => const OnboardingIntensityPage(),
+      customTransition: _carousel,
+      transitionDuration: const Duration(milliseconds: 350),
+    ),
+    GetPage(
+      name: AppRoutes.onboardingDays,
+      page: () => const OnboardingDaysPage(),
       customTransition: _carousel,
       transitionDuration: const Duration(milliseconds: 350),
     ),

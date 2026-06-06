@@ -10,6 +10,7 @@ abstract class AppRoutes {
   static const onboardingWeight = '/onboardingWeight';
   static const onboardingExpertise = '/onboardingExpertise';
   static const onboardingIntensity = '/onboardingIntensity';
+  static const onboardingDays = '/onboardingDays';
   static const onboardingResult = '/onboardingResult';
   static const otpVerification = '/otp-verification';
   static const forgotPassword = '/forgot-password';

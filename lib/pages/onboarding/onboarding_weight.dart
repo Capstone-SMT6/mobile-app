@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:get/get.dart';
+import '../../controllers/onboarding_controller.dart';
 import '../../routes/app_routes.dart';
 
 class OnboardingWeightPage extends StatefulWidget {
@@ -11,16 +12,21 @@ class OnboardingWeightPage extends StatefulWidget {
 }
 
 class _OnboardingWeightPageState extends State<OnboardingWeightPage> {
+  final OnboardingController _controller = Get.find<OnboardingController>();
   static const int minWeight = 30;
   static const int maxWeight = 200;
   static const double pixelsPerKg = 24.0;
 
-  int selectedWeight = 60;
+  late int selectedWeight;
   late final ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
+    selectedWeight = _controller.weight.value
+        .round()
+        .clamp(minWeight, maxWeight)
+        .toInt();
     _scrollController = ScrollController(
       initialScrollOffset: (selectedWeight - minWeight) * pixelsPerKg,
     );
@@ -31,7 +37,8 @@ class _OnboardingWeightPageState extends State<OnboardingWeightPage> {
     if (!_scrollController.hasClients) return;
     final newW = (minWeight + _scrollController.offset / pixelsPerKg)
         .round()
-        .clamp(minWeight, maxWeight);
+        .clamp(minWeight, maxWeight)
+        .toInt();
     if (newW != selectedWeight) setState(() => selectedWeight = newW);
   }
 
@@ -56,26 +63,29 @@ class _OnboardingWeightPageState extends State<OnboardingWeightPage> {
       final double leftOffset =
           width / 2 + (v - selectedWeight) * pixelsPerKg - 12;
       if (leftOffset < -30 || leftOffset > width + 10) continue;
-      widgets.add(Positioned(
-        left: leftOffset,
-        top: 0,
-        child: SizedBox(
-          width: 24,
-          child: Text(
-            '$v',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: v == selectedWeight || (v - selectedWeight).abs() <= 2
-                  ? FontWeight.w500
-                  : FontWeight.w400,
-              color: (v - selectedWeight).abs() <= 2
-                  ? Colors.white70
-                  : Colors.white30,
+      widgets.add(
+        Positioned(
+          left: leftOffset,
+          top: 0,
+          child: SizedBox(
+            width: 24,
+            child: Text(
+              '$v',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight:
+                    v == selectedWeight || (v - selectedWeight).abs() <= 2
+                    ? FontWeight.w500
+                    : FontWeight.w400,
+                color: (v - selectedWeight).abs() <= 2
+                    ? Colors.white70
+                    : Colors.white30,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
         ),
-      ));
+      );
     }
     return widgets;
   }
@@ -90,9 +100,7 @@ class _OnboardingWeightPageState extends State<OnboardingWeightPage> {
         Container(
           width: width,
           height: 90,
-          decoration: const BoxDecoration(
-            color: Color(0xFF1A1C27),
-          ),
+          decoration: const BoxDecoration(color: Color(0xFF1A1C27)),
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -109,8 +117,7 @@ class _OnboardingWeightPageState extends State<OnboardingWeightPage> {
                     scrollDirection: Axis.horizontal,
                     controller: _scrollController,
                     child: Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: width / 2),
+                      padding: EdgeInsets.symmetric(horizontal: width / 2),
                       child: CustomPaint(
                         size: Size((maxWeight - minWeight) * pixelsPerKg, 90),
                         painter: _HorizontalRulerTicksPainter(
@@ -125,10 +132,7 @@ class _OnboardingWeightPageState extends State<OnboardingWeightPage> {
                 ),
               ),
               // Fixed green center line
-              Container(
-                width: 2,
-                color: const Color(0xFF6CC551),
-              ),
+              Container(width: 2, color: const Color(0xFF6CC551)),
             ],
           ),
         ),
@@ -143,7 +147,11 @@ class _OnboardingWeightPageState extends State<OnboardingWeightPage> {
               ..._buildNumberLabels(width),
               const Positioned(
                 top: -12,
-                child: Icon(Icons.arrow_drop_up, color: Colors.white38, size: 32),
+                child: Icon(
+                  Icons.arrow_drop_up,
+                  color: Colors.white38,
+                  size: 32,
+                ),
               ),
             ],
           ),
@@ -168,72 +176,72 @@ class _OnboardingWeightPageState extends State<OnboardingWeightPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 24),
-                    RichText(
-                      text: const TextSpan(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Column(
                         children: [
-                          TextSpan(
-                            text: 'Sma',
-                            style: TextStyle(
-                              fontSize: 56,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                              letterSpacing: -1.0,
+                          const SizedBox(height: 24),
+                          RichText(
+                            text: const TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Sma',
+                                  style: TextStyle(
+                                    fontSize: 56,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    letterSpacing: -1.0,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: 'Fit',
+                                  style: TextStyle(
+                                    fontSize: 56,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF6CC551),
+                                    letterSpacing: -1.0,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          TextSpan(
-                            text: 'Fit',
+                          const SizedBox(height: 16),
+                          const Text(
+                            "Rancang Rencana Kamu Sendiri",
                             style: TextStyle(
-                              fontSize: 56,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF6CC551),
-                              letterSpacing: -1.0,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
                             ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            "Berapa berat badan kamu?",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white70,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      "Rancang Rencana Kamu Sendiri",
-                      style: TextStyle(
-                        fontSize: 18,
+                    const SizedBox(height: 64),
+                    _buildRulerArea(screenWidth),
+                    const SizedBox(height: 32),
+                    Text(
+                      '$selectedWeight KG',
+                      style: const TextStyle(
+                        fontSize: 40,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      "Berapa berat badan kamu?",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 64),
-              _buildRulerArea(screenWidth),
-              const SizedBox(height: 32),
-              Text(
-                '$selectedWeight KG',
-                style: const TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
                   ],
                 ),
               ),
             ),
-            
+
             // Bottom section pinned
             Column(
               children: [
@@ -246,7 +254,10 @@ class _OnboardingWeightPageState extends State<OnboardingWeightPage> {
                       style: TextButton.styleFrom(
                         backgroundColor: const Color(0xFF222434),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
                         shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.only(
                             topRight: Radius.circular(12),
@@ -256,17 +267,24 @@ class _OnboardingWeightPageState extends State<OnboardingWeightPage> {
                       ),
                       child: const Text(
                         "Sebelumnya",
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                     TextButton(
                       onPressed: () {
+                        _controller.weight.value = selectedWeight.toDouble();
                         Get.toNamed(AppRoutes.onboardingExpertise);
                       },
                       style: TextButton.styleFrom(
                         backgroundColor: const Color(0xFF222434),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
                         shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(12),
@@ -276,7 +294,10 @@ class _OnboardingWeightPageState extends State<OnboardingWeightPage> {
                       ),
                       child: const Text(
                         "Selanjutnya",
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ],
@@ -287,7 +308,7 @@ class _OnboardingWeightPageState extends State<OnboardingWeightPage> {
                 // Pagination Dots (5th dot active = index 4)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(8, (i) {
+                  children: List.generate(9, (i) {
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       width: 8,

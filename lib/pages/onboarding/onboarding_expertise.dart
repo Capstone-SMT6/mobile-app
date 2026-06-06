@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../controllers/onboarding_controller.dart';
 import '../../routes/app_routes.dart';
 
 class OnboardingExpertisePage extends StatefulWidget {
@@ -11,7 +12,25 @@ class OnboardingExpertisePage extends StatefulWidget {
 }
 
 class _OnboardingExpertisePageState extends State<OnboardingExpertisePage> {
+  final OnboardingController _controller = Get.find<OnboardingController>();
   String selectedExpertise = '';
+
+  static const Map<String, String> _expertiseValues = {
+    'Pemula': 'pemula',
+    'Menengah': 'menengah',
+    'Ahli': 'ahli',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    selectedExpertise = _expertiseValues.entries
+        .firstWhere(
+          (entry) => entry.value == _controller.skillLevel.value,
+          orElse: () => const MapEntry('Pemula', 'pemula'),
+        )
+        .key;
+  }
 
   Widget _buildOptionCard(String title) {
     final bool isSelected = selectedExpertise == title;
@@ -64,57 +83,57 @@ class _OnboardingExpertisePageState extends State<OnboardingExpertisePage> {
                       padding: const EdgeInsets.symmetric(horizontal: 24.0),
                       child: Column(
                         children: [
-                    const SizedBox(height: 24),
-                    // Logo
-                    RichText(
-                      text: const TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'Sma',
+                          const SizedBox(height: 24),
+                          // Logo
+                          RichText(
+                            text: const TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Sma',
+                                  style: TextStyle(
+                                    fontSize: 56,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    letterSpacing: -1.0,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: 'Fit',
+                                  style: TextStyle(
+                                    fontSize: 56,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF6CC551),
+                                    letterSpacing: -1.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "Rancang Rencana Kamu Sendiri",
                             style: TextStyle(
-                              fontSize: 56,
-                              fontWeight: FontWeight.w800,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
                               color: Colors.white,
-                              letterSpacing: -1.0,
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                          TextSpan(
-                            text: 'Fit',
+                          const SizedBox(height: 8),
+                          const Text(
+                            "Seberapa ahli kamu?",
                             style: TextStyle(
-                              fontSize: 56,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF6CC551),
-                              letterSpacing: -1.0,
+                              fontSize: 16,
+                              color: Colors.white70,
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      "Rancang Rencana Kamu Sendiri",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      "Seberapa ahli kamu?",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 48),
+                          const SizedBox(height: 48),
 
-                    // Options
-                    _buildOptionCard("Pemula"),
-                    _buildOptionCard("Menengah"),
-                    _buildOptionCard("Ahli"),
+                          // Options
+                          _buildOptionCard("Pemula"),
+                          _buildOptionCard("Menengah"),
+                          _buildOptionCard("Ahli"),
                         ],
                       ),
                     ),
@@ -136,7 +155,9 @@ class _OnboardingExpertisePageState extends State<OnboardingExpertisePage> {
                         backgroundColor: const Color(0xFF222434),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 16),
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
                         shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.only(
                             topRight: Radius.circular(12),
@@ -146,13 +167,19 @@ class _OnboardingExpertisePageState extends State<OnboardingExpertisePage> {
                       ),
                       child: const Text(
                         "Sebelumnya",
-                        style:
-                            TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                     TextButton(
                       onPressed: selectedExpertise.isNotEmpty
-                          ? () => Get.toNamed(AppRoutes.onboardingIntensity)
+                          ? () {
+                              _controller.skillLevel.value =
+                                  _expertiseValues[selectedExpertise]!;
+                              Get.toNamed(AppRoutes.onboardingIntensity);
+                            }
                           : null,
                       style: TextButton.styleFrom(
                         backgroundColor: const Color(0xFF222434),
@@ -160,7 +187,9 @@ class _OnboardingExpertisePageState extends State<OnboardingExpertisePage> {
                         disabledBackgroundColor: const Color(0xFF171925),
                         disabledForegroundColor: Colors.white38,
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 32, vertical: 16),
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
                         shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(12),
@@ -170,8 +199,10 @@ class _OnboardingExpertisePageState extends State<OnboardingExpertisePage> {
                       ),
                       child: const Text(
                         "Selanjutnya",
-                        style:
-                            TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ],
@@ -182,7 +213,7 @@ class _OnboardingExpertisePageState extends State<OnboardingExpertisePage> {
                 // Pagination Dots (assume 8 pages, this is 6th)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(8, (i) {
+                  children: List.generate(9, (i) {
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       width: 8,

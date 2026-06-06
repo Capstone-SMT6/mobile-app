@@ -5,8 +5,10 @@ class AppConfig {
   // Backend API
   // ---------------------------------------------------------------------------
 
-  static const String apiBaseUrl =
-      String.fromEnvironment('API_BASE_URL', defaultValue: 'http://127.0.0.1:8000');
+  static const String apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://127.0.0.1:8000',
+  );
 
   static String get usersEndpoint => '$apiBaseUrl/api/users/';
   static String get loginEndpoint => '$apiBaseUrl/api/users/login';
@@ -14,10 +16,15 @@ class AppConfig {
   static String get refreshEndpoint => '$apiBaseUrl/api/users/refresh';
   static String get meEndpoint => '$apiBaseUrl/api/users/me';
   static String get meStatsEndpoint => '$apiBaseUrl/api/users/me/stats';
-  static String get meFitnessProfileEndpoint => '$apiBaseUrl/api/users/me/fitness-profile';
+  static String get meFitnessProfileEndpoint =>
+      '$apiBaseUrl/api/users/me/fitness-profile';
+  static String get meExercisePlanEndpoint =>
+      '$apiBaseUrl/api/users/me/exercise-plan';
   static String get chatbotSessionsEndpoint => '$apiBaseUrl/chatbot/sessions';
-  static String chatbotChatEndpoint(String sessionId) => '$apiBaseUrl/chatbot/sessions/$sessionId/chat';
-  static String chatbotStreamEndpoint(String sessionId) => '$apiBaseUrl/chatbot/sessions/$sessionId/stream';
+  static String chatbotChatEndpoint(String sessionId) =>
+      '$apiBaseUrl/chatbot/sessions/$sessionId/chat';
+  static String chatbotStreamEndpoint(String sessionId) =>
+      '$apiBaseUrl/chatbot/sessions/$sessionId/stream';
   static String get trendingEndpoint => '$apiBaseUrl/api/trends';
   // ---------------------------------------------------------------------------
   // Google OAuth

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../controllers/onboarding_controller.dart';
 import '../../routes/app_routes.dart';
 
 class OnboardingGoalPage extends StatefulWidget {
@@ -10,14 +11,40 @@ class OnboardingGoalPage extends StatefulWidget {
 }
 
 class _OnboardingGoalPageState extends State<OnboardingGoalPage> {
+  final OnboardingController _controller = Get.find<OnboardingController>();
   int? selectedIndex;
 
   final List<Map<String, dynamic>> goals = [
-    {"icon": Icons.monitor_weight, "text": "Menurunkan berat\nbadan"},
-    {"icon": Icons.fastfood, "text": "Menaikkan berat\nbadan"},
-    {"icon": Icons.monitor_heart, "text": "Menjaga kebugaran\ntubuh"},
-    {"icon": Icons.fitness_center, "text": "Membentuk otot"},
+    {
+      "icon": Icons.monitor_weight,
+      "text": "Menurunkan berat\nbadan",
+      "value": "menurunkan_berat_badan",
+    },
+    {
+      "icon": Icons.fastfood,
+      "text": "Menaikkan berat\nbadan",
+      "value": "menaikkan_berat_badan",
+    },
+    {
+      "icon": Icons.monitor_heart,
+      "text": "Menjaga kebugaran\ntubuh",
+      "value": "menjaga_kebugaran",
+    },
+    {
+      "icon": Icons.fitness_center,
+      "text": "Membentuk otot",
+      "value": "membentuk_otot",
+    },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    selectedIndex = goals.indexWhere(
+      (goal) => goal["value"] == _controller.goal.value,
+    );
+    if (selectedIndex == -1) selectedIndex = null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -167,6 +194,8 @@ class _OnboardingGoalPageState extends State<OnboardingGoalPage> {
                   child: TextButton(
                     onPressed: selectedIndex != null
                         ? () {
+                            _controller.goal.value =
+                                goals[selectedIndex!]["value"] as String;
                             Get.toNamed(AppRoutes.onboardingGender);
                           }
                         : null,
@@ -200,7 +229,7 @@ class _OnboardingGoalPageState extends State<OnboardingGoalPage> {
                 // Pagination Dots
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(8, (index) {
+                  children: List.generate(9, (index) {
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       width: 8,
