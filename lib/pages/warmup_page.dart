@@ -26,46 +26,6 @@ class WorkoutExercise {
   });
 }
 
-// Default workout plan — bisa dikembangkan dari goal user
-const defaultWorkoutPlan = [
-  WorkoutExercise(
-    name: 'Push Up',
-    description: 'Jaga punggung lurus seperti papan, turun perlahan dan terkontrol.',
-    sets: 3,
-    reps: 15,
-    muscleGroup: 'Chest · Shoulder · Triceps',
-    poseAngle: 'side',
-    exerciseType: 'pushup',
-  ),
-  WorkoutExercise(
-    name: 'Sit Up',
-    description: 'Angkat badan sampai siku menyentuh lutut, jaga leher tetap netral.',
-    sets: 3,
-    reps: 15,
-    muscleGroup: 'Abs · Core · Hip Flexors',
-    poseAngle: 'side',
-    exerciseType: 'situp',
-  ),
-  WorkoutExercise(
-    name: 'Squat',
-    description: 'Turun sampai paha sejajar lantai, lutut tidak melewati jari kaki.',
-    sets: 3,
-    reps: 12,
-    muscleGroup: 'Quads · Glutes · Hamstring',
-    poseAngle: 'side',
-    exerciseType: 'squat',
-  ),
-  WorkoutExercise(
-    name: 'Plank',
-    description: 'Tahan posisi tubuh lurus selama waktu yang ditentukan.',
-    sets: 3,
-    reps: 30, // detik
-    muscleGroup: 'Core · Lower Back',
-    poseAngle: 'side',
-    exerciseType: 'plank',
-  ),
-];
-
 // ─────────────────────────────────────────────────────────────
 // WARMUP PAGE
 // ─────────────────────────────────────────────────────────────
@@ -74,7 +34,7 @@ class WarmupPage extends StatefulWidget {
 
   const WarmupPage({
     super.key,
-    this.workoutPlan = defaultWorkoutPlan,
+    required this.workoutPlan,
   });
 
   @override

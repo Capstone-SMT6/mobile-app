@@ -1,30 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../services/workout_service.dart';
 import 'warmup_page.dart';
 
-class WorkoutListPage extends StatelessWidget {
+class WorkoutListPage extends StatefulWidget {
   const WorkoutListPage({super.key});
 
-  final List<Map<String, String>> workouts = const [
-    {
-      "title": "Push Up",
-      "gif": "https://media.giphy.com/media/XIqCQx02E1U9W/giphy.gif",
-      "desc": "Push-up melatih otot dada, bahu, dan triceps."
-    },
-    {
-      "title": "Squat",
-      "gif": "https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif",
-      "desc": "Squat sangat efektif untuk melatih kekuatan kaki dan glutes."
-    },
-    {
-      "title": "Plank",
-      "gif": "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif",
-      "desc": "Plank melatih core stability dan daya tahan otot perut."
-    },
-  ];
+  @override
+  State<WorkoutListPage> createState() => _WorkoutListPageState();
+}
 
-  // Menampilkan modal dari bawah (BottomSheet) menggunakan GetX
-  void _showDetailBottomSheet(Map<String, String> item) {
+class _WorkoutListPageState extends State<WorkoutListPage> {
+  late final Future<ActiveExercisePlan> _planFuture;
+  List<WorkoutExercise> _todayPlan = [];
+
+  static WorkoutExercise _toWorkoutExercise(ExerciseTarget e) {
+    final key = e.name.toLowerCase().trim().replaceAll('-', ' ');
+    // Only the 4 exercises the app's pose detector supports
+    const info = {
+      'push up': ('Jaga punggung lurus, turun perlahan dan terkontrol.', 'Chest · Shoulder · Triceps', 'side', 'pushup'),
+      'sit up':  ('Angkat badan sampai siku menyentuh lutut, jaga leher netral.', 'Abs · Core · Hip Flexors', 'side', 'situp'),
+      'squat':   ('Turun sampai paha sejajar lantai, lutut tidak melewati jari kaki.', 'Quads · Glutes · Hamstring', 'side', 'squat'),
+      'plank':   ('Tahan posisi tubuh lurus selama waktu yang ditentukan.', 'Core · Lower Back', 'side', 'plank'),
+    };
+    final (desc, muscle, angle, type) = info[key] ?? ('Ikuti gerakan dengan benar.', 'Full Body', 'side', 'other');
+    return WorkoutExercise(
+      name: e.name,
+      description: desc,
+      sets: e.sets,
+      reps: e.reps ?? e.targetDurationSeconds ?? 30,
+      muscleGroup: muscle,
+      poseAngle: angle,
+      exerciseType: type,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _planFuture = WorkoutService.getActiveExercisePlan();
+  }
+
+  void _showDetailBottomSheet(ExerciseTarget item) {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(24),
@@ -33,10 +50,10 @@ class WorkoutListPage extends StatelessWidget {
           borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Menyesuaikan tinggi dengan konten
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle bar (garis abu-abu kecil di atas)
+            // Handle bar
             Center(
               child: Container(
                 width: 40,
@@ -48,9 +65,8 @@ class WorkoutListPage extends StatelessWidget {
                 ),
               ),
             ),
-            
             Text(
-              item["title"]!,
+              item.name,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 24,
@@ -58,66 +74,59 @@ class WorkoutListPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            
-            // GIF Animation
-            Container(
-              height: 220,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: const Color(0xFF222434),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white10),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.network(
-                  item["gif"]!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => const Center(
-                    child: Icon(
-                      Icons.broken_image,
-                      color: Colors.white38,
-                      size: 64,
-                    ),
-                  ),
+            // Stats row
+            Row(
+              children: [
+                _statChip(Icons.repeat, '${item.sets} sets'),
+                const SizedBox(width: 12),
+                if (item.reps != null)
+                  _statChip(Icons.fitness_center, '${item.reps} reps'),
+                if (item.targetDurationSeconds != null)
+                  _statChip(Icons.timer, '${item.targetDurationSeconds}s'),
+                const SizedBox(width: 12),
+                _statChip(
+                  Icons.pause_circle_outline,
+                  '${item.restSeconds}s rest',
                 ),
-              ),
+              ],
             ),
             const SizedBox(height: 24),
-            
-            // Description
-            const Text(
-              "Instruction",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              item["desc"]!,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 15,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 24), // Spasi bawah ekstra
           ],
         ),
       ),
-      isScrollControlled: true, // Memungkinkan BottomSheet untuk tampil optimal jika layarnya kecil
+      isScrollControlled: true,
+    );
+  }
+
+  Widget _statChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF222434),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: const Color(0xFF6CC551), size: 16),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white70, fontSize: 13),
+          ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0F14), // Dark premium background
+      backgroundColor: const Color(0xFF0D0F14),
       appBar: AppBar(
         title: const Text(
-          "Workout List",
+          "Today's Workout",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -128,52 +137,121 @@ class WorkoutListPage extends StatelessWidget {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        itemCount: workouts.length,
-        itemBuilder: (context, index) {
-          final item = workouts[index];
+      body: FutureBuilder<ActiveExercisePlan>(
+        future: _planFuture,
+        builder: (context, snapshot) {
+          // Loading
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xFF6CC551)),
+            );
+          }
 
-          return GestureDetector(
-            onTap: () => _showDetailBottomSheet(item), // Klik memunculkan dialog bawah
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF222434),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white10),
+          // Error
+          if (snapshot.hasError || !snapshot.hasData) {
+            return const Center(
+              child: Text(
+                'Belum ada rencana latihan.',
+                style: TextStyle(color: Colors.white54, fontSize: 15),
               ),
-              child: Row(
+            );
+          }
+
+          final exercises = snapshot.data!.exercisesForDate(DateTime.now());
+
+          // Map to WorkoutExercise for the session (done once after build)
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (exercises.isNotEmpty && mounted) {
+              setState(() => _todayPlan = exercises.map(_toWorkoutExercise).toList());
+            }
+          });
+
+          // Rest day
+          if (exercises.isEmpty) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF6CC551).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Icon(Icons.fitness_center, color: Color(0xFF6CC551), size: 28),
+                  Icon(Icons.event_available, color: Colors.white24, size: 64),
+                  SizedBox(height: 16),
+                  Text(
+                    'Hari ini adalah hari istirahat 🎉',
+                    style: TextStyle(color: Colors.white54, fontSize: 15),
                   ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: Text(
-                      item["title"]!,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                  const Icon(Icons.info_outline_rounded, color: Colors.white38, size: 24),
                 ],
               ),
-            ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            itemCount: exercises.length,
+            itemBuilder: (context, index) {
+              final item = exercises[index];
+
+              return GestureDetector(
+                onTap: () => _showDetailBottomSheet(item),
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF222434),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white10),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(
+                            0xFF6CC551,
+                          ).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.fitness_center,
+                          color: Color(0xFF6CC551),
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.name,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              item.targetText,
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(
+                        Icons.info_outline_rounded,
+                        color: Colors.white38,
+                        size: 24,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           );
         },
       ),
-      
-      // Tombol Start Workout dipindahkan ke Halaman List
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -190,19 +268,18 @@ class WorkoutListPage extends StatelessWidget {
                 elevation: 8,
                 shadowColor: const Color(0xFF6CC551).withValues(alpha: 0.4),
               ),
-              onPressed: () {
-                Get.to(
-                  () => const WarmupPage(),
-                  transition: Transition.fadeIn,
-                  duration: const Duration(milliseconds: 500),
-                );
-              },
+              onPressed: _todayPlan.isEmpty
+                  ? null
+                  : () {
+                      Get.to(
+                        () => WarmupPage(workoutPlan: _todayPlan),
+                        transition: Transition.fadeIn,
+                        duration: const Duration(milliseconds: 500),
+                      );
+                    },
               child: const Text(
                 "Start Workout",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ),

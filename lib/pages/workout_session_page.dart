@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'warmup_page.dart';
 import 'pose_camera_page.dart';
+import '../services/workout_service.dart';
 import '../utils/snackbar_helper.dart';
 
 // ─────────────────────────────────────────────────────────────
@@ -23,6 +25,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
   int _currentSet = 1;
   bool _resting = false;
   int _restSeconds = 0;
+  Timer? _restTimer;
 
   static const _restDuration = 30; // detik istirahat antar set
 
@@ -51,6 +54,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
   bool get _isLastExercise => _currentIndex >= widget.workoutPlan.length - 1;
 
   void _onSetDone() {
+    if (_resting) return; // Guard against double-tap
     if (_isLastSet) {
       if (_isLastExercise) {
         _finishWorkout();
@@ -72,23 +76,24 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
   }
 
   void _startRestTimer() {
-    Future.doWhile(() async {
-      await Future.delayed(const Duration(seconds: 1));
-      if (!mounted) return false;
+    _restTimer?.cancel();
+    _restTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) { timer.cancel(); return; }
       if (_restSeconds <= 1) {
+        timer.cancel();
         setState(() {
           _resting = false;
           _currentSet++;
         });
         _updateProgress();
-        return false;
+        return;
       }
       setState(() => _restSeconds--);
-      return true;
     });
   }
 
   void _skipRest() {
+    _restTimer?.cancel();
     setState(() {
       _resting = false;
       _currentSet++;
@@ -97,7 +102,16 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
   }
 
   void _finishWorkout() {
-    Get.back(); // kembali ke WorkoutList
+    // Log to backend (fire-and-forget)
+    WorkoutService.logWorkout(
+      exercises: widget.workoutPlan.map((e) => {
+        'exercise_name': e.name,
+        'sets_completed': e.sets,
+        'reps_completed': e.reps,
+      }).toList(),
+    ).catchError((_) {}); // Silently ignore network errors
+
+    Get.back();
     showCustomSnackbar(
       title: 'Workout Selesai',
       message: 'Mantap! Latihan hari ini sudah tercatat.',
@@ -115,6 +129,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
 
   @override
   void dispose() {
+    _restTimer?.cancel();
     _progressCtrl.dispose();
     super.dispose();
   }

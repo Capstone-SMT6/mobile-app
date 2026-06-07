@@ -150,6 +150,40 @@ class WorkoutService {
     }
   }
 
+  static Future<void> logWorkout({
+    required List<Map<String, dynamic>> exercises,
+    int durationSeconds = 0,
+  }) async {
+    final headers = await _getAuthHeaders();
+    final body = jsonEncode({
+      'duration_seconds': durationSeconds,
+      'exercises': exercises,
+    });
+    final response = await http.post(
+      Uri.parse('${AppConfig.apiBaseUrl}/api/users/me/workout-log'),
+      headers: headers,
+      body: body,
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to log workout: ${response.statusCode}');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getWorkoutHistory() async {
+    final headers = await _getAuthHeaders();
+    final response = await http.get(
+      Uri.parse('${AppConfig.apiBaseUrl}/api/users/me/workout-history'),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return List<Map<String, dynamic>>.from(data);
+    } else {
+      throw Exception('Failed to fetch workout history: ${response.statusCode}');
+    }
+  }
+
   static Future<ActiveExercisePlan> getActiveExercisePlan() async {
     final headers = await _getAuthHeaders();
     final response = await http.get(

@@ -19,6 +19,11 @@ class UserController extends GetxController {
     try {
       isLoading.value = true;
       
+      // Clear previous cached values first to prevent data leakage
+      user.value = null;
+      stats.value = null;
+      fitnessProfile.value = null;
+      
       // Fetch User Info
       final userData = await UserService.getCurrentUser();
       debugPrint('DEBUG: User Photo URL: ${userData.photoUrl}');
@@ -29,6 +34,7 @@ class UserController extends GetxController {
         final statsData = await UserService.getUserStats();
         stats.value = statsData;
       } catch (e) {
+        stats.value = null;
         debugPrint('Error fetching stats: $e');
       }
 
@@ -37,6 +43,7 @@ class UserController extends GetxController {
         final profileData = await UserService.getFitnessProfile();
         fitnessProfile.value = profileData;
       } catch (e) {
+        fitnessProfile.value = null;
         debugPrint('Fitness profile not found: $e');
       }
     } catch (e) {

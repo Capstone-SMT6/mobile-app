@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/user_controller.dart';
+import '../services/workout_service.dart';
+import '../services/trends_service.dart';
 import 'calendar_page.dart';
 import 'workout_list_page.dart';
 import 'analysis_page.dart';
@@ -24,6 +26,8 @@ class BerandaPage extends StatelessWidget {
               ProgressCard(),
               SizedBox(height: 32),
               TodayMenu(),
+              SizedBox(height: 32),
+              TrendingSection(),
               SizedBox(height: 32),
               WorkoutAnalysis(),
               SizedBox(height: 40),
@@ -278,87 +282,140 @@ class ProgressCard extends StatelessWidget {
 }
 
 // ───────────────────────────────────────────────────────────────
-// TODAY MENU  — Menu latihan hari ini (bisa dikembangkan ke API)
+// TODAY MENU  — Fetch latihan hari ini dari active exercise plan
 // ───────────────────────────────────────────────────────────────
-class TodayMenu extends StatelessWidget {
+class TodayMenu extends StatefulWidget {
   const TodayMenu({super.key});
 
   @override
+  State<TodayMenu> createState() => _TodayMenuState();
+}
+
+class _TodayMenuState extends State<TodayMenu> {
+  late final Future<ActiveExercisePlan> _planFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _planFuture = WorkoutService.getActiveExercisePlan();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final userCtrl = Get.find<UserController>();
-
-    // Daftar latihan berdasarkan goal user
-    return Obx(() {
-      final goal = userCtrl.fitnessProfile.value?.goal ?? 'default';
-      final menuItems = _getMenuByGoal(goal);
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Today's Workout",
+    return FutureBuilder<ActiveExercisePlan>(
+      future: _planFuture,
+      builder: (context, snapshot) {
+        // Header always visible
+        final header = Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Today's Workout",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 20,
+              ),
+            ),
+            TextButton(
+              onPressed: () => Get.to(() => const WorkoutListPage()),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(50, 30),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text(
+                "See more",
                 style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 20,
+                  color: Color(0xFF6CC551),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
                 ),
               ),
-              TextButton(
-                onPressed: () => Get.to(() => const WorkoutListPage()),
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(50, 30),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text(
-                  "See more",
-                  style: TextStyle(
-                    color: Color(0xFF6CC551),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
+            ),
+          ],
+        );
+
+        // Loading state
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              header,
+              const SizedBox(height: 24),
+              const Center(
+                child: CircularProgressIndicator(color: Color(0xFF6CC551)),
+              ),
+            ],
+          );
+        }
+
+        // Error / no plan state
+        if (snapshot.hasError || !snapshot.hasData) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              header,
+              const SizedBox(height: 16),
+              const Center(
+                child: Text(
+                  'Belum ada rencana latihan.',
+                  style: TextStyle(color: Colors.white54, fontSize: 14),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 16),
-          ...menuItems.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _buildMenuItem(item[0], item[1], item[2] as IconData),
-              )),
-        ],
-      );
-    });
+          );
+        }
+
+        final exercises = snapshot.data!.exercisesForDate(DateTime.now());
+
+        // Rest day state
+        if (exercises.isEmpty) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              header,
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF222434),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white10),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.event_available, color: Colors.white38, size: 28),
+                    SizedBox(width: 12),
+                    Text(
+                      'Hari ini adalah hari istirahat 🎉',
+                      style: TextStyle(color: Colors.white54, fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }
+
+        // Exercise list
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            header,
+            const SizedBox(height: 16),
+            ...exercises.map((e) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _buildMenuItem(e.name, e.targetText),
+                )),
+          ],
+        );
+      },
+    );
   }
 
-  // Sesuaikan menu berdasarkan goal dari fitness profile
-  List<List<dynamic>> _getMenuByGoal(String goal) {
-    switch (goal) {
-      case 'weight_loss':
-        return [
-          ['Jumping Jacks', '3 Set X 30 Rep', Icons.directions_run],
-          ['Burpees', '3 Set X 10 Rep', Icons.fitness_center],
-          ['Plank', '3 Set X 1 Min', Icons.accessibility_new],
-        ];
-      case 'muscle_gain':
-        return [
-          ['Push Up', 'Rep 20 X 5', Icons.fitness_center],
-          ['Pull Up', 'Rep 10 X 3', Icons.sports_gymnastics],
-          ['Squat', 'Rep 15 X 4', Icons.accessibility_new],
-        ];
-      default:
-        return [
-          ['Push Up', 'Rep 20 X 5', Icons.fitness_center],
-          ['Pull Up', 'Rep 10 X 3', Icons.sports_gymnastics],
-          ['Plank', '1 Min X 3', Icons.accessibility_new],
-        ];
-    }
-  }
-
-  Widget _buildMenuItem(String title, String subtitle, IconData icon) {
+  Widget _buildMenuItem(String title, String subtitle) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       decoration: BoxDecoration(
@@ -374,7 +431,7 @@ class TodayMenu extends StatelessWidget {
               color: const Color(0xFF6CC551).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: const Color(0xFF6CC551), size: 24),
+            child: const Icon(Icons.fitness_center, color: Color(0xFF6CC551), size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -470,6 +527,144 @@ class WorkoutAnalysis extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ───────────────────────────────────────────────────────────────
+// TRENDING SECTION  — Top topics from Big Data (last 90 days)
+// ───────────────────────────────────────────────────────────────
+class TrendingSection extends StatefulWidget {
+  const TrendingSection({super.key});
+
+  @override
+  State<TrendingSection> createState() => _TrendingSectionState();
+}
+
+class _TrendingSectionState extends State<TrendingSection> {
+  late Future<List<TrendItem>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = TrendsService.fetchTrending();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Trending Topics 🔥',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+            fontSize: 20,
+          ),
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Most researched fitness topics (last 90 days)',
+          style: TextStyle(color: Colors.white54, fontSize: 12),
+        ),
+        const SizedBox(height: 16),
+        FutureBuilder<List<TrendItem>>(
+          future: _future,
+          builder: (context, snap) {
+            if (snap.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                height: 110,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF6CC551),
+                    strokeWidth: 2,
+                  ),
+                ),
+              );
+            }
+            if (snap.hasError || !snap.hasData || snap.data!.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            final items = snap.data!;
+            return SizedBox(
+              height: 110,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: items.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (_, i) => _TrendCard(item: items[i]),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _TrendCard extends StatelessWidget {
+  final TrendItem item;
+  const _TrendCard({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final rankColors = [
+      const Color(0xFFFFD700),
+      const Color(0xFFC0C0C0),
+      const Color(0xFFCD7F32),
+    ];
+    final badgeColor = item.rank <= 3 ? rankColors[item.rank - 1] : Colors.white24;
+
+    final views = item.views90d;
+    final viewsLabel = views >= 1000000
+        ? '${(views / 1000000).toStringAsFixed(1)}M views'
+        : '${(views / 1000).toStringAsFixed(0)}K views';
+
+    return Container(
+      width: 140,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF222434),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: badgeColor.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              '#${item.rank}',
+              style: TextStyle(
+                color: badgeColor,
+                fontWeight: FontWeight.w800,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const Spacer(),
+          Text(
+            item.article,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            viewsLabel,
+            style: const TextStyle(color: Colors.white38, fontSize: 11),
+          ),
+        ],
       ),
     );
   }

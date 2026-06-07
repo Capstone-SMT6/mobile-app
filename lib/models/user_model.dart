@@ -52,7 +52,7 @@ class UserStats {
     try {
       return UserStats(
         id: json['id'] as String,
-        userId: json['user_id'] as String,
+        userId: (json['user_id'] ?? json['userId']) as String,
         currentStreak: json['currentStreak'] as int? ?? 0,
         longestStreak: json['longestStreak'] as int? ?? 0,
         totalPushUps: json['totalPushUps'] as int? ?? 0,
@@ -75,6 +75,10 @@ class UserFitnessProfile {
   final double weight;
   final String skillLevel;
   final String intensity;
+  final double? bmr;
+  final double? tdee;
+  final double? targetDailyKcal;
+  final Map<String, dynamic>? macrosJson;
 
   UserFitnessProfile({
     required this.id,
@@ -86,20 +90,38 @@ class UserFitnessProfile {
     required this.weight,
     required this.skillLevel,
     required this.intensity,
+    this.bmr,
+    this.tdee,
+    this.targetDailyKcal,
+    this.macrosJson,
   });
 
   factory UserFitnessProfile.fromJson(Map<String, dynamic> json) {
     try {
+      final finalUserId = (json['user_id'] ?? json['userId']) as String;
+      final finalDurationTarget = (json['durationTarget'] ?? json['duration_target'] ?? '') as String;
+      final finalSkillLevel = (json['skillLevel'] ?? json['skill_level'] ?? '') as String;
+      final finalIntensity = (json['intensity'] ?? '') as String;
+      
+      final rawBmr = json['bmr'];
+      final rawTdee = json['tdee'];
+      final rawTargetKcal = json['target_daily_kcal'] ?? json['targetDailyKcal'];
+      final rawMacros = json['macros_json'] ?? json['macrosJson'];
+
       return UserFitnessProfile(
         id: json['id'] as String,
-        userId: json['user_id'] as String,
+        userId: finalUserId,
         goal: json['goal'] as String,
-        durationTarget: json['durationTarget'] as String? ?? '',
+        durationTarget: finalDurationTarget,
         age: json['age'] as int,
         height: (json['height'] as num).toDouble(),
         weight: (json['weight'] as num).toDouble(),
-        skillLevel: json['skillLevel'] as String,
-        intensity: json['intensity'] as String,
+        skillLevel: finalSkillLevel,
+        intensity: finalIntensity,
+        bmr: rawBmr != null ? (rawBmr as num).toDouble() : null,
+        tdee: rawTdee != null ? (rawTdee as num).toDouble() : null,
+        targetDailyKcal: rawTargetKcal != null ? (rawTargetKcal as num).toDouble() : null,
+        macrosJson: rawMacros as Map<String, dynamic>?,
       );
     } catch (e) {
       debugPrint('DEBUG ERROR: UserFitnessProfile parsing failed. JSON: $json. Error: $e');
@@ -107,11 +129,31 @@ class UserFitnessProfile {
     }
   }
 
+  double get bmi {
+    if (height <= 0) return 0.0;
+    final heightInMeters = height / 100;
+    return weight / (heightInMeters * heightInMeters);
+  }
+
+  String get bmiStatus {
+    final val = bmi;
+    if (val < 18.5) return 'Kurus';
+    if (val < 25.0) return 'Normal';
+    if (val < 30.0) return 'Kelebihan';
+    return 'Obesitas';
+  }
+  int get carbGrams => ((macrosJson?['carbs_g'] ?? macrosJson?['carbs_grams'] ?? macrosJson?['carbsG'] ?? 0) as num).toInt();
+  int get proteinGrams => ((macrosJson?['protein_g'] ?? macrosJson?['protein_grams'] ?? macrosJson?['proteinG'] ?? 0) as num).toInt();
+  int get fatGrams => ((macrosJson?['fat_g'] ?? macrosJson?['fat_grams'] ?? macrosJson?['fatG'] ?? 0) as num).toInt();
   String get goalFormatted {
     switch (goal) {
       case 'weight_loss': return 'Weight Loss';
       case 'muscle_gain': return 'Muscle Gain';
       case 'maintain': return 'Maintain Weight';
+      case 'menurunkan_berat_badan': return 'Menurunkan Berat Badan';
+      case 'menaikkan_berat_badan': return 'Menaikkan Berat Badan';
+      case 'menjaga_kebugaran': return 'Menjaga Kebugaran';
+      case 'membentuk_otot': return 'Membentuk Otot';
       default: return goal;
     }
   }

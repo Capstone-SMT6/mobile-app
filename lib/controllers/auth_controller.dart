@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../services/auth_service.dart';
 import '../routes/app_routes.dart';
 import '../config.dart';
+import '../controllers/user_controller.dart';
 
 class AuthController extends GetxController {
   final AuthService _authService = AuthService();
@@ -37,6 +38,12 @@ class AuthController extends GetxController {
   Future<void> logout() async {
     await _authService.deleteTokens();
     isLoggedIn.value = false;
+    try {
+      final userCtrl = Get.find<UserController>();
+      userCtrl.user.value = null;
+      userCtrl.stats.value = null;
+      userCtrl.fitnessProfile.value = null;
+    } catch (_) {}
     Get.offAllNamed(AppRoutes.login);
   }
 

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/profil_controller.dart';
 import '../controllers/user_controller.dart';
 import '../routes/app_routes.dart';
+import 'workout_history_page.dart';
 
 const _bg = Color(0xFF0A0C10);
 const _surface = Color(0xFF161824);
@@ -113,9 +114,6 @@ class ProfilPage extends StatelessWidget {
                         color: _textPrimary,
                         fontSize: 22,
                         fontWeight: FontWeight.w800)),
-                const SizedBox(height: 4),
-                Text(profile?.goalFormatted ?? 'Setting up profile...',
-                    style: const TextStyle(color: _textSecondary, fontSize: 13)),
                 const SizedBox(height: 16),
 
                 // Edit button
@@ -207,13 +205,26 @@ class ProfilPage extends StatelessWidget {
                       ],
                     ),
                   )
-                else
+                else ...[
                   _menuGroup([
                     _profileItem('Goal', profile.goalFormatted),
                     _profileItem('Intensity', profile.intensity.capitalizeFirst ?? '-'),
                     _profileItem('Skill Level', profile.skillLevel.capitalizeFirst ?? '-'),
                     _profileItem('Duration', profile.durationTarget.replaceAll('_', ' ').capitalizeFirst ?? '-'),
                   ]),
+                  const SizedBox(height: 28),
+                  _sectionLabel('HEALTH & NUTRITION'),
+                  const SizedBox(height: 10),
+                  _menuGroup([
+                    _profileItem('BMI', '${profile.bmi.toStringAsFixed(1)} (${profile.bmiStatus})'),
+                    _profileItem('BMR', profile.bmr != null ? '${profile.bmr!.round()} kcal' : '-'),
+                    _profileItem('TDEE', profile.tdee != null ? '${profile.tdee!.round()} kcal' : '-'),
+                    _profileItem('Target Kalori', profile.targetDailyKcal != null ? '${profile.targetDailyKcal!.round()} kcal' : '-'),
+                    _profileItem('Karbohidrat', '${profile.carbGrams} g'),
+                    _profileItem('Protein', '${profile.proteinGrams} g'),
+                    _profileItem('Lemak', '${profile.fatGrams} g'),
+                  ]),
+                ],
 
                 const SizedBox(height: 28),
 
@@ -239,7 +250,7 @@ class ProfilPage extends StatelessWidget {
                 const SizedBox(height: 10),
                 _menuGroup([
                   _menuItem(Icons.person_outline, 'Account Information', () {}),
-                  _menuItem(Icons.history, 'Workout History', () {}),
+                  _menuItem(Icons.history, 'Workout History', () => Get.to(() => const WorkoutHistoryPage())),
                   _menuItem(Icons.lock_outline, 'Privacy & Security', () => profilController.showChangePasswordDialog(context)),
                 ]),
 
