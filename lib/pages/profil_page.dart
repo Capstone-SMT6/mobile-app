@@ -55,11 +55,9 @@ class ProfilPage extends StatelessWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 children: [
-                // ── Avatar ──────────────────────────────────────
                 Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Outer glow ring
                     Container(
                       width: 112,
                       height: 112,
@@ -116,11 +114,10 @@ class ProfilPage extends StatelessWidget {
                         fontWeight: FontWeight.w800)),
                 const SizedBox(height: 16),
 
-                // Edit button
                 OutlinedButton.icon(
                   onPressed: () {},
                   icon: const Icon(Icons.edit_outlined, size: 15, color: _purple),
-                  label: const Text('EDIT PROFILE',
+                  label: const Text('Edit Profil',
                       style: TextStyle(
                           color: _purple,
                           letterSpacing: 1,
@@ -137,26 +134,24 @@ class ProfilPage extends StatelessWidget {
 
                 const SizedBox(height: 28),
 
-                // ── Stats row (Physical Metrics) ──────────────────
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: _cardDecoration,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _statCol('${profile?.weight ?? "-"} kg', 'Weight'),
+                      _statCol('${profile?.weight ?? "-"} kg', 'Berat Badan'),
                       _divider(),
-                      _statCol('${profile?.height ?? "-"} cm', 'Height'),
+                      _statCol('${profile?.height ?? "-"} cm', 'Tinggi Badan'),
                       _divider(),
-                      _statCol('${profile?.age ?? "-"}', 'Age'),
+                      _statCol('${profile?.age ?? "-"}', 'Umur'),
                     ],
                   ),
                 ),
 
                 const SizedBox(height: 24),
 
-                // ── Fitness Profile Details ───────────────────────
-                _sectionLabel('FITNESS PROFILE'),
+                _sectionLabel('PROFIL FISIK'),
                 const SizedBox(height: 10),
                 if (profile == null)
                   Container(
@@ -182,12 +177,12 @@ class ProfilPage extends StatelessWidget {
                         const Icon(Icons.fitness_center, color: _purple, size: 40),
                         const SizedBox(height: 12),
                         const Text(
-                          'Profile Incomplete',
+                          'Profil Belum Lengkap',
                           style: TextStyle(color: _textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         const Text(
-                          'Set up your fitness profile to get personalized training recommendations.',
+                          'Lengkapi profil fisik Anda untuk mendapatkan rekomendasi latihan yang dipersonalisasi.',
                           textAlign: TextAlign.center,
                           style: TextStyle(color: _textSecondary, fontSize: 13),
                         ),
@@ -200,20 +195,20 @@ class ProfilPage extends StatelessWidget {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                           ),
-                          child: const Text('COMPLETE PROFILE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                          child: const Text('LENGKAPI PROFIL', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
                   )
                 else ...[
                   _menuGroup([
-                    _profileItem('Goal', profile.goalFormatted),
-                    _profileItem('Intensity', profile.intensity.capitalizeFirst ?? '-'),
-                    _profileItem('Skill Level', profile.skillLevel.capitalizeFirst ?? '-'),
-                    _profileItem('Duration', profile.durationTarget.replaceAll('_', ' ').capitalizeFirst ?? '-'),
+                    _profileItem('Tujuan', profile.goalFormatted),
+                    _profileItem('Intensitas', profile.intensity.capitalizeFirst ?? '-'),
+                    _profileItem('Tingkat Keahlian', profile.skillLevel.capitalizeFirst ?? '-'),
+                    _profileItem('Durasi', profile.durationTarget.replaceAll('_', ' ').capitalizeFirst ?? '-'),
                   ]),
                   const SizedBox(height: 28),
-                  _sectionLabel('HEALTH & NUTRITION'),
+                  _sectionLabel('NUTRISI & KESEHATAN'),
                   const SizedBox(height: 10),
                   _menuGroup([
                     _profileItem('BMI', '${profile.bmi.toStringAsFixed(1)} (${profile.bmiStatus})'),
@@ -228,8 +223,7 @@ class ProfilPage extends StatelessWidget {
 
                 const SizedBox(height: 28),
 
-                // ── Performance Metrics ──────────────────────────
-                _sectionLabel('LIFETIME PERFORMANCE'),
+                _sectionLabel('PERFORMA SEPANJANG MASA'),
                 const SizedBox(height: 12),
                 SizedBox(
                   height: 38,
@@ -245,41 +239,34 @@ class ProfilPage extends StatelessWidget {
 
                 const SizedBox(height: 28),
 
-                // ── Account section ──────────────────────────────
-                _sectionLabel('ACCOUNT'),
+                _sectionLabel('AKUN'),
                 const SizedBox(height: 10),
                 _menuGroup([
-                  _menuItem(Icons.person_outline, 'Account Information', () {}),
-                  _menuItem(Icons.history, 'Workout History', () => Get.to(() => const WorkoutHistoryPage())),
-                  _menuItem(Icons.lock_outline, 'Privacy & Security', () => profilController.showChangePasswordDialog(context)),
+                  _menuItem(Icons.person_outline, 'Informasi Akun', () {}),
+                  _menuItem(Icons.history, 'Riwayat Latihan', () => Get.to(() => const WorkoutHistoryPage())),
+                  _menuItem(Icons.lock_outline, 'Ganti Kata Sandi', () => profilController.showChangePasswordDialog(context)),
                 ]),
 
                 const SizedBox(height: 16),
 
-                // ── Preferences section ──────────────────────────
-                _sectionLabel('PREFERENCES'),
+                _sectionLabel('PENGATURAN'),
                 const SizedBox(height: 10),
                 _menuGroup([
-                  _toggleItem(Icons.notifications_outlined, 'Notifications',
+                  _toggleItem(Icons.notifications_outlined, 'Notifikasi',
                       profilController.notificationsEnabled.value,
                       profilController.toggleNotifications),
-                  const Divider(height: 1, color: _border),
-                  _toggleItem(Icons.vibration, 'Haptic Feedback',
-                      profilController.hapticEnabled.value,
-                      profilController.toggleHaptic),
                 ]),
 
                 const SizedBox(height: 16),
 
-                // ── Support section ──────────────────────────────
                 _sectionLabel('SUPPORT'),
                 const SizedBox(height: 10),
                 _menuGroup([
-                  _menuItem(Icons.help_outline, 'Help Center', () {}),
-                  _menuItem(Icons.info_outline, 'About App', () {}),
+                  _menuItem(Icons.help_outline, 'Hubungi Kami', () {}),
+                  _menuItem(Icons.info_outline, 'Tentang Kami', () {}),
                   _menuItem(
                     Icons.logout,
-                    'Log Out',
+                    'Keluar',
                     () => profilController.logout(),
                     accent: Colors.redAccent,
                   ),

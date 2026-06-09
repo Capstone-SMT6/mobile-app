@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/user_controller.dart';
@@ -15,14 +16,13 @@ class BerandaPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: HeaderSection(),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              HeaderSection(),
-              SizedBox(height: 32),
               ProgressCard(),
               SizedBox(height: 32),
               TodayMenu(),
@@ -42,7 +42,7 @@ class BerandaPage extends StatelessWidget {
 // ───────────────────────────────────────────────────────────────
 // HEADER  — Sapa user dengan nama & greeting waktu
 // ───────────────────────────────────────────────────────────────
-class HeaderSection extends StatelessWidget {
+class HeaderSection extends StatelessWidget implements PreferredSizeWidget {
   const HeaderSection({super.key});
 
   String _greeting() {
@@ -54,52 +54,51 @@ class HeaderSection extends StatelessWidget {
   }
 
   @override
+  Size get preferredSize => const Size.fromHeight(80);
+
+  @override
   Widget build(BuildContext context) {
     final userCtrl = Get.find<UserController>();
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Obx(() {
-            final username = userCtrl.user.value?.username ?? 'User';
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _greeting(),
-                  style: const TextStyle(
-                    color: Colors.white60,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  username,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Let's crush some weight today",
-                  style: TextStyle(
-                    color: const Color(0xFF6CC551).withValues(alpha: 0.9),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            );
-          }),
-        ),
-        const SizedBox(width: 16),
+    return AppBar(
+      automaticallyImplyLeading: false,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
+      toolbarHeight: 80,
+      titleSpacing: 24,
+      title: Obx(() {
+        final username = userCtrl.user.value?.username ?? 'User';
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${_greeting()}, $username 👋',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "Yuk, capai target latihanmu hari ini!",
+              style: TextStyle(
+                color: const Color(0xFF6CC551).withValues(alpha: 0.8),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        );
+      }),
+      actions: [
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             _buildIconButton(
               Icons.calendar_month_rounded,
@@ -107,8 +106,9 @@ class HeaderSection extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             _buildIconButton(Icons.notifications_none_rounded),
+            const SizedBox(width: 24),
           ],
-        )
+        ),
       ],
     );
   }
@@ -117,14 +117,14 @@ class HeaderSection extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 44,
-        height: 44,
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
           color: const Color(0xFF222434),
           shape: BoxShape.circle,
           border: Border.all(color: Colors.white12),
         ),
-        child: Icon(icon, color: Colors.white, size: 22),
+        child: Icon(icon, color: Colors.white, size: 20),
       ),
     );
   }
@@ -215,7 +215,7 @@ class ProgressCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "Weekly Progress",
+                    "Kemajuan Mingguan",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -230,7 +230,7 @@ class ProgressCard extends StatelessWidget {
                           color: Colors.orangeAccent, size: 16),
                       const SizedBox(width: 4),
                       Text(
-                        '$streak day streak',
+                        '$streak hari beruntun',
                         style: const TextStyle(
                           color: Colors.orangeAccent,
                           fontSize: 13,
@@ -241,7 +241,7 @@ class ProgressCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   const Text(
-                    "Let's continue what we started!",
+                    "Ayo lanjutkan latihan yang telah kita mulai!",
                     style: TextStyle(
                       color: Colors.white60,
                       fontSize: 12,
@@ -261,7 +261,7 @@ class ProgressCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Text(
-                          "Start",
+                          "Mulai",
                           style: TextStyle(
                             color: Color(0xFF101216),
                             fontWeight: FontWeight.w800,
@@ -310,7 +310,7 @@ class _TodayMenuState extends State<TodayMenu> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              "Today's Workout",
+              "Latihan Hari Ini",
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w800,
@@ -325,7 +325,7 @@ class _TodayMenuState extends State<TodayMenu> {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: const Text(
-                "See more",
+                "Lihat semua",
                 style: TextStyle(
                   color: Color(0xFF6CC551),
                   fontWeight: FontWeight.w600,
@@ -389,7 +389,7 @@ class _TodayMenuState extends State<TodayMenu> {
                     Icon(Icons.event_available, color: Colors.white38, size: 28),
                     SizedBox(width: 12),
                     Text(
-                      'Hari ini adalah hari istirahat 🎉',
+                      'Hari ini adalah hari istirahat',
                       style: TextStyle(color: Colors.white54, fontSize: 14),
                     ),
                   ],
@@ -499,7 +499,7 @@ class WorkoutAnalysis extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
                 Text(
-                  "Workouts Analysis",
+                  "Analisis Latihan",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -508,7 +508,7 @@ class WorkoutAnalysis extends StatelessWidget {
                 ),
                 SizedBox(height: 6),
                 Text(
-                  "Check your daily progress",
+                  "Lihat perkembangan harianmu",
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 13,
@@ -548,7 +548,7 @@ class _TrendingSectionState extends State<TrendingSection> {
   @override
   void initState() {
     super.initState();
-    _future = TrendsService.fetchTrending();
+    _future = TrendsService.fetchTrending(limit: 3);
   }
 
   @override
@@ -557,7 +557,7 @@ class _TrendingSectionState extends State<TrendingSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Trending Topics 🔥',
+          'Topik Populer Hari Ini',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w800,
@@ -566,7 +566,7 @@ class _TrendingSectionState extends State<TrendingSection> {
         ),
         const SizedBox(height: 4),
         const Text(
-          'Most researched fitness topics (last 90 days)',
+          'Topik kebugaran paling banyak dicari',
           style: TextStyle(color: Colors.white54, fontSize: 12),
         ),
         const SizedBox(height: 16),
@@ -575,7 +575,7 @@ class _TrendingSectionState extends State<TrendingSection> {
           builder: (context, snap) {
             if (snap.connectionState == ConnectionState.waiting) {
               return const SizedBox(
-                height: 110,
+                height: 140,
                 child: Center(
                   child: CircularProgressIndicator(
                     color: Color(0xFF6CC551),
@@ -589,12 +589,15 @@ class _TrendingSectionState extends State<TrendingSection> {
             }
             final items = snap.data!;
             return SizedBox(
-              height: 110,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: items.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (_, i) => _TrendCard(item: items[i]),
+              height: 140,
+              child: Row(
+                children: List.generate(items.length, (i) {
+                  final card = Expanded(child: _TrendCard(item: items[i]));
+                  if (i < items.length - 1) {
+                    return [card, const SizedBox(width: 12)];
+                  }
+                  return [card];
+                }).expand((x) => x).toList(),
               ),
             );
           },
@@ -608,63 +611,351 @@ class _TrendCard extends StatelessWidget {
   final TrendItem item;
   const _TrendCard({required this.item});
 
+  void _showDetails(BuildContext context, Color badgeColor, String viewsLabel) {
+    Get.dialog(
+      BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF1B1C2A).withValues(alpha: 0.95),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: -60,
+                    left: -60,
+                    child: Container(
+                      width: 150,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: badgeColor.withValues(alpha: 0.15),
+                            blurRadius: 45,
+                            spreadRadius: 15,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    badgeColor,
+                                    badgeColor.withValues(alpha: 0.6),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: badgeColor.withValues(alpha: 0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 3),
+                                  )
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.fitness_center_rounded,
+                                color: Colors.black,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Peringkat #${item.rank}',
+                                    style: TextStyle(
+                                      color: badgeColor,
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 13,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.trending_up_rounded,
+                                        color: Color(0xFF6CC551),
+                                        size: 14,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        viewsLabel,
+                                        style: const TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              visualDensity: VisualDensity.compact,
+                              icon: const Icon(Icons.close, color: Colors.white38, size: 20),
+                              onPressed: () => Get.back(),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          item.article,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 24,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.03),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.05),
+                            ),
+                          ),
+                          child: Text(
+                            item.description.isNotEmpty
+                                ? item.description
+                                : 'Tidak ada deskripsi bahasa Indonesia yang tersedia untuk topik ini.',
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                              height: 1.6,
+                              letterSpacing: 0.1,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFF6CC551),
+                                Color(0xFF55A43D),
+                              ],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF6CC551).withValues(alpha: 0.25),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              foregroundColor: Colors.black,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                            onPressed: () => Get.back(),
+                            child: const Text(
+                              'Tutup',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final rankColors = [
-      const Color(0xFFFFD700),
-      const Color(0xFFC0C0C0),
-      const Color(0xFFCD7F32),
+      const Color(0xFFFFC72C), // Gold
+      const Color(0xFFD1D5DB), // Silver
+      const Color(0xFFD97706), // Bronze
     ];
     final badgeColor = item.rank <= 3 ? rankColors[item.rank - 1] : Colors.white24;
 
     final views = item.views90d;
     final viewsLabel = views >= 1000000
-        ? '${(views / 1000000).toStringAsFixed(1)}M views'
-        : '${(views / 1000).toStringAsFixed(0)}K views';
+        ? '${(views / 1000000).toStringAsFixed(1)} Jt'
+        : '${(views / 1000).toStringAsFixed(0)} Rb';
 
-    return Container(
-      width: 140,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF222434),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: badgeColor.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
+    return GestureDetector(
+      onTap: () => _showDetails(context, badgeColor, '$viewsLabel tayangan'),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF26293C), Color(0xFF171926)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+          boxShadow: [
+            BoxShadow(
+              color: item.rank <= 3
+                  ? badgeColor.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            child: Text(
-              '#${item.rank}',
-              style: TextStyle(
-                color: badgeColor,
-                fontWeight: FontWeight.w800,
-                fontSize: 12,
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            children: [
+              Positioned(
+                bottom: -10,
+                right: -5,
+                child: Text(
+                  '${item.rank}',
+                  style: TextStyle(
+                    fontSize: 76,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white.withValues(alpha: 0.035),
+                  ),
+                ),
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        item.rank <= 3
+                            ? Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: badgeColor,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  '#${item.rank}',
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  '#${item.rank}',
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.trending_up_rounded,
+                              color: Color(0xFF6CC551),
+                              size: 13,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              viewsLabel,
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      item.article,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Expanded(
+                      child: Text(
+                        item.description.isNotEmpty
+                            ? item.description
+                            : 'Tidak ada deskripsi bahasa Indonesia yang tersedia.',
+                        style: const TextStyle(
+                          color: Colors.white38,
+                          fontSize: 12,
+                          height: 1.3,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const Spacer(),
-          Text(
-            item.article,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            viewsLabel,
-            style: const TextStyle(color: Colors.white38, fontSize: 11),
-          ),
-        ],
+        ),
       ),
     );
   }

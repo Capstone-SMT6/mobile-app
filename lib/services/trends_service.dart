@@ -6,13 +6,20 @@ class TrendItem {
   final int rank;
   final String article;
   final int views90d;
+  final String description;
 
-  const TrendItem({required this.rank, required this.article, required this.views90d});
+  const TrendItem({
+    required this.rank,
+    required this.article,
+    required this.views90d,
+    required this.description,
+  });
 
   factory TrendItem.fromJson(Map<String, dynamic> j) => TrendItem(
         rank: j['rank'] as int,
         article: j['article'] as String,
         views90d: j['views_90d'] as int,
+        description: (j['description'] as String?) ?? '',
       );
 }
 

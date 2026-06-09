@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/user_controller.dart';
-import 'workout_list_page.dart'; // Ditambahkan agar tombol "Start Workout" berfungsi
+import 'workout_list_page.dart';
 
-const _bg = Color(0xFF0D0F14); // Warna background diselaraskan
-const _green = Color(0xFF6CC551); // Warna hijau diselaraskan
+const _bg = Color(0xFF0D0F14);
+const _green = Color(0xFF6CC551);
 const _purple = Color(0xFF7C6AF7);
 const _textPrimary = Color(0xFFE8EAF2);
 const _textSecondary = Color(0xFF8B92A5);
@@ -19,52 +19,45 @@ class LaporanPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: _bg,
+      appBar: AppBar(
+        title: const Text(
+          "Progress",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        titleSpacing: 24,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+      ),
       body: SafeArea(
         child: Obx(() {
           final stats = c.stats.value;
 
           return ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
             children: [
-              // PAGE HEADER
-              const Padding(
-                padding: EdgeInsets.only(bottom: 24),
-                child: Text(
-                  'Progress',
-                  style: TextStyle(
-                    color: Color(0xFFE8EAF2),
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ),
-              // HERO (CTA)
               _heroSection(stats),
 
               const SizedBox(height: 24),
-
-              // AI INSIGHT
               _insightCard(),
 
               const SizedBox(height: 20),
-
-              // FOCUS TODAY
               _focusCard(),
 
               const SizedBox(height: 24),
-
-              // PERSONAL BEST
               _personalBest(stats),
 
               const SizedBox(height: 24),
-
-              // WEEKLY
               _weeklyChart(),
 
               const SizedBox(height: 24),
 
-              // GOALS
               _goals(),
 
               const SizedBox(height: 32),
@@ -75,7 +68,6 @@ class LaporanPage extends StatelessWidget {
     );
   }
 
-  // HERO SECTION
   Widget _heroSection(stats) {
     final streak = stats?.currentStreak ?? 0;
     return Container(
@@ -121,7 +113,7 @@ class LaporanPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const Text("Ready for today's workout?",
+          const Text("Siap untuk latihan hari ini?",
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -141,7 +133,7 @@ class LaporanPage extends StatelessWidget {
               onPressed: () {
                 Get.to(() => const WorkoutListPage());
               },
-              child: const Text("Start Workout", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              child: const Text("Mulai Latihan", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ),
           )
         ],
@@ -149,7 +141,6 @@ class LaporanPage extends StatelessWidget {
     );
   }
 
-  // INSIGHT
   Widget _insightCard() {
     return _card(
       child: Column(
@@ -159,15 +150,15 @@ class LaporanPage extends StatelessWidget {
             children: [
               Icon(Icons.lightbulb, color: _gold, size: 22),
               SizedBox(width: 8),
-              Text("AI Insight",
+              Text("Wawasan AI",
                   style: TextStyle(
                       color: _textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
             ],
           ),
           SizedBox(height: 12),
           Text(
-            "Your push-up form improved 15% this week.\n"
-            "But your squat depth is still below target.",
+            "Form push-up Anda meningkat 15% minggu ini.\n"
+            "Tetapi kedalaman squat Anda masih di bawah target.",
             style: TextStyle(color: _textSecondary, fontSize: 14, height: 1.5),
           ),
         ],
@@ -175,7 +166,6 @@ class LaporanPage extends StatelessWidget {
     );
   }
 
-  // FOCUS
   Widget _focusCard() {
     return _card(
       child: Column(
@@ -185,25 +175,24 @@ class LaporanPage extends StatelessWidget {
             children: [
               Icon(Icons.center_focus_strong, color: Colors.orangeAccent, size: 22),
               SizedBox(width: 8),
-              Text("Focus Today",
+              Text("Fokus Hari Ini",
                   style: TextStyle(
                       color: _textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
             ],
           ),
           SizedBox(height: 12),
-          Text("• Improve squat depth", style: TextStyle(color: _textSecondary, fontSize: 14, height: 1.5)),
-          Text("• Slow down tempo", style: TextStyle(color: _textSecondary, fontSize: 14, height: 1.5)),
+          Text("• Tingkatkan kedalaman squat", style: TextStyle(color: _textSecondary, fontSize: 14, height: 1.5)),
+          Text("• Perlambat tempo", style: TextStyle(color: _textSecondary, fontSize: 14, height: 1.5)),
         ],
       ),
     );
   }
 
-  // PERSONAL BEST
   Widget _personalBest(stats) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("PERSONAL BEST",
+        const Text("REKOR PRIBADI",
             style: TextStyle(color: _textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
         const SizedBox(height: 12),
         Row(
@@ -245,12 +234,12 @@ class LaporanPage extends StatelessWidget {
   // WEEKLY
   Widget _weeklyChart() {
     final vals = [0.6, 0.3, 0.85, 0.4, 0.95, 0.5, 0.2];
-    final days = ["M", "T", "W", "T", "F", "S", "S"];
+    final days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("WEEKLY ACTIVITY",
+        const Text("AKTIVITAS MINGGUAN",
             style: TextStyle(color: _textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
         const SizedBox(height: 12),
         _card(
@@ -286,15 +275,15 @@ class LaporanPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("MONTHLY GOALS",
+        const Text("TARGET BULANAN",
             style: TextStyle(color: _textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
         const SizedBox(height: 12),
         _card(
           child: Column(
             children: [
-              _progress("Consistency", 0.6),
+              _progress("Konsistensi", 0.6),
               const SizedBox(height: 20),
-              _progress("Strength", 0.3),
+              _progress("Kekuatan", 0.3),
             ],
           ),
         ),
@@ -327,7 +316,6 @@ class LaporanPage extends StatelessWidget {
     );
   }
 
-  // CARD
   Widget _card({required Widget child}) {
     return Container(
       width: double.infinity,
@@ -339,7 +327,7 @@ class LaporanPage extends StatelessWidget {
 
   BoxDecoration _box() {
     return BoxDecoration(
-      color: const Color(0xFF222434), // Disesuaikan dengan halaman lain
+      color: const Color(0xFF222434),
       borderRadius: BorderRadius.circular(24),
       border: Border.all(color: Colors.white10),
     );

@@ -18,12 +18,12 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
     final key = e.name.toLowerCase().trim().replaceAll('-', ' ');
     // Only the 4 exercises the app's pose detector supports
     const info = {
-      'push up': ('Jaga punggung lurus, turun perlahan dan terkontrol.', 'Chest · Shoulder · Triceps', 'side', 'pushup'),
-      'sit up':  ('Angkat badan sampai siku menyentuh lutut, jaga leher netral.', 'Abs · Core · Hip Flexors', 'side', 'situp'),
-      'squat':   ('Turun sampai paha sejajar lantai, lutut tidak melewati jari kaki.', 'Quads · Glutes · Hamstring', 'side', 'squat'),
-      'plank':   ('Tahan posisi tubuh lurus selama waktu yang ditentukan.', 'Core · Lower Back', 'side', 'plank'),
+      'push up': ('Jaga punggung lurus, turun perlahan dan terkontrol.', 'Punggung · Bahu · Triceps', 'side', 'pushup'),
+      'sit up':  ('Angkat badan sampai siku menyentuh lutut, jaga leher netral.', 'Perut · Inti · Fleksor Pinggul', 'side', 'situp'),
+      'squat':   ('Turun sampai paha sejajar lantai, lutut tidak melewati jari kaki.', 'Kaki · Bokong · Paha Depan', 'side', 'squat'),
+      'plank':   ('Tahan posisi tubuh lurus selama waktu yang ditentukan.', 'Inti · Punggung Bawah', 'side', 'plank'),
     };
-    final (desc, muscle, angle, type) = info[key] ?? ('Ikuti gerakan dengan benar.', 'Full Body', 'side', 'other');
+    final (desc, muscle, angle, type) = info[key] ?? ('Ikuti gerakan dengan benar.', 'Seluruh Tubuh', 'side', 'other');
     return WorkoutExercise(
       name: e.name,
       description: desc,
@@ -126,7 +126,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
       backgroundColor: const Color(0xFF0D0F14),
       appBar: AppBar(
         title: const Text(
-          "Today's Workout",
+          "Latihan Hari Ini",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -278,7 +278,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                       );
                     },
               child: const Text(
-                "Start Workout",
+                "Mulai Latihan",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),

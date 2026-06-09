@@ -32,8 +32,8 @@ class ExerciseListPage extends StatelessWidget {
       name: "Push Up",
       gif: "https://media.giphy.com/media/XIqCQx02E1U9W/giphy.gif",
       desc: "Latihan fundamental untuk membangun kekuatan tubuh bagian atas, khususnya otot dada, bahu, dan triceps.",
-      muscle: "Chest, Shoulder, Triceps",
-      difficulty: "Beginner",
+      muscle: "Punggung, Bahu, Triceps",
+      difficulty: "Pemula",
       target: "3 Set x 12 Reps",
       tips: [
         "Jaga punggung lurus seperti papan",
@@ -50,8 +50,8 @@ class ExerciseListPage extends StatelessWidget {
       name: "Sit Up",
       gif: "https://media.giphy.com/media/3o7qE0gCO5LXcIVbTq/giphy.gif",
       desc: "Latihan inti (core strength) klasik untuk melatih stabilitas abdomen serta kekuatan otot perut.",
-      muscle: "Abs, Core",
-      difficulty: "Beginner",
+      muscle: "Perut, Inti",
+      difficulty: "Pemula",
       target: "3 Set x 15 Reps",
       tips: [
         "Jaga leher tetap rileks dan jangan ditarik paksa",
@@ -68,8 +68,8 @@ class ExerciseListPage extends StatelessWidget {
       name: "Squat",
       gif: "https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif",
       desc: "Latihan utama untuk membangun kekuatan tubuh bagian bawah (lower body), khususnya otot kaki and glutes.",
-      muscle: "Legs, Glutes, Quadriceps",
-      difficulty: "Beginner",
+      muscle: "Kaki, Bokong, Paha Depan",
+      difficulty: "Pemula",
       target: "3 Set x 15 Reps",
       tips: [
         "Turun sampai pinggul sejajar dengan lutut (knee < 95°)",
@@ -86,8 +86,8 @@ class ExerciseListPage extends StatelessWidget {
       name: "Plank",
       gif: "https://media.giphy.com/media/3o85xDf6Ur790FD5VC/giphy.gif",
       desc: "Latihan isometrik statik terbaik untuk membangun kekuatan inti (core), stabilitas seluruh tubuh, dan postur.",
-      muscle: "Core, Abs, Lower Back",
-      difficulty: "Intermediate",
+      muscle: "Inti, Perut, Punggung Bawah",
+      difficulty: "Menengah",
       target: "3 Set x 30 Sec",
       tips: [
         "Jaga tubuh tetap lurus horizontal dari kepala ke tumit",
@@ -108,7 +108,7 @@ class ExerciseListPage extends StatelessWidget {
       backgroundColor: const Color(0xFF0D0F14),
       appBar: AppBar(
         title: const Text(
-          "Workout Guide",
+          "Panduan Latihan",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -117,6 +117,9 @@ class ExerciseListPage extends StatelessWidget {
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        titleSpacing: 24,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
       ),
       body: SafeArea(
@@ -181,7 +184,7 @@ class ExerciseListPage extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: e.difficulty == "Beginner"
+                                  color: e.difficulty == "Pemula"
                                       ? Colors.green.withValues(alpha: 0.15)
                                       : Colors.orange.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(8),
@@ -189,7 +192,7 @@ class ExerciseListPage extends StatelessWidget {
                                 child: Text(
                                   e.difficulty,
                                   style: TextStyle(
-                                    color: e.difficulty == "Beginner"
+                                    color: e.difficulty == "Pemula"
                                         ? Colors.greenAccent
                                         : Colors.orangeAccent,
                                     fontSize: 11,
@@ -314,14 +317,14 @@ class ExerciseDetailPage extends StatelessWidget {
                   child: Column(
                     children: [
                       const Text(
-                        "Difficulty",
+                        "Kesulitan",
                         style: TextStyle(color: Colors.white54, fontSize: 12),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         exercise.difficulty,
                         style: TextStyle(
-                          color: exercise.difficulty == "Beginner"
+                          color: exercise.difficulty == "Pemula"
                               ? Colors.greenAccent
                               : Colors.orangeAccent,
                           fontWeight: FontWeight.bold,
@@ -344,7 +347,7 @@ class ExerciseDetailPage extends StatelessWidget {
                   child: Column(
                     children: [
                       const Text(
-                        "Target Plan",
+                        "Target Latihan",
                         style: TextStyle(color: Colors.white54, fontSize: 12),
                       ),
                       const SizedBox(height: 4),
@@ -367,7 +370,7 @@ class ExerciseDetailPage extends StatelessWidget {
 
           // DESCRIPTION
           _card(
-            title: "Description",
+            title: "Deskripsi",
             icon: Icons.info_outline_rounded,
             iconColor: const Color(0xFF29B6F6),
             child: Text(
@@ -384,7 +387,7 @@ class ExerciseDetailPage extends StatelessWidget {
 
           // MUSCLE
           _card(
-            title: "Target Muscle",
+            title: "Otot yang Dilatih",
             icon: Icons.fitness_center_rounded,
             iconColor: const Color(0xFF7C6AF7),
             child: Text(
@@ -401,7 +404,7 @@ class ExerciseDetailPage extends StatelessWidget {
 
           // TIPS
           _card(
-            title: "Pro Tips",
+            title: "Tips Pro",
             icon: Icons.check_circle_outline_rounded,
             iconColor: const Color(0xFF6CC551),
             child: Column(
@@ -443,7 +446,7 @@ class ExerciseDetailPage extends StatelessWidget {
 
           // MISTAKES
           _card(
-            title: "Common Mistakes",
+            title: "Kesalahan Umum",
             icon: Icons.warning_amber_rounded,
             iconColor: const Color(0xFFF76A6A),
             child: Column(
@@ -499,13 +502,13 @@ class ExerciseDetailPage extends StatelessWidget {
               ),
               onPressed: () {
                 showCustomSnackbar(
-                  title: "Added to Workout",
+                  title: "Ditambahkan ke Latihan",
                   message: "${exercise.name} berhasil ditambahkan ke jadwal latihan Anda!",
                   backgroundColor: const Color(0xFF222434),
                 );
               },
               child: const Text(
-                "Add to Workout",
+                "Tambah ke Latihan",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
