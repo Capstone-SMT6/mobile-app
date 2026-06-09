@@ -589,17 +589,19 @@ class _TrendingSectionState extends State<TrendingSection> {
               return const SizedBox.shrink();
             }
             final items = snap.data!;
-            return SizedBox(
-              height: 140,
-              child: Row(
-                children: List.generate(items.length, (i) {
-                  final card = Expanded(child: _TrendCard(item: items[i]));
-                  if (i < items.length - 1) {
-                    return [card, const SizedBox(width: 12)];
-                  }
-                  return [card];
-                }).expand((x) => x).toList(),
-              ),
+            return Column(
+              children: List.generate(items.length, (i) {
+                final card = SizedBox(height: 130, child: _TrendCard(item: items[i]));
+                if (i < items.length - 1) {
+                  return Column(
+                    children: [
+                      card,
+                      const SizedBox(height: 12),
+                    ],
+                  );
+                }
+                return card;
+              }),
             );
           },
         ),
@@ -905,7 +907,6 @@ class _TrendCard extends StatelessWidget {
                                 ),
                               ),
                         Row(
-                          mainAxisSize: MainAxisSize.min,
                           children: [
                             const Icon(
                               Icons.trending_up_rounded,

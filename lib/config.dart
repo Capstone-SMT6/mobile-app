@@ -7,7 +7,7 @@ class AppConfig {
 
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:8000',
+    defaultValue: 'https://justparadis-smafit-fastapi.hf.space',
   );
 
   static String get usersEndpoint => '$apiBaseUrl/api/users/';
