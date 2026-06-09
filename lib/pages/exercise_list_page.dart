@@ -155,170 +155,123 @@ class ExerciseListPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Visual Thumbnail
-                          Container(
-                            width: 90,
-                            height: 90,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: borderColor.withValues(alpha: 0.8), width: 1.5),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: Image.network(
-                                e.gif,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Icon(
-                                  Icons.fitness_center,
-                                  color: Colors.white38,
-                                  size: 36,
-                                ),
-                              ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Thumbnail
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: borderColor.withValues(alpha: 0.8), width: 1.5),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: Image.network(
+                            e.gif,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.fitness_center,
+                              color: Colors.white38,
+                              size: 32,
                             ),
                           ),
-                          const SizedBox(width: 16),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
 
-                          // Content Details
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      // Content
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title + difficulty badge
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                // Exercise Title
-                                Text(
-                                  e.name,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
+                                Expanded(
+                                  child: Text(
+                                    e.name,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(height: 6),
-
-                                // Muscle Tag
-                                Row(
-                                  children: [
-                                    const Icon(Icons.fitness_center_rounded, size: 12, color: accentGreen),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      e.muscle,
-                                      style: const TextStyle(
-                                        color: accentGreen,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 0.5,
-                                      ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: e.difficulty == "Pemula"
+                                        ? Colors.green.withValues(alpha: 0.12)
+                                        : Colors.orange.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: e.difficulty == "Pemula"
+                                          ? Colors.green.withValues(alpha: 0.3)
+                                          : Colors.orange.withValues(alpha: 0.3),
                                     ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-
-                                // Description Snippet
-                                Text(
-                                  e.desc,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: textSecondary,
-                                    fontSize: 12,
-                                    height: 1.4,
                                   ),
-                                ),
-                                const SizedBox(height: 12),
-
-                                // Badges Row
-                                Row(
-                                  children: [
-                                    // Difficulty Badge
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: e.difficulty == "Pemula"
-                                            ? Colors.green.withValues(alpha: 0.1)
-                                            : Colors.orange.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: e.difficulty == "Pemula"
-                                              ? Colors.green.withValues(alpha: 0.25)
-                                              : Colors.orange.withValues(alpha: 0.25),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        e.difficulty,
-                                        style: TextStyle(
-                                          color: e.difficulty == "Pemula"
-                                              ? Colors.greenAccent
-                                              : Colors.orangeAccent,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                  child: Text(
+                                    e.difficulty,
+                                    style: TextStyle(
+                                      color: e.difficulty == "Pemula"
+                                          ? Colors.greenAccent
+                                          : Colors.orangeAccent,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    const SizedBox(width: 8),
-
-                                    // Target sets/reps badge
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withValues(alpha: 0.04),
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: borderColor),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          const Icon(Icons.adjust_rounded, size: 10, color: Colors.white54),
-                                          const SizedBox(width: 5),
-                                          Text(
-                                            e.target,
-                                            style: const TextStyle(
-                                              color: Colors.white70,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
+                            const SizedBox(height: 8),
 
-                    // Floating Action/Play Button Overlay in Bottom-Right
-                    Positioned(
-                      bottom: 16,
-                      right: 16,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: accentGreen,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: accentGreen.withValues(alpha: 0.4),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                            // Muscle group
+                            Row(
+                              children: [
+                                const Icon(Icons.fitness_center_rounded, size: 12, color: accentGreen),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    e.muscle,
+                                    style: const TextStyle(
+                                      color: accentGreen,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+
+                            // Sets / reps
+                            Row(
+                              children: [
+                                const Icon(Icons.repeat_rounded, size: 12, color: Colors.white38),
+                                const SizedBox(width: 6),
+                                Text(
+                                  e.target,
+                                  style: const TextStyle(
+                                    color: textSecondary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                        child: const Icon(
-                          Icons.play_arrow_rounded,
-                          color: Color(0xFF0D0F14),
-                          size: 20,
-                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
