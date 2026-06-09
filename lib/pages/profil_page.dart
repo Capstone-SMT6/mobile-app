@@ -362,7 +362,7 @@ class ProfilPage extends StatelessWidget {
   Widget _toggleItem(IconData icon, String title, bool value,
       ValueChanged<bool> onChanged) {
     return ListTile(
-      leading: Icon(icon, color: _green, size: 20),
+      leading: Icon(icon, color: textSecondary, size: 20),
       title: Text(title,
           style: const TextStyle(
               color: _textPrimary,
@@ -371,7 +371,7 @@ class ProfilPage extends StatelessWidget {
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeThumbColor: _green,
+        activeThumbColor: accentGreen,
         inactiveThumbColor: _textSecondary,
         inactiveTrackColor: _border,
       ),

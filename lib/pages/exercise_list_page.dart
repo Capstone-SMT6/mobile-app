@@ -131,108 +131,191 @@ class ExerciseListPage extends StatelessWidget {
             final e = exercises[index];
 
             return GestureDetector(
-              onTap: () {
-                Get.to(() => ExerciseDetailPage(exercise: e));
-              },
+              onTap: () => Get.to(() => ExerciseDetailPage(exercise: e)),
               child: Container(
                 margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: surfaceColor,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: borderColor),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 70,
-                      height: 70,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: borderColor),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.network(
-                          e.gif,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Icon(
-                            Icons.fitness_center,
-                            color: Colors.white38,
-                          ),
-                        ),
-                      ),
+                  gradient: LinearGradient(
+                    colors: [surfaceColor, surfaceColor.withValues(alpha: 0.85), const Color(0xFF141724)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: borderColor, width: 1.2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
+                    BoxShadow(
+                      color: accentGreen.withValues(alpha: 0.03),
+                      blurRadius: 20,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            e.name,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
+                          // Visual Thumbnail
+                          Container(
+                            width: 90,
+                            height: 90,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(color: borderColor.withValues(alpha: 0.8), width: 1.5),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.network(
+                                e.gif,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Icon(
+                                  Icons.fitness_center,
+                                  color: Colors.white38,
+                                  size: 36,
+                                ),
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: e.difficulty == "Pemula"
-                                      ? Colors.green.withValues(alpha: 0.15)
-                                      : Colors.orange.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  e.difficulty,
-                                  style: TextStyle(
-                                    color: e.difficulty == "Pemula"
-                                        ? Colors.greenAccent
-                                        : Colors.orangeAccent,
-                                    fontSize: 11,
+                          const SizedBox(width: 16),
+
+                          // Content Details
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Exercise Title
+                                Text(
+                                  e.name,
+                                  style: const TextStyle(
+                                    color: Colors.white,
                                     fontWeight: FontWeight.bold,
+                                    fontSize: 18,
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                e.target,
-                                style: const TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 12,
+                                const SizedBox(height: 6),
+
+                                // Muscle Tag
+                                Row(
+                                  children: [
+                                    const Icon(Icons.fitness_center_rounded, size: 12, color: accentGreen),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      e.muscle,
+                                      style: const TextStyle(
+                                        color: accentGreen,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            e.muscle,
-                            style: const TextStyle(
-                              color: accentGreen,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
+                                const SizedBox(height: 8),
+
+                                // Description Snippet
+                                Text(
+                                  e.desc,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: textSecondary,
+                                    fontSize: 12,
+                                    height: 1.4,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+
+                                // Badges Row
+                                Row(
+                                  children: [
+                                    // Difficulty Badge
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: e.difficulty == "Pemula"
+                                            ? Colors.green.withValues(alpha: 0.1)
+                                            : Colors.orange.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: e.difficulty == "Pemula"
+                                              ? Colors.green.withValues(alpha: 0.25)
+                                              : Colors.orange.withValues(alpha: 0.25),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        e.difficulty,
+                                        style: TextStyle(
+                                          color: e.difficulty == "Pemula"
+                                              ? Colors.greenAccent
+                                              : Colors.orangeAccent,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+
+                                    // Target sets/reps badge
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withValues(alpha: 0.04),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: borderColor),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.adjust_rounded, size: 10, color: Colors.white54),
+                                          const SizedBox(width: 5),
+                                          Text(
+                                            e.target,
+                                            style: const TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.05),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        color: Colors.white54,
-                        size: 16,
+
+                    // Floating Action/Play Button Overlay in Bottom-Right
+                    Positioned(
+                      bottom: 16,
+                      right: 16,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: accentGreen,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: accentGreen.withValues(alpha: 0.4),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.play_arrow_rounded,
+                          color: Color(0xFF0D0F14),
+                          size: 20,
+                        ),
                       ),
                     ),
                   ],
