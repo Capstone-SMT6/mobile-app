@@ -1,3 +1,4 @@
+import '../utils/colors.dart';
 import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -252,7 +253,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: const Color(0xFF0D0F14),
+      backgroundColor: bgColor,
       body: Stack(
         children: [
           // Camera preview (jika sudah ready)
@@ -277,9 +278,9 @@ class _CalibrationPageState extends State<CalibrationPage> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    const Color(0xFF0D0F14).withValues(alpha:0.90),
-                    const Color(0xFF0D0F14).withValues(alpha:0.70),
-                    const Color(0xFF0D0F14).withValues(alpha:0.92),
+                    bgColor.withValues(alpha:0.90),
+                    bgColor.withValues(alpha:0.70),
+                    bgColor.withValues(alpha:0.92),
                   ],
                 ),
               ),
@@ -379,9 +380,9 @@ class _CalibrationPageState extends State<CalibrationPage> {
                         height: 40,
                         decoration: BoxDecoration(
                           color: isCompleted
-                              ? const Color(0xFF6CC551)
+                              ? accentGreen
                               : isActive
-                                  ? const Color(0xFF7C6AF7)
+                                  ? accentPurple
                                   : Colors.white.withValues(alpha:0.2),
                           shape: BoxShape.circle,
                         ),
@@ -419,7 +420,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
                       height: 2,
                       margin: const EdgeInsets.only(bottom: 32),
                       color: isCompleted
-                          ? const Color(0xFF6CC551)
+                          ? accentGreen
                           : Colors.white.withValues(alpha:0.2),
                     ),
                   ),
@@ -467,7 +468,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           CircularProgressIndicator(
-            color: Color(0xFF7C6AF7),
+            color: accentPurple,
           ),
           SizedBox(height: 24),
           Text(
@@ -490,7 +491,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
               : Icons.check_circle_rounded,
           color: _diagnostics.isLowEndDevice
               ? Colors.orange
-              : const Color(0xFF6CC551),
+              : accentGreen,
           size: 80,
         ),
         
@@ -558,9 +559,9 @@ class _CalibrationPageState extends State<CalibrationPage> {
                   ? Icons.check_circle_rounded
                   : Icons.warning_amber_rounded,
           color: _lightingCheckFrames < 10
-              ? const Color(0xFF7C6AF7)
+              ? accentPurple
               : _diagnostics.lightingCondition == 'Good'
-                  ? const Color(0xFF6CC551)
+                  ? accentGreen
                   : Colors.orange,
           size: 80,
         ),
@@ -619,9 +620,9 @@ class _CalibrationPageState extends State<CalibrationPage> {
       return Colors.orange;
     } else if (_diagnostics.currentBrightness >= 0.4 && 
                _diagnostics.currentBrightness <= 0.7) {
-      return const Color(0xFF6CC551);
+      return accentGreen;
     }
-    return const Color(0xFF7C6AF7);
+    return accentPurple;
   }
   
   Widget _buildPositionCheckContent() {
@@ -633,8 +634,8 @@ class _CalibrationPageState extends State<CalibrationPage> {
               ? Icons.check_circle_rounded
               : Icons.accessibility_new_rounded,
           color: _poseDetected
-              ? const Color(0xFF6CC551)
-              : const Color(0xFF7C6AF7),
+              ? accentGreen
+              : accentPurple,
           size: 80,
         ),
         
@@ -698,7 +699,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
         color: Colors.white.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF7C6AF7).withValues(alpha:0.5),
+          color: accentPurple.withValues(alpha:0.5),
           width: 2,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
@@ -717,7 +718,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
       children: [
         const Icon(
           Icons.rocket_launch_rounded,
-          color: Color(0xFF6CC551),
+          color: accentGreen,
           size: 80,
         ),
         
@@ -784,7 +785,7 @@ class _CalibrationPageState extends State<CalibrationPage> {
               onPressed: _currentStep == 3 ? _proceedToWorkout : null,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                backgroundColor: const Color(0xFF7C6AF7),
+                backgroundColor: accentPurple,
                 disabledBackgroundColor: Colors.white24,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -818,7 +819,7 @@ class _PositionGuidePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF7C6AF7)
+      ..color = accentPurple
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
     

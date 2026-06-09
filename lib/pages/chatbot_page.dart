@@ -1,3 +1,4 @@
+import '../utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:get/get.dart';
@@ -11,10 +12,10 @@ class ChatbotPage extends StatelessWidget {
     final ChatbotController controller = Get.find<ChatbotController>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0C10),
+      backgroundColor: bgColor,
       endDrawer: _buildDrawer(controller),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF161824),
+        backgroundColor: surfaceColor,
         foregroundColor: Colors.white,
         title: Row(
           children: [
@@ -22,14 +23,14 @@ class ChatbotPage extends StatelessWidget {
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.purple.shade400, Colors.purple.shade700],
+                  colors: [accentGreen, accentGreen],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.purple.withValues(alpha: 0.3),
+                    color: accentGreen.withValues(alpha: 0.3),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -107,11 +108,14 @@ class ChatbotPage extends StatelessWidget {
 
   Widget _buildDrawer(ChatbotController controller) {
     return Drawer(
-      backgroundColor: const Color(0xFF161824),
+      backgroundColor: surfaceColor,
       child: Column(
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(color: Colors.purple.shade900),
+            decoration: BoxDecoration(
+              color: surfaceColor,
+              border: Border(bottom: BorderSide(color: borderColor)),
+            ),
             child: const Center(
               child: Text(
                 'Chat History',
@@ -124,7 +128,7 @@ class ChatbotPage extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.add_circle_outline,
-                color: Colors.purpleAccent),
+                color: accentGreen),
             title:
                 const Text('New Chat', style: TextStyle(color: Colors.white)),
             onTap: () {
@@ -136,7 +140,7 @@ class ChatbotPage extends StatelessWidget {
           Expanded(
             child: Obx(() => controller.isLoadingSessions.value
                 ? const Center(
-                    child: CircularProgressIndicator(color: Colors.purple))
+                    child: CircularProgressIndicator(color: accentGreen))
                 : ListView.builder(
                     itemCount: controller.sessions.length,
                     itemBuilder: (context, index) {
@@ -155,7 +159,7 @@ class ChatbotPage extends StatelessWidget {
                             ),
                             selected: controller.sessionId.value == session.id,
                             selectedTileColor:
-                                Colors.purple.shade900.withValues(alpha: 0.5),
+                                accentGreen.withValues(alpha: 0.15),
                             onTap: () => controller.openSession(session),
                             trailing: IconButton(
                               icon: const Icon(Icons.delete_outline,
@@ -182,11 +186,11 @@ class ChatbotPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.purple.shade900.withValues(alpha: 0.4),
+                color: accentGreen.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.smart_toy_outlined,
-                  size: 48, color: Colors.purple.shade300),
+                  size: 48, color: accentGreen),
             ),
             const SizedBox(height: 16),
             const Text('AI Assistant',
@@ -252,7 +256,7 @@ class ChatbotPage extends StatelessWidget {
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.purple.shade600, Colors.purple.shade800],
+                  colors: [accentGreen, accentGreen.withValues(alpha: 0.85)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -264,7 +268,7 @@ class ChatbotPage extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.purple.shade900.withValues(alpha: 0.3),
+                    color: accentGreen.withValues(alpha: 0.2),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -325,14 +329,14 @@ class ChatbotPage extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFF161824),
+              color: surfaceColor,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(20),
                 topRight: Radius.circular(20),
                 bottomLeft: Radius.circular(4),
                 bottomRight: Radius.circular(20),
               ),
-              border: Border.all(color: const Color(0xFF262A3D)),
+              border: Border.all(color: borderColor),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.2),
@@ -360,7 +364,7 @@ class ChatbotPage extends StatelessWidget {
                         fontSize: 16,
                         fontWeight: FontWeight.bold),
                     h3: TextStyle(
-                        color: Colors.purple.shade200,
+                        color: accentGreen,
                         fontSize: 14,
                         fontWeight: FontWeight.bold),
                     listBullet: const TextStyle(
@@ -371,10 +375,10 @@ class ChatbotPage extends StatelessWidget {
                         fontFamily: 'monospace',
                         fontSize: 13),
                     blockquoteDecoration: BoxDecoration(
-                      color: Colors.purple.shade900.withValues(alpha: 0.3),
+                      color: accentGreen.withValues(alpha: 0.1),
                       border: Border(
                           left: BorderSide(
-                              color: Colors.purple.shade400, width: 3)),
+                              color: accentGreen, width: 3)),
                     ),
                   ),
                 ),
@@ -392,21 +396,21 @@ class ChatbotPage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.purple.shade900.withValues(alpha: 0.4),
+                    color: accentGreen.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: Colors.purple.shade700, width: 0.5),
+                        color: accentGreen.withValues(alpha: 0.3), width: 0.5),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.auto_stories_outlined,
-                          size: 11, color: Colors.purple.shade300),
+                          size: 11, color: accentGreen),
                       const SizedBox(width: 5),
                       Text(
                         '${sources.length} source${sources.length > 1 ? 's' : ''}',
                         style: TextStyle(
-                            fontSize: 11, color: Colors.purple.shade300),
+                            fontSize: 11, color: accentGreen),
                       ),
                     ],
                   ),
@@ -425,14 +429,14 @@ class ChatbotPage extends StatelessWidget {
         padding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFF161824),
+          color: surfaceColor,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
             bottomRight: Radius.circular(20),
             bottomLeft: Radius.circular(4),
           ),
-          border: Border.all(color: const Color(0xFF262A3D)),
+          border: Border.all(color: borderColor),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.2),
@@ -458,8 +462,8 @@ class ChatbotPage extends StatelessWidget {
         bottom: MediaQuery.of(context).viewInsets.bottom + 12,
       ),
       decoration: const BoxDecoration(
-        color: Color(0xFF161824),
-        border: Border(top: BorderSide(color: Color(0xFF262A3D))),
+        color: surfaceColor,
+        border: Border(top: BorderSide(color: borderColor)),
       ),
       child: Row(
         children: [
@@ -475,7 +479,7 @@ class ChatbotPage extends StatelessWidget {
                 hintStyle: const TextStyle(
                     color: Colors.white38, fontSize: 14),
                 filled: true,
-                fillColor: const Color(0xFF0A0C10),
+                fillColor: bgColor,
                 contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16, vertical: 10),
                 border: OutlineInputBorder(
@@ -495,8 +499,8 @@ class ChatbotPage extends StatelessWidget {
                   height: 44,
                   decoration: BoxDecoration(
                     color: controller.isStreaming.value
-                        ? Colors.purple.shade900
-                        : Colors.purple.shade600,
+                        ? accentGreen
+                        : accentGreen,
                     shape: BoxShape.circle,
                   ),
                   child: controller.isStreaming.value
@@ -517,7 +521,7 @@ class ChatbotPage extends StatelessWidget {
   void _showSources(BuildContext context, List<String> sources) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1E1E2E),
+      backgroundColor: surfaceColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -529,7 +533,7 @@ class ChatbotPage extends StatelessWidget {
           children: [
             Row(children: [
               Icon(Icons.source_outlined,
-                  color: Colors.purple.shade300, size: 18),
+                  color: accentGreen, size: 18),
               const SizedBox(width: 8),
               const Text('Sources used',
                   style: TextStyle(
@@ -542,7 +546,7 @@ class ChatbotPage extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Row(children: [
                     Icon(Icons.article_outlined,
-                        size: 14, color: Colors.purple.shade200),
+                        size: 14, color: accentGreen),
                     const SizedBox(width: 8),
                     Expanded(
                         child: Text(s,
@@ -573,19 +577,19 @@ class _SuggestionChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.purple.shade900.withValues(alpha: 0.5),
+          color: surfaceColor,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.purple.shade700, width: 1),
+          border: Border.all(color: borderColor, width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[  
-              Icon(icon, size: 14, color: Colors.purple.shade300),
+              Icon(icon, size: 14, color: accentGreen),
               const SizedBox(width: 6),
             ],
             Text(label,
-                style: TextStyle(color: Colors.purple.shade200, fontSize: 12)),
+                style: const TextStyle(color: textSecondary, fontSize: 12)),
           ],
         ),
       ),
@@ -626,7 +630,7 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
         width: 2,
         height: 16,
         decoration: BoxDecoration(
-          color: Colors.purple.shade300,
+          color: accentGreen,
           borderRadius: BorderRadius.circular(2),
         ),
       ),
@@ -675,7 +679,7 @@ class _PulsingDotState extends State<_PulsingDot>
         height: 7,
         margin: const EdgeInsets.symmetric(horizontal: 3),
         decoration: BoxDecoration(
-          color: Colors.purple.shade300,
+          color: accentGreen,
           shape: BoxShape.circle,
         ),
       ),

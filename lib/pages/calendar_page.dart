@@ -1,3 +1,4 @@
+import '../utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../services/workout_service.dart';
@@ -43,7 +44,7 @@ class _CalendarPageState extends State<CalendarPage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF6CC551)),
+              child: CircularProgressIndicator(color: accentGreen),
             );
           }
 
@@ -74,7 +75,7 @@ class _CalendarPageState extends State<CalendarPage> {
                   height: 280,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF6CC551).withValues(alpha: 0.04),
+                    color: accentGreen.withValues(alpha: 0.04),
                   ),
                 ),
               ),
@@ -86,7 +87,7 @@ class _CalendarPageState extends State<CalendarPage> {
                   height: 320,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF7C6AF7).withValues(alpha: 0.03),
+                    color: accentPurple.withValues(alpha: 0.03),
                   ),
                 ),
               ),
@@ -104,7 +105,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     padding: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF1E2130), Color(0xFF141622)],
+                        colors: [surfaceColor, bgColor],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -120,7 +121,7 @@ class _CalendarPageState extends State<CalendarPage> {
                           offset: const Offset(0, 8),
                         ),
                         BoxShadow(
-                          color: const Color(0xFF6CC551).withValues(alpha: 0.02),
+                          color: accentGreen.withValues(alpha: 0.02),
                           blurRadius: 20,
                           offset: const Offset(0, 4),
                         ),
@@ -186,14 +187,14 @@ class _CalendarPageState extends State<CalendarPage> {
                               height: 38,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [Color(0xFF6CC551), Color(0xFF4CA63D)],
+                                  colors: [accentGreen, accentGreen],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF6CC551).withValues(alpha: 0.35),
+                                    color: accentGreen.withValues(alpha: 0.35),
                                     blurRadius: 8,
                                     offset: const Offset(0, 3),
                                   ),
@@ -219,7 +220,7 @@ class _CalendarPageState extends State<CalendarPage> {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: const Color(0xFF6CC551).withValues(alpha: 0.6),
+                                  color: accentGreen.withValues(alpha: 0.6),
                                   width: 1.5,
                                 ),
                               ),
@@ -246,12 +247,12 @@ class _CalendarPageState extends State<CalendarPage> {
                               height: 5,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: isSelected ? Colors.white : const Color(0xFF6CC551),
+                                color: isSelected ? Colors.white : accentGreen,
                                 boxShadow: isSelected
                                     ? null
                                     : [
                                         BoxShadow(
-                                          color: const Color(0xFF6CC551).withValues(alpha: 0.6),
+                                          color: accentGreen.withValues(alpha: 0.6),
                                           blurRadius: 3,
                                         ),
                                       ],
@@ -266,7 +267,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     child: Container(
                       padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
                       decoration: const BoxDecoration(
-                        color: Color(0xFF12141C),
+                        color: bgColor,
                         borderRadius: BorderRadius.vertical(
                           top: Radius.circular(32),
                         ),
@@ -304,16 +305,16 @@ class _CalendarPageState extends State<CalendarPage> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF6CC551).withValues(alpha: 0.12),
+                                    color: accentGreen.withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
-                                      color: const Color(0xFF6CC551).withValues(alpha: 0.2),
+                                      color: accentGreen.withValues(alpha: 0.2),
                                     ),
                                   ),
                                   child: Text(
                                     "${workouts.length} Latihan",
                                     style: const TextStyle(
-                                      color: Color(0xFF6CC551),
+                                      color: accentGreen,
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -332,7 +333,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                           Container(
                                             padding: const EdgeInsets.all(22),
                                             decoration: BoxDecoration(
-                                              color: const Color(0xFF1E2030),
+                                              color: surfaceColor,
                                               shape: BoxShape.circle,
                                               border: Border.all(
                                                 color: Colors.white.withValues(alpha: 0.05),
@@ -349,7 +350,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                             child: const Icon(
                                               Icons.spa_outlined,
                                               size: 44,
-                                              color: Color(0xFF6CC551),
+                                              color: accentGreen,
                                             ),
                                           ),
                                           const SizedBox(height: 18),
@@ -387,7 +388,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                       final item = workouts[index];
                                       return Container(
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF1E2030),
+                                          color: surfaceColor,
                                           borderRadius: BorderRadius.circular(16),
                                           border: Border.all(
                                             color: Colors.white.withValues(alpha: 0.04),
@@ -410,7 +411,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                                 bottom: 0,
                                                 width: 4,
                                                 child: Container(
-                                                  color: const Color(0xFF6CC551),
+                                                  color: accentGreen,
                                                 ),
                                               ),
                                               Padding(
@@ -425,12 +426,12 @@ class _CalendarPageState extends State<CalendarPage> {
                                                     Container(
                                                       padding: const EdgeInsets.all(10),
                                                       decoration: BoxDecoration(
-                                                        color: const Color(0xFF6CC551).withValues(alpha: 0.12),
+                                                        color: accentGreen.withValues(alpha: 0.12),
                                                         borderRadius: BorderRadius.circular(12),
                                                       ),
                                                       child: const Icon(
                                                         Icons.fitness_center,
-                                                        color: Color(0xFF6CC551),
+                                                        color: accentGreen,
                                                         size: 18,
                                                       ),
                                                     ),
@@ -451,7 +452,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                                           Text(
                                                             item.targetText,
                                                             style: const TextStyle(
-                                                              color: Color(0xFF6CC551),
+                                                              color: accentGreen,
                                                               fontSize: 12,
                                                               fontWeight: FontWeight.w600,
                                                             ),

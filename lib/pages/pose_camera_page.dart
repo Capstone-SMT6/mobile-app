@@ -1,3 +1,4 @@
+import '../utils/colors.dart';
 import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -608,7 +609,7 @@ class _PoseCameraPageState extends State<PoseCameraPage>
   Widget _buildCameraLayer() {
     if (_cameraError) {
       return Container(
-        color: const Color(0xFF0D0F14),
+        color: bgColor,
         child: const Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -629,7 +630,7 @@ class _PoseCameraPageState extends State<PoseCameraPage>
     if (!_cameraReady || _cameraCtrl == null) {
       return const Center(
         child: CircularProgressIndicator(
-            color: Color(0xFF7C6AF7), strokeWidth: 2),
+            color: accentPurple, strokeWidth: 2),
       );
     }
 
@@ -705,15 +706,15 @@ class _PoseCameraPageState extends State<PoseCameraPage>
               padding:
                   const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF7C6AF7).withValues(alpha:0.2),
+                color: accentPurple.withValues(alpha:0.2),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                    color: const Color(0xFF7C6AF7).withValues(alpha:0.4)),
+                    color: accentPurple.withValues(alpha:0.4)),
               ),
               child: Text(
                 'Tampak ${widget.exercise.poseAngle == 'side' ? 'Samping' : 'Depan'}',
                 style: const TextStyle(
-                    color: Color(0xFF7C6AF7),
+                    color: accentPurple,
                     fontSize: 11,
                     fontWeight: FontWeight.w600),
               ),
@@ -774,7 +775,7 @@ class _PoseCameraPageState extends State<PoseCameraPage>
                       _StatBox(
                         label: 'REPS',
                         value: '$_repCount',
-                        color: const Color(0xFF6CC551),
+                        color: accentGreen,
                         large: true,
                       ),
                       VerticalDivider(color: Colors.white12, width: 1, thickness: 1),
@@ -784,7 +785,7 @@ class _PoseCameraPageState extends State<PoseCameraPage>
                           label: 'STATUS',
                           value: _stage.toUpperCase(),
                           color: _stage == 'running'
-                              ? const Color(0xFF6CC551)
+                              ? accentGreen
                               : Colors.white54,
                         )
                       else
@@ -830,7 +831,7 @@ class _PoseCameraPageState extends State<PoseCameraPage>
                           label: 'HIP',
                           value: '${_plankAnalysis?.hipAngle.toStringAsFixed(0) ?? '--'}°',
                           color: (_plankAnalysis?.hipAngle ?? 0) >= 165
-                              ? const Color(0xFF6CC551)
+                              ? accentGreen
                               : (_plankAnalysis?.hipAngle ?? 0) >= 150
                                   ? const Color(0xFFF0A500)
                                   : Colors.white70,
@@ -840,7 +841,7 @@ class _PoseCameraPageState extends State<PoseCameraPage>
                           label: 'FORM',
                           value: '${_plankAnalysis?.formScore ?? '--'}%',
                           color: (_plankAnalysis?.formScore ?? 0) >= 80
-                              ? const Color(0xFF6CC551)
+                              ? accentGreen
                               : (_plankAnalysis?.formScore ?? 0) >= 50
                                   ? const Color(0xFFF0A500)
                                   : const Color(0xFFF76A6A),
@@ -859,14 +860,14 @@ class _PoseCameraPageState extends State<PoseCameraPage>
                               ? const Color(0xFFF76A6A)   // pinggul turun
                               : (_pushUpAnalysis?.hipAngle ?? 0) > 170
                                   ? const Color(0xFFF0A500) // pinggul naik
-                                  : const Color(0xFF6CC551),
+                                  : accentGreen,
                         ),
                         VerticalDivider(color: Colors.white12, width: 1, thickness: 1),
                         _StatBox(
                           label: 'POSISI',
                           value: (_pushUpAnalysis?.isHorizontal ?? false) ? 'OK ✓' : 'BERDIRI',
                           color: (_pushUpAnalysis?.isHorizontal ?? false)
-                              ? const Color(0xFF6CC551)
+                              ? accentGreen
                               : const Color(0xFFF76A6A),
                         ),
                       ],
@@ -891,7 +892,7 @@ class _PoseCameraPageState extends State<PoseCameraPage>
                       : !_isHorizontal
                           ? const Color(0xFFF0A500).withValues(alpha: 0.85)
                           : _isGoodPosture
-                              ? const Color(0xFF6CC551).withValues(alpha: 0.80)
+                              ? accentGreen.withValues(alpha: 0.80)
                               : const Color(0xFFF76A6A).withValues(alpha: 0.80),
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -947,7 +948,7 @@ class _PoseCameraPageState extends State<PoseCameraPage>
                   angle: _rotateHintAnim.value,
                   child: const Icon(
                     Icons.screen_rotation_rounded,
-                    color: Color(0xFF7C6AF7),
+                    color: accentPurple,
                     size: 64,
                   ),
                 ),
@@ -1020,9 +1021,9 @@ class PosePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (poses.isEmpty) return;
 
-    final goodColor = const Color(0xFF6CC551);
+    final goodColor = accentGreen;
     final badColor = const Color(0xFFF76A6A);
-    final neutralColor = const Color(0xFF7C6AF7);
+    final neutralColor = accentPurple;
 
     final accentColor = isGoodPosture ? goodColor : badColor;
 
@@ -1359,7 +1360,7 @@ class _OrientDot extends StatelessWidget {
           height: 16,
           decoration: BoxDecoration(
             color: active
-                ? const Color(0xFF7C6AF7)
+                ? accentPurple
                 : Colors.white24,
             borderRadius: BorderRadius.circular(8),
           ),
@@ -1368,7 +1369,7 @@ class _OrientDot extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: active ? const Color(0xFF7C6AF7) : Colors.white38,
+            color: active ? accentPurple : Colors.white38,
             fontSize: 10,
             fontWeight: FontWeight.w600,
           ),

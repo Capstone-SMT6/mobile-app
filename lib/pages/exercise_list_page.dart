@@ -1,3 +1,4 @@
+import '../utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../utils/snackbar_helper.dart';
@@ -137,9 +138,9 @@ class ExerciseListPage extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF222434),
+                  color: surfaceColor,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white10),
+                  border: Border.all(color: borderColor),
                 ),
                 child: Row(
                   children: [
@@ -148,7 +149,7 @@ class ExerciseListPage extends StatelessWidget {
                       height: 70,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white10),
+                        border: Border.all(color: borderColor),
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
@@ -214,7 +215,7 @@ class ExerciseListPage extends StatelessWidget {
                           Text(
                             e.muscle,
                             style: const TextStyle(
-                              color: Color(0xFF6CC551),
+                              color: accentGreen,
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -274,9 +275,9 @@ class ExerciseDetailPage extends StatelessWidget {
             height: 250,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: const Color(0xFF222434),
+              color: surfaceColor,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white10),
+              border: Border.all(color: borderColor),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.3),
@@ -310,9 +311,9 @@ class ExerciseDetailPage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF222434),
+                    color: surfaceColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white10),
+                    border: Border.all(color: borderColor),
                   ),
                   child: Column(
                     children: [
@@ -340,9 +341,9 @@ class ExerciseDetailPage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF222434),
+                    color: surfaceColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white10),
+                    border: Border.all(color: borderColor),
                   ),
                   child: Column(
                     children: [
@@ -389,7 +390,7 @@ class ExerciseDetailPage extends StatelessWidget {
           _card(
             title: "Otot yang Dilatih",
             icon: Icons.fitness_center_rounded,
-            iconColor: const Color(0xFF7C6AF7),
+            iconColor: accentPurple,
             child: Text(
               exercise.muscle,
               style: const TextStyle(
@@ -406,7 +407,7 @@ class ExerciseDetailPage extends StatelessWidget {
           _card(
             title: "Tips Pro",
             icon: Icons.check_circle_outline_rounded,
-            iconColor: const Color(0xFF6CC551),
+            iconColor: accentGreen,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: exercise.tips
@@ -420,7 +421,7 @@ class ExerciseDetailPage extends StatelessWidget {
                             padding: EdgeInsets.only(top: 4.0),
                             child: Icon(
                               Icons.circle,
-                              color: Color(0xFF6CC551),
+                              color: accentGreen,
                               size: 6,
                             ),
                           ),
@@ -491,20 +492,20 @@ class ExerciseDetailPage extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6CC551),
+                backgroundColor: accentGreen,
                 foregroundColor: const Color(0xFF101216),
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 8,
-                shadowColor: const Color(0xFF6CC551).withValues(alpha: 0.4),
+                shadowColor: accentGreen.withValues(alpha: 0.4),
               ),
               onPressed: () {
                 showCustomSnackbar(
                   title: "Ditambahkan ke Latihan",
                   message: "${exercise.name} berhasil ditambahkan ke jadwal latihan Anda!",
-                  backgroundColor: const Color(0xFF222434),
+                  backgroundColor: surfaceColor,
                 );
               },
               child: const Text(
@@ -529,9 +530,9 @@ class ExerciseDetailPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF222434),
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

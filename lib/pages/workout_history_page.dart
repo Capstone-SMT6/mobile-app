@@ -1,3 +1,4 @@
+import '../utils/colors.dart';
 import 'package:flutter/material.dart';
 import '../services/workout_service.dart';
 
@@ -48,11 +49,11 @@ class _WorkoutHistoryPageState extends State<WorkoutHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    const bg = Color(0xFF0D0F14);
-    const cardColor = Color(0xFF222434);
-    const purple = Color(0xFF7C6AF7);
+    const bg = bgColor;
+    const cardColor = surfaceColor;
+    const purple = accentPurple;
     const textPrimary = Color(0xFFE8EAF2);
-    const textSecondary = Color(0xFF8B92A5);
+    
 
     return Scaffold(
       backgroundColor: bg,
@@ -122,14 +123,14 @@ class _WorkoutHistoryPageState extends State<WorkoutHistoryPage> {
                 decoration: BoxDecoration(
                   color: cardColor,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white10),
+                  border: Border.all(color: borderColor),
                 ),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: purple.withOpacity(0.1),
+                        color: purple.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(

@@ -1,3 +1,4 @@
+import '../utils/colors.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -88,7 +89,7 @@ class HeaderSection extends StatelessWidget implements PreferredSizeWidget {
             Text(
               "Yuk, capai target latihanmu hari ini!",
               style: TextStyle(
-                color: const Color(0xFF6CC551).withValues(alpha: 0.8),
+                color: accentGreen.withValues(alpha: 0.8),
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
@@ -120,9 +121,9 @@ class HeaderSection extends StatelessWidget implements PreferredSizeWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: const Color(0xFF222434),
+          color: surfaceColor,
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white12),
+          border: Border.all(color: borderColor),
         ),
         child: Icon(icon, color: Colors.white, size: 20),
       ),
@@ -155,18 +156,18 @@ class ProgressCard extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF222434), Color(0xFF171925)],
+            colors: [surfaceColor, bgColor],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: const Color(0xFF6CC551).withValues(alpha: 0.3),
+            color: accentGreen.withValues(alpha: 0.3),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6CC551).withValues(alpha: 0.1),
+              color: accentGreen.withValues(alpha: 0.1),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -189,7 +190,7 @@ class ProgressCard extends StatelessWidget {
                       backgroundColor: Colors.white10,
                       strokeCap: StrokeCap.round,
                       valueColor: const AlwaysStoppedAnimation<Color>(
-                        Color(0xFF6CC551),
+                        accentGreen,
                       ),
                     ),
                   ),
@@ -257,7 +258,7 @@ class ProgressCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             vertical: 10, horizontal: 24),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF6CC551),
+                          color: accentGreen,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Text(
@@ -327,7 +328,7 @@ class _TodayMenuState extends State<TodayMenu> {
               child: const Text(
                 "Lihat semua",
                 style: TextStyle(
-                  color: Color(0xFF6CC551),
+                  color: accentGreen,
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                 ),
@@ -344,7 +345,7 @@ class _TodayMenuState extends State<TodayMenu> {
               header,
               const SizedBox(height: 24),
               const Center(
-                child: CircularProgressIndicator(color: Color(0xFF6CC551)),
+                child: CircularProgressIndicator(color: accentGreen),
               ),
             ],
           );
@@ -379,9 +380,9 @@ class _TodayMenuState extends State<TodayMenu> {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF222434),
+                  color: surfaceColor,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white10),
+                  border: Border.all(color: borderColor),
                 ),
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -419,19 +420,19 @@ class _TodayMenuState extends State<TodayMenu> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       decoration: BoxDecoration(
-        color: const Color(0xFF222434),
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF6CC551).withValues(alpha: 0.15),
+              color: accentGreen.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.fitness_center, color: Color(0xFF6CC551), size: 24),
+            child: const Icon(Icons.fitness_center, color: accentGreen, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -479,14 +480,14 @@ class WorkoutAnalysis extends StatelessWidget {
             const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF7C6AF7), Color(0xFF5A49D3)],
+            colors: [accentPurple, accentPurple],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF7C6AF7).withValues(alpha: 0.3),
+              color: accentPurple.withValues(alpha: 0.3),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -578,7 +579,7 @@ class _TrendingSectionState extends State<TrendingSection> {
                 height: 140,
                 child: Center(
                   child: CircularProgressIndicator(
-                    color: Color(0xFF6CC551),
+                    color: accentGreen,
                     strokeWidth: 2,
                   ),
                 ),
@@ -620,9 +621,9 @@ class _TrendCard extends StatelessWidget {
           insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           child: Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF1B1C2A).withValues(alpha: 0.95),
+              color: surfaceColor.withValues(alpha: 0.95),
               borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              border: Border.all(color: borderColor),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.4),
@@ -706,7 +707,7 @@ class _TrendCard extends StatelessWidget {
                                     children: [
                                       const Icon(
                                         Icons.trending_up_rounded,
-                                        color: Color(0xFF6CC551),
+                                        color: accentGreen,
                                         size: 14,
                                       ),
                                       const SizedBox(width: 4),
@@ -768,13 +769,13 @@ class _TrendCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(14),
                             gradient: const LinearGradient(
                               colors: [
-                                Color(0xFF6CC551),
-                                Color(0xFF55A43D),
+                                accentGreen,
+                                accentGreen,
                               ],
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF6CC551).withValues(alpha: 0.25),
+                                color: accentGreen.withValues(alpha: 0.25),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -833,11 +834,11 @@ class _TrendCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           gradient: const LinearGradient(
-            colors: [Color(0xFF26293C), Color(0xFF171926)],
+            colors: [surfaceColor, bgColor],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+          border: Border.all(color: borderColor),
           boxShadow: [
             BoxShadow(
               color: item.rank <= 3
@@ -908,7 +909,7 @@ class _TrendCard extends StatelessWidget {
                           children: [
                             const Icon(
                               Icons.trending_up_rounded,
-                              color: Color(0xFF6CC551),
+                              color: accentGreen,
                               size: 13,
                             ),
                             const SizedBox(width: 4),

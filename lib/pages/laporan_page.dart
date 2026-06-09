@@ -1,13 +1,13 @@
+import '../utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/user_controller.dart';
 import 'workout_list_page.dart';
 
-const _bg = Color(0xFF0D0F14);
-const _green = Color(0xFF6CC551);
-const _purple = Color(0xFF7C6AF7);
+const _bg = bgColor;
+const _green = accentGreen;
 const _textPrimary = Color(0xFFE8EAF2);
-const _textSecondary = Color(0xFF8B92A5);
+const _textSecondary = textSecondary;
 const _gold = Color(0xFFF59E0B);
 
 class LaporanPage extends StatelessWidget {
@@ -73,15 +73,15 @@ class LaporanPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [_purple, _green],
+        gradient: LinearGradient(
+          colors: [_green, _green.withValues(alpha: 0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: _purple.withValues(alpha: 0.3),
+            color: _green.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -197,7 +197,7 @@ class LaporanPage extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           children: [
-            _pb("Push Ups", "${stats?.totalPushUps ?? 0}", _purple),
+            _pb("Push Ups", "${stats?.totalPushUps ?? 0}", _green),
             const SizedBox(width: 16),
             _pb("Sit Ups", "${stats?.totalSitUps ?? 0}", _green),
           ],
@@ -254,7 +254,7 @@ class LaporanPage extends StatelessWidget {
                     width: 16,
                     height: 100 * vals[i],
                     decoration: BoxDecoration(
-                      color: vals[i] > 0.8 ? _green : _purple,
+                      color: _green.withValues(alpha: 0.3 + 0.7 * vals[i]),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -327,9 +327,9 @@ class LaporanPage extends StatelessWidget {
 
   BoxDecoration _box() {
     return BoxDecoration(
-      color: const Color(0xFF222434),
+      color: surfaceColor,
       borderRadius: BorderRadius.circular(24),
-      border: Border.all(color: Colors.white10),
+      border: Border.all(color: borderColor),
     );
   }
 }

@@ -1,3 +1,4 @@
+import '../utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
@@ -118,7 +119,7 @@ class _WarmupPageState extends State<WarmupPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0C10),
+      backgroundColor: bgColor,
       body: Stack(
         children: [
           // ── VIDEO / PLACEHOLDER ────────────────────────────
@@ -151,7 +152,7 @@ class _WarmupPageState extends State<WarmupPage>
                   _PillBadge(
                     icon: Icons.self_improvement_rounded,
                     label: 'Warm Up',
-                    color: const Color(0xFF7C6AF7),
+                    color: accentPurple,
                   ),
                   GestureDetector(
                     onTap: _goToSession,
@@ -191,7 +192,7 @@ class _WarmupPageState extends State<WarmupPage>
                     const Text(
                       'Sesi Pemanasan',
                       style: TextStyle(
-                        color: Color(0xFF7C6AF7),
+                        color: accentPurple,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 1.5,
@@ -226,8 +227,8 @@ class _WarmupPageState extends State<WarmupPage>
                       child: ElevatedButton(
                         onPressed: _goToSession,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF6CC551),
-                          foregroundColor: const Color(0xFF0A0C10),
+                          backgroundColor: accentGreen,
+                          foregroundColor: bgColor,
                           padding: const EdgeInsets.symmetric(vertical: 18),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -272,11 +273,11 @@ class _WarmupPageState extends State<WarmupPage>
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7C6AF7).withValues(alpha: 0.2),
+                    color: accentPurple.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.self_improvement_rounded,
-                      size: 40, color: Color(0xFF7C6AF7)),
+                      size: 40, color: accentPurple),
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -295,7 +296,7 @@ class _WarmupPageState extends State<WarmupPage>
         color: const Color(0xFF0D0F14),
         child: const Center(
           child: CircularProgressIndicator(
-            color: Color(0xFF7C6AF7),
+            color: accentPurple,
             strokeWidth: 2,
           ),
         ),
@@ -345,7 +346,7 @@ class _WarmupPageState extends State<WarmupPage>
                 value: progress,
                 minHeight: 4,
                 backgroundColor: Colors.white12,
-                valueColor: const AlwaysStoppedAnimation(Color(0xFF7C6AF7)),
+                valueColor: const AlwaysStoppedAnimation(accentPurple),
               ),
             ),
           ],

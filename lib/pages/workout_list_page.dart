@@ -1,3 +1,4 @@
+import '../utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/workout_service.dart';
@@ -46,7 +47,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
       Container(
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
-          color: Color(0xFF171925),
+          color: surfaceColor,
           borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         ),
         child: Column(
@@ -102,14 +103,14 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF222434),
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: const Color(0xFF6CC551), size: 16),
+          Icon(icon, color: accentGreen, size: 16),
           const SizedBox(width: 6),
           Text(
             label,
@@ -143,7 +144,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
           // Loading
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF6CC551)),
+              child: CircularProgressIndicator(color: accentGreen),
             );
           }
 
@@ -195,9 +196,9 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF222434),
+                    color: surfaceColor,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white10),
+                    border: Border.all(color: borderColor),
                   ),
                   child: Row(
                     children: [
@@ -211,7 +212,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                         ),
                         child: const Icon(
                           Icons.fitness_center,
-                          color: Color(0xFF6CC551),
+                          color: accentGreen,
                           size: 28,
                         ),
                       ),
@@ -259,14 +260,14 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
             width: double.infinity,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6CC551),
+                backgroundColor: accentGreen,
                 foregroundColor: const Color(0xFF101216),
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 8,
-                shadowColor: const Color(0xFF6CC551).withValues(alpha: 0.4),
+                shadowColor: accentGreen.withValues(alpha: 0.4),
               ),
               onPressed: _todayPlan.isEmpty
                   ? null

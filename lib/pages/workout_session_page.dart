@@ -1,3 +1,4 @@
+import '../utils/colors.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -137,7 +138,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0C10),
+      backgroundColor: bgColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -168,9 +169,9 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFF1C2030),
+                color: surfaceColor,
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF2A2F45)),
+                border: Border.all(color: borderColor),
               ),
               child: const Icon(Icons.close, color: Colors.white, size: 20),
             ),
@@ -212,8 +213,8 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
               child: LinearProgressIndicator(
                 value: _progressAnim.value,
                 minHeight: 4,
-                backgroundColor: Colors.white10,
-                valueColor: const AlwaysStoppedAnimation(Color(0xFF6CC551)),
+                backgroundColor: borderColor,
+                valueColor: const AlwaysStoppedAnimation(accentGreen),
               ),
             ),
           ),
@@ -239,12 +240,12 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF1C2030), Color(0xFF161824)],
+                colors: [surfaceColor, surfaceColor],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white10),
+              border: Border.all(color: borderColor),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,18 +255,18 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF6CC551).withValues(alpha: 0.15),
+                        color: accentGreen.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(Icons.fitness_center,
-                          color: Color(0xFF6CC551), size: 22),
+                          color: accentGreen, size: 22),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         exercise.muscleGroup,
                         style: const TextStyle(
-                            color: Color(0xFF6CC551),
+                            color: accentGreen,
                             fontSize: 12,
                             fontWeight: FontWeight.w600),
                       ),
@@ -336,8 +337,8 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
                 child: ElevatedButton(
                   onPressed: _onSetDone,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6CC551),
-                    foregroundColor: const Color(0xFF0A0C10),
+                    backgroundColor: accentGreen,
+                    foregroundColor: bgColor,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16)),
@@ -372,9 +373,9 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
               height: 6,
               decoration: BoxDecoration(
                 color: done
-                    ? const Color(0xFF6CC551)
+                    ? accentGreen
                     : current
-                        ? const Color(0xFF6CC551).withValues(alpha: 0.4)
+                        ? accentGreen.withValues(alpha: 0.4)
                         : Colors.white12,
                 borderRadius: BorderRadius.circular(3),
               ),
@@ -390,9 +391,9 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF161824),
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         children: [
@@ -452,7 +453,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF161824),
+                  color: surfaceColor,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                 ),
@@ -509,7 +510,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
                     child: CircularProgressIndicator(
                       value: _restSeconds / _restDuration,
                       strokeWidth: 6,
-                      backgroundColor: Colors.white10,
+                      backgroundColor: borderColor,
                       valueColor: const AlwaysStoppedAnimation(
                           Color(0xFF7C6AF7)),
                       strokeCap: StrokeCap.round,
@@ -558,7 +559,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
               child: const Text(
                 'Lewati Istirahat',
                 style: TextStyle(
-                    color: Color(0xFF6CC551),
+                    color: accentGreen,
                     fontWeight: FontWeight.w700,
                     fontSize: 15),
               ),

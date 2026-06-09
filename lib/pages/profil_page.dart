@@ -1,3 +1,4 @@
+import '../utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/profil_controller.dart';
@@ -5,13 +6,12 @@ import '../controllers/user_controller.dart';
 import '../routes/app_routes.dart';
 import 'workout_history_page.dart';
 
-const _bg = Color(0xFF0A0C10);
-const _surface = Color(0xFF161824);
-const _border = Color(0xFF262A3D);
-const _green = Color(0xFF4FFFB0);
-const _purple = Color(0xFF7C6AF7);
+const _bg = bgColor;
+const _surface = surfaceColor;
+const _border = borderColor;
+const _green = accentGreen;
 const _textPrimary = Color(0xFFE8EAF2);
-const _textSecondary = Color(0xFF8B92A5);
+const _textSecondary = textSecondary;
 
 final _cardDecoration = BoxDecoration(
   color: _surface,
@@ -38,7 +38,7 @@ class ProfilPage extends StatelessWidget {
       backgroundColor: _bg,
       body: Obx(() {
         if (userController.isLoading.value && userController.user.value == null) {
-          return const Center(child: CircularProgressIndicator(color: _purple));
+          return const Center(child: CircularProgressIndicator(color: _green));
         }
 
         final user = userController.user.value;
@@ -48,7 +48,7 @@ class ProfilPage extends StatelessWidget {
         return SafeArea(
           child: RefreshIndicator(
             onRefresh: () => userController.refreshData(),
-            color: _purple,
+            color: _green,
             backgroundColor: _surface,
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 32, 16, 40),
@@ -64,8 +64,8 @@ class ProfilPage extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                            color: _purple.withValues(alpha: 0.4), width: 2),
-                        color: _purple.withValues(alpha: 0.08),
+                            color: _green.withValues(alpha: 0.4), width: 2),
+                        color: _green.withValues(alpha: 0.08),
                       ),
                     ),
                     Container(
@@ -116,15 +116,15 @@ class ProfilPage extends StatelessWidget {
 
                 OutlinedButton.icon(
                   onPressed: () {},
-                  icon: const Icon(Icons.edit_outlined, size: 15, color: _purple),
+                  icon: const Icon(Icons.edit_outlined, size: 15, color: Colors.white),
                   label: const Text('Edit Profil',
                       style: TextStyle(
-                          color: _purple,
+                          color: Colors.white,
                           letterSpacing: 1,
                           fontSize: 12,
                           fontWeight: FontWeight.bold)),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: _purple.withValues(alpha: 0.5)),
+                    side: BorderSide(color: Colors.white.withValues(alpha: 0.5)),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20)),
                     padding:
@@ -158,15 +158,15 @@ class ProfilPage extends StatelessWidget {
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [_purple.withValues(alpha: 0.15), _surface],
+                        colors: [_green.withValues(alpha: 0.15), _surface],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: _purple.withValues(alpha: 0.3), width: 1.5),
+                      border: Border.all(color: _green.withValues(alpha: 0.3), width: 1.5),
                       boxShadow: [
                         BoxShadow(
-                          color: _purple.withValues(alpha: 0.05),
+                          color: _green.withValues(alpha: 0.05),
                           blurRadius: 20,
                           offset: const Offset(0, 8),
                         ),
@@ -174,7 +174,7 @@ class ProfilPage extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        const Icon(Icons.fitness_center, color: _purple, size: 40),
+                        const Icon(Icons.fitness_center, color: _green, size: 40),
                         const SizedBox(height: 12),
                         const Text(
                           'Profil Belum Lengkap',
@@ -190,7 +190,7 @@ class ProfilPage extends StatelessWidget {
                         ElevatedButton(
                           onPressed: () => Get.toNamed(AppRoutes.onboardingGoal),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _purple,
+                            backgroundColor: _green,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -230,9 +230,9 @@ class ProfilPage extends StatelessWidget {
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     children: [
-                      _chip(Icons.fitness_center, '${stats?.totalPushUps ?? 0} Push Ups', _purple),
+                      _chip(Icons.fitness_center, '${stats?.totalPushUps ?? 0} Push Ups', Colors.white),
                       const SizedBox(width: 8),
-                      _chip(Icons.accessibility_new, '${stats?.totalSitUps ?? 0} Sit Ups', _green),
+                      _chip(Icons.accessibility_new, '${stats?.totalSitUps ?? 0} Sit Ups', Colors.white),
                     ],
                   ),
                 ),
@@ -286,7 +286,7 @@ class ProfilPage extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: Text(label,
             style: const TextStyle(
-                color: _green,
+                color: Colors.white,
                 fontSize: 11,
                 letterSpacing: 2,
                 fontWeight: FontWeight.bold)),
@@ -296,7 +296,7 @@ class ProfilPage extends StatelessWidget {
         children: [
           Text(value,
               style: const TextStyle(
-                  color: _purple,
+                  color: _textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
@@ -349,7 +349,7 @@ class ProfilPage extends StatelessWidget {
       {Color? accent}) {
     final col = accent ?? _textPrimary;
     return ListTile(
-      leading: Icon(icon, color: accent ?? _purple, size: 20),
+      leading: Icon(icon, color: accent ?? _textSecondary, size: 20),
       title: Text(title,
           style: TextStyle(
               color: col, fontWeight: FontWeight.w500, fontSize: 14)),
@@ -362,7 +362,7 @@ class ProfilPage extends StatelessWidget {
   Widget _toggleItem(IconData icon, String title, bool value,
       ValueChanged<bool> onChanged) {
     return ListTile(
-      leading: Icon(icon, color: _purple, size: 20),
+      leading: Icon(icon, color: _green, size: 20),
       title: Text(title,
           style: const TextStyle(
               color: _textPrimary,
