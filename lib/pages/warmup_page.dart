@@ -64,6 +64,33 @@ const defaultWorkoutPlan = [
     poseAngle: 'side',
     exerciseType: 'plank',
   ),
+  WorkoutExercise(
+    name: 'Lunge',
+    description: 'Langkah ke depan, turunkan lutut belakang hampir menyentuh lantai.',
+    sets: 3,
+    reps: 12,
+    muscleGroup: 'Quads · Glutes · Hamstring',
+    poseAngle: 'side',
+    exerciseType: 'lunge',
+  ),
+  WorkoutExercise(
+    name: 'Burpee',
+    description: 'Kombinasi squat, plank, dan lompat. Gerakan full-body intensitas tinggi.',
+    sets: 3,
+    reps: 10,
+    muscleGroup: 'Full Body · Cardio',
+    poseAngle: 'front',
+    exerciseType: 'burpee',
+  ),
+  WorkoutExercise(
+    name: 'Mountain Climber',
+    description: 'Posisi plank, tarik lutut bergantian ke arah dada dengan cepat.',
+    sets: 3,
+    reps: 20,
+    muscleGroup: 'Core · Shoulder · Cardio',
+    poseAngle: 'side',
+    exerciseType: 'mountain_climber',
+  ),
 ];
 
 // ─────────────────────────────────────────────────────────────

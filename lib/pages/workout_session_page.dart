@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../services/tts_service.dart';
 import 'warmup_page.dart';
 import 'pose_camera_page.dart';
 import 'calibration_page.dart';
+import 'workout_summary_page.dart';
 
 // ─────────────────────────────────────────────────────────────
 // WORKOUT SESSION PAGE
@@ -23,6 +25,12 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
   int _currentSet = 1;
   bool _resting = false;
   int _restSeconds = 0;
+  final _tts = TtsService();
+
+  // Workout tracking
+  late DateTime _workoutStart;
+  int _totalReps = 0;
+  int _totalSets = 0;
 
   static const _restDuration = 30; // detik istirahat antar set
 
@@ -32,11 +40,17 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
   @override
   void initState() {
     super.initState();
+    _workoutStart = DateTime.now();
     _progressCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
     _progressAnim = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _progressCtrl, curve: Curves.easeOut),
     );
     _updateProgress();
+
+    // Initialize TTS
+    _tts.init();
+    // Announce first exercise
+    _tts.speakExerciseStart(_currentExercise.name);
   }
 
   void _updateProgress() {
@@ -51,6 +65,8 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
   bool get _isLastExercise => _currentIndex >= widget.workoutPlan.length - 1;
 
   void _onSetDone() {
+    _totalSets++;
+    _totalReps += _currentExercise.reps;
     if (_isLastSet) {
       if (_isLastExercise) {
         _finishWorkout();
@@ -60,6 +76,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
           _currentSet = 1;
         });
         _updateProgress();
+        _tts.speakExerciseStart(_currentExercise.name);
       }
     } else {
       // Mulai istirahat
@@ -67,6 +84,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
         _resting = true;
         _restSeconds = _restDuration;
       });
+      _tts.speakSetComplete(_currentSet, _currentExercise.sets);
       _startRestTimer();
     }
   }
@@ -81,9 +99,14 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
           _currentSet++;
         });
         _updateProgress();
+        _tts.speakRestCountdown(0);
         return false;
       }
       setState(() => _restSeconds--);
+      // TTS: countdown last 3 seconds
+      if (_restSeconds <= 3) {
+        _tts.speakRestCountdown(_restSeconds);
+      }
       return true;
     });
   }
@@ -97,17 +120,29 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
   }
 
   void _finishWorkout() {
-    Get.back(); // kembali ke WorkoutList
-    Get.snackbar(
-      'Workout Selesai',
-      'Mantap! Latihan hari ini sudah tercatat.',
-      backgroundColor: const Color(0xFF222434),
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      icon: const Icon(Icons.check_circle, color: Color(0xFF6CC551)),
-      duration: const Duration(seconds: 3),
+    _totalSets++;
+    _totalReps += _currentExercise.reps;
+    _tts.speakWorkoutComplete();
+
+    final duration = DateTime.now().difference(_workoutStart);
+    final exercises = widget.workoutPlan.map((e) => ExerciseResult(
+      name: e.name,
+      sets: e.sets,
+      reps: e.reps,
+      muscleGroup: e.muscleGroup,
+    )).toList();
+
+    final summary = WorkoutSummaryData(
+      totalExercises: widget.workoutPlan.length,
+      totalSets: _totalSets,
+      totalReps: _totalReps,
+      duration: duration,
+      avgQuality: 75, // Placeholder — will be updated by real quality data from pose detectors
+      currentStreak: 1, // Placeholder — will be updated from API
+      exercises: exercises,
     );
+
+    Get.off(() => WorkoutSummaryPage(data: summary));
   }
 
   Future<void> _openCamera() async {
@@ -126,6 +161,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
   @override
   void dispose() {
     _progressCtrl.dispose();
+    _tts.stop();
     super.dispose();
   }
 

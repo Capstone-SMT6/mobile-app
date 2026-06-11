@@ -7,12 +7,15 @@ import 'controllers/auth_controller.dart';
 import 'controllers/user_controller.dart';
 import 'routes/app_pages.dart';
 import 'routes/app_routes.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  // Initialize local notifications
+  await NotificationService().init();
   // Register Controllers permanently so they're available app-wide
   Get.put(AuthController(), permanent: true);
   Get.put(UserController(), permanent: true);

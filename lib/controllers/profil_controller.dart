@@ -4,15 +4,19 @@ import '../controllers/auth_controller.dart';
 import '../controllers/user_controller.dart';
 import '../routes/app_routes.dart';
 import '../services/user_service.dart';
+import '../services/notification_service.dart';
 import '../models/user_model.dart';
 
 class ProfilController extends GetxController {
   final RxBool notificationsEnabled = true.obs;
   final RxBool hapticEnabled = true.obs;
+  final _notifService = NotificationService();
 
   void toggleNotifications(bool value) {
     notificationsEnabled.value = value;
-    // Optional: Update on backend too
+    if (!value) {
+      _notifService.cancelWorkoutReminders();
+    }
   }
 
   void toggleHaptic(bool value) {

@@ -18,6 +18,17 @@ class AppConfig {
   static String get chatbotSessionsEndpoint => '$apiBaseUrl/chatbot/sessions';
   static String chatbotChatEndpoint(String sessionId) => '$apiBaseUrl/chatbot/sessions/$sessionId/chat';
   static String chatbotStreamEndpoint(String sessionId) => '$apiBaseUrl/chatbot/sessions/$sessionId/stream';
+
+  // ---------------------------------------------------------------------------
+  // Workout Plans & Analytics
+  // ---------------------------------------------------------------------------
+
+  static String get generatePlanEndpoint => '$apiBaseUrl/api/workouts/generate-plan';
+  static String get activePlanEndpoint => '$apiBaseUrl/api/workouts/active-plan';
+  static String get analyticsSummaryEndpoint => '$apiBaseUrl/api/workouts/analytics/summary';
+  static String get analyticsWeeklyEndpoint => '$apiBaseUrl/api/workouts/analytics/weekly';
+  static String analyticsCalendarEndpoint(int year, int month) =>
+      '$apiBaseUrl/api/workouts/analytics/calendar?year=$year&month=$month';
   // ---------------------------------------------------------------------------
   // Google OAuth
   // ---------------------------------------------------------------------------

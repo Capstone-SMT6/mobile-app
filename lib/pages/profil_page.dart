@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/profil_controller.dart';
 import '../controllers/user_controller.dart';
 import '../routes/app_routes.dart';
+import '../services/plan_service.dart';
 
 const _bg = Color(0xFF0A0C10);
 const _surface = Color(0xFF161824);
@@ -25,8 +26,31 @@ final _cardDecoration = BoxDecoration(
   ],
 );
 
-class ProfilPage extends StatelessWidget {
+class ProfilPage extends StatefulWidget {
   const ProfilPage({super.key});
+
+  @override
+  State<ProfilPage> createState() => _ProfilPageState();
+}
+
+class _ProfilPageState extends State<ProfilPage> {
+  Map<String, dynamic>? _analytics;
+  bool _analyticsLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAnalytics();
+  }
+
+  Future<void> _loadAnalytics() async {
+    try {
+      final data = await PlanService.getAnalyticsSummary();
+      if (mounted) setState(() { _analytics = data; _analyticsLoading = false; });
+    } catch (_) {
+      if (mounted) setState(() => _analyticsLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +144,7 @@ class ProfilPage extends StatelessWidget {
 
                 // Edit button
                 OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () => Get.toNamed(AppRoutes.onboardingGoal),
                   icon: const Icon(Icons.edit_outlined, size: 15, color: _purple),
                   label: const Text('EDIT PROFILE',
                       style: TextStyle(
@@ -228,9 +252,24 @@ class ProfilPage extends StatelessWidget {
                       _chip(Icons.fitness_center, '${stats?.totalPushUps ?? 0} Push Ups', _purple),
                       const SizedBox(width: 8),
                       _chip(Icons.accessibility_new, '${stats?.totalSitUps ?? 0} Sit Ups', _green),
+                      if (_analytics != null) ...[  
+                        const SizedBox(width: 8),
+                        _chip(Icons.repeat, '${_analytics!['total_reps'] ?? 0} Total Reps', const Color(0xFFAB47BC)),
+                        const SizedBox(width: 8),
+                        _chip(Icons.local_fire_department, '${_analytics!['current_streak'] ?? 0} Day Streak', const Color(0xFFFFA726)),
+                        const SizedBox(width: 8),
+                        _chip(Icons.fitness_center, '${_analytics!['total_workouts'] ?? 0} Workouts', const Color(0xFF29B6F6)),
+                      ],
                     ],
                   ),
                 ),
+
+                const SizedBox(height: 28),
+
+                // ── Achievement Badges ────────────────────────────
+                _sectionLabel('ACHIEVEMENTS'),
+                const SizedBox(height: 12),
+                _buildAchievements(),
 
                 const SizedBox(height: 28),
 
@@ -376,6 +415,139 @@ class ProfilPage extends StatelessWidget {
         activeThumbColor: _green,
         inactiveThumbColor: _textSecondary,
         inactiveTrackColor: _border,
+      ),
+    );
+  }
+
+  // ── Achievement badges ─────────────────────────────────────
+  Widget _buildAchievements() {
+    final streak = (_analytics?['current_streak'] as num?)?.toInt() ?? 0;
+    final longestStreak = (_analytics?['longest_streak'] as num?)?.toInt() ?? 0;
+    final totalReps = (_analytics?['total_reps'] as num?)?.toInt() ?? 0;
+    final totalWorkouts = (_analytics?['total_workouts'] as num?)?.toInt() ?? 0;
+
+    final achievements = <_Achievement>[
+      _Achievement(
+        icon: Icons.local_fire_department,
+        title: '7 Day Streak',
+        desc: 'Latihan 7 hari berturut-turut',
+        unlocked: streak >= 7 || longestStreak >= 7,
+        color: const Color(0xFFFFA726),
+      ),
+      _Achievement(
+        icon: Icons.whatshot,
+        title: '14 Day Streak',
+        desc: 'Latihan 14 hari berturut-turut',
+        unlocked: streak >= 14 || longestStreak >= 14,
+        color: const Color(0xFFFF7043),
+      ),
+      _Achievement(
+        icon: Icons.emoji_events,
+        title: '30 Day Legend',
+        desc: 'Latihan 30 hari berturut-turut',
+        unlocked: streak >= 30 || longestStreak >= 30,
+        color: const Color(0xFFFFD54F),
+      ),
+      _Achievement(
+        icon: Icons.repeat,
+        title: '100 Reps Club',
+        desc: 'Total 100 repetisi',
+        unlocked: totalReps >= 100,
+        color: const Color(0xFFAB47BC),
+      ),
+      _Achievement(
+        icon: Icons.fitness_center,
+        title: '10 Workouts',
+        desc: 'Selesaikan 10 sesi workout',
+        unlocked: totalWorkouts >= 10,
+        color: const Color(0xFF7C6AF7),
+      ),
+      _Achievement(
+        icon: Icons.star,
+        title: '50 Workouts',
+        desc: 'Selesaikan 50 sesi workout',
+        unlocked: totalWorkouts >= 50,
+        color: const Color(0xFF6CC551),
+      ),
+    ];
+
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: achievements.map((a) => _AchievementBadge(achievement: a)).toList(),
+    );
+  }
+}
+
+class _Achievement {
+  final IconData icon;
+  final String title;
+  final String desc;
+  final bool unlocked;
+  final Color color;
+
+  const _Achievement({
+    required this.icon,
+    required this.title,
+    required this.desc,
+    required this.unlocked,
+    required this.color,
+  });
+}
+
+class _AchievementBadge extends StatelessWidget {
+  final _Achievement achievement;
+
+  const _AchievementBadge({required this.achievement});
+
+  @override
+  Widget build(BuildContext context) {
+    final a = achievement;
+    return Container(
+      width: 100,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      decoration: BoxDecoration(
+        color: a.unlocked
+            ? a.color.withValues(alpha: 0.12)
+            : _surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: a.unlocked
+              ? a.color.withValues(alpha: 0.4)
+              : _border,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            a.icon,
+            color: a.unlocked ? a.color : _textSecondary.withValues(alpha: 0.3),
+            size: 28,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            a.title,
+            style: TextStyle(
+              color: a.unlocked ? _textPrimary : _textSecondary.withValues(alpha: 0.4),
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            a.desc,
+            style: TextStyle(
+              color: a.unlocked ? _textSecondary : _textSecondary.withValues(alpha: 0.2),
+              fontSize: 8,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }

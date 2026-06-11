@@ -33,6 +33,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _handleLogin() async {
     // [DEV] Bypass login - langsung ke onboarding untuk testing
+
     Get.offAllNamed(AppRoutes.onboardingGoal);
 
     // if (!_formKey.currentState!.validate()) return;
@@ -68,7 +69,6 @@ class _LoginPageState extends State<LoginPage> {
     // }
   }
 
-
   Future<void> _handleGoogleLogin() async {
     _isLoading.value = true;
     try {
@@ -96,19 +96,31 @@ class _LoginPageState extends State<LoginPage> {
           if (accessToken != null && refreshToken != null) {
             await _authController.saveTokens(accessToken, refreshToken);
           }
-          Get.snackbar('Success', 'Google Login successful!',
-              backgroundColor: Colors.green, colorText: Colors.white);
+          Get.snackbar(
+            'Success',
+            'Google Login successful!',
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
           // Refresh global user data
           Get.find<UserController>().refreshData();
           Get.offAllNamed(AppRoutes.home);
         } else {
-          Get.snackbar('Failed', 'Server rejected Google Login',
-              backgroundColor: Colors.red, colorText: Colors.white);
+          Get.snackbar(
+            'Failed',
+            'Server rejected Google Login',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
         }
       }
     } catch (e) {
-      Get.snackbar('Google Auth Error', e.toString(),
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Google Auth Error',
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       _isLoading.value = false;
     }
@@ -129,10 +141,7 @@ class _LoginPageState extends State<LoginPage> {
         fit: StackFit.expand,
         children: [
           // Full-screen background image
-          Image.asset(
-            'assets/images/authBackground.jfif',
-            fit: BoxFit.cover,
-          ),
+          Image.asset('assets/images/authBackground.jfif', fit: BoxFit.cover),
 
           // Content column
           SafeArea(
@@ -152,7 +161,7 @@ class _LoginPageState extends State<LoginPage> {
                         Text(
                           'MASUK',
                           style: TextStyle(
-                            color: Colors.white,  
+                            color: Colors.white,
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 3,
@@ -192,9 +201,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: Material(
                     type: MaterialType.transparency,
                     child: Container(
-                      decoration: const BoxDecoration(
-                        color: formBg,
-                      ),
+                      decoration: const BoxDecoration(color: formBg),
                       padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
                       child: Form(
                         key: _formKey,
@@ -207,48 +214,59 @@ class _LoginPageState extends State<LoginPage> {
                               // Email field
                               TextFormField(
                                 controller: _emailController,
-                              style: const TextStyle(color: textLight),
-                              keyboardType: TextInputType.emailAddress,
-                              decoration: InputDecoration(
-                                hintText: 'Masukkan Email',
-                                hintStyle: const TextStyle(color: textHint),
-                                filled: true,
-                                fillColor: fieldBg,
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 16),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                borderSide:
-                                    const BorderSide(color: borderColor, width: 1),
+                                style: const TextStyle(color: textLight),
+                                keyboardType: TextInputType.emailAddress,
+                                decoration: InputDecoration(
+                                  hintText: 'Masukkan Email',
+                                  hintStyle: const TextStyle(color: textHint),
+                                  filled: true,
+                                  fillColor: fieldBg,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 16,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: borderColor,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: borderColor,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: accentGreen,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  errorStyle: const TextStyle(
+                                    color: Colors.redAccent,
+                                  ),
                                 ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide:
-                                      const BorderSide(color: borderColor, width: 1),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide:
-                                      const BorderSide(color: accentGreen, width: 1.5),
-                                ),
-                                errorStyle:
-                                    const TextStyle(color: Colors.redAccent),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Masukkan email Anda';
+                                  }
+                                  if (!RegExp(
+                                    r'^[^@]+@[^@]+\.[^@]+$',
+                                  ).hasMatch(value.trim())) {
+                                    return 'Email tidak valid';
+                                  }
+                                  return null;
+                                },
                               ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Masukkan email Anda';
-                                }
-                                if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$')
-                                    .hasMatch(value.trim())) {
-                                  return 'Email tidak valid';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 12),
-    
-                            // Password field
-                            Obx(() => TextFormField(
+                              const SizedBox(height: 12),
+
+                              // Password field
+                              Obx(
+                                () => TextFormField(
                                   controller: _passwordController,
                                   style: const TextStyle(color: textLight),
                                   obscureText: _obscurePassword.value,
@@ -258,21 +276,29 @@ class _LoginPageState extends State<LoginPage> {
                                     filled: true,
                                     fillColor: fieldBg,
                                     contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 20, vertical: 16),
+                                      horizontal: 20,
+                                      vertical: 16,
+                                    ),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: const BorderSide(
-                                          color: borderColor, width: 1),
+                                        color: borderColor,
+                                        width: 1,
+                                      ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: const BorderSide(
-                                          color: borderColor, width: 1),
+                                        color: borderColor,
+                                        width: 1,
+                                      ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: const BorderSide(
-                                          color: accentGreen, width: 1.5),
+                                        color: accentGreen,
+                                        width: 1.5,
+                                      ),
                                     ),
                                     suffixIcon: GestureDetector(
                                       onTap: () => _obscurePassword.toggle(),
@@ -283,8 +309,9 @@ class _LoginPageState extends State<LoginPage> {
                                         color: textHint,
                                       ),
                                     ),
-                                    errorStyle:
-                                        const TextStyle(color: Colors.redAccent),
+                                    errorStyle: const TextStyle(
+                                      color: Colors.redAccent,
+                                    ),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
@@ -295,32 +322,38 @@ class _LoginPageState extends State<LoginPage> {
                                     }
                                     return null;
                                   },
-                                )),
-    
-                            // Forgot password
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () {},
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                child: const Text(
-                                  'Lupa Password?',
-                                  style:
-                                      TextStyle(color: Colors.white, fontSize: 13),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-    
-                            // Main action button
-                            Obx(() => SizedBox(
+
+                              // Forgot password
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () {},
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  child: const Text(
+                                    'Lupa Password?',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+
+                              // Main action button
+                              Obx(
+                                () => SizedBox(
                                   height: 52,
                                   child: ElevatedButton(
-                                    onPressed:
-                                        _isLoading.value ? null : _handleLogin,
+                                    onPressed: _isLoading.value
+                                        ? null
+                                        : _handleLogin,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: accentGreen,
                                       foregroundColor: Colors.white,
@@ -346,12 +379,13 @@ class _LoginPageState extends State<LoginPage> {
                                             ),
                                           ),
                                   ),
-                                )),
-                          ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
                   ),
                 ),
 
@@ -370,39 +404,45 @@ class _LoginPageState extends State<LoginPage> {
                             style: TextStyle(color: Colors.white, fontSize: 13),
                           ),
                           const SizedBox(height: 12),
-    
+
                           // Google button
-                          Obx(() => SizedBox(
-                                height: 52,
-                                child: OutlinedButton(
-                                  onPressed:
-                                      _isLoading.value ? null : _handleGoogleLogin,
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: Colors.black,
-                                    backgroundColor: Colors.white,
-                                    side: BorderSide.none,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: const [
-                                      FaIcon(FontAwesomeIcons.google,
-                                          size: 18, color: Colors.red),
-                                      SizedBox(width: 10),
-                                      Text(
-                                        'Google',
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                    ],
+                          Obx(
+                            () => SizedBox(
+                              height: 52,
+                              child: OutlinedButton(
+                                onPressed: _isLoading.value
+                                    ? null
+                                    : _handleGoogleLogin,
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.black,
+                                  backgroundColor: Colors.white,
+                                  side: BorderSide.none,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                              )),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    FaIcon(
+                                      FontAwesomeIcons.google,
+                                      size: 18,
+                                      color: Colors.red,
+                                    ),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'Google',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),

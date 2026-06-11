@@ -29,6 +29,107 @@ double calculateAngle(List<double> a, List<double> b, List<double> c) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// REP QUALITY TRACKER — tempo + quality scoring per rep
+// ─────────────────────────────────────────────────────────────
+class RepQualityTracker {
+  final List<double> _repScores = [];
+  final List<double> _repTempos = []; // seconds per rep
+  DateTime? _lastStageChange;
+  int _badFormFrames = 0;
+  int _totalFramesInRep = 0;
+  int _commonMistakeCount = 0;
+  String _mostCommonMistake = '';
+  final Map<String, int> _mistakeCounts = {};
+
+  /// Call when stage changes (e.g. up→down or down→up)
+  void onStageChange(bool isGoodForm) {
+    final now = DateTime.now();
+    if (_lastStageChange != null) {
+      final elapsed = now.difference(_lastStageChange!).inMilliseconds / 1000.0;
+      if (elapsed > 0.2) { // ignore micro-transitions
+        _repTempos.add(elapsed);
+      }
+    }
+    _lastStageChange = now;
+  }
+
+  /// Call on every frame to track form quality within current rep
+  void onFrame(bool isGoodForm, String feedback) {
+    _totalFramesInRep++;
+    if (!isGoodForm) {
+      _badFormFrames++;
+      if (feedback.isNotEmpty && feedback != 'Postur Bagus' && feedback != 'Mendeteksi pose...') {
+        _mistakeCounts[feedback] = (_mistakeCounts[feedback] ?? 0) + 1;
+      }
+    }
+  }
+
+  /// Call when a rep is counted — returns quality score 0-100
+  double onRepComplete() {
+    if (_totalFramesInRep == 0) {
+      _repScores.add(100.0);
+      _resetRepCounters();
+      return 100.0;
+    }
+    final goodRatio = 1.0 - (_badFormFrames / _totalFramesInRep);
+    final score = (goodRatio * 100).clamp(0.0, 100.0);
+    _repScores.add(score);
+    _resetRepCounters();
+    return score;
+  }
+
+  void _resetRepCounters() {
+    _badFormFrames = 0;
+    _totalFramesInRep = 0;
+  }
+
+  /// Current quality score (0-100) — average of all reps
+  double get avgQuality {
+    if (_repScores.isEmpty) return 0;
+    return _repScores.reduce((a, b) => a + b) / _repScores.length;
+  }
+
+  /// Quality of the last rep
+  double get lastRepQuality => _repScores.isEmpty ? 0 : _repScores.last;
+
+  /// Average tempo in seconds
+  double get avgTempo {
+    if (_repTempos.isEmpty) return 0;
+    return _repTempos.reduce((a, b) => a + b) / _repTempos.length;
+  }
+
+  /// Tempo of last rep in seconds
+  double get lastTempo => _repTempos.isEmpty ? 0 : _repTempos.last;
+
+  /// Is the current tempo too fast? (< 0.8s per half-rep)
+  bool get isTooFast => lastTempo > 0 && lastTempo < 0.8;
+
+  /// Is the current tempo too slow? (> 5s per half-rep)
+  bool get isTooSlow => lastTempo > 5.0;
+
+  /// Form summary for end-of-set display
+  Map<String, dynamic> get summary => {
+    'avgQuality': avgQuality.round(),
+    'totalReps': _repScores.length,
+    'avgTempo': double.parse(avgTempo.toStringAsFixed(1)),
+    'bestRep': _repScores.isEmpty ? 0 : _repScores.reduce(math.max).round(),
+    'worstRep': _repScores.isEmpty ? 0 : _repScores.reduce(math.min).round(),
+    'mistakes': Map<String, int>.from(_mistakeCounts),
+  };
+
+  void reset() {
+    _repScores.clear();
+    _repTempos.clear();
+    _lastStageChange = null;
+    _badFormFrames = 0;
+    _totalFramesInRep = 0;
+    _commonMistakeCount = 0;
+    _mostCommonMistake = '';
+    _mistakeCounts.clear();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
 // BASE CLASS — eliminasi boilerplate init/close di tiap service
 // ─────────────────────────────────────────────────────────────
 abstract class _PoseServiceBase {
@@ -69,6 +170,8 @@ class PushUpAnalysis {
   final bool   isGoodPosture;
   final bool   isHorizontal;
   final List<Pose> poses;
+  final double qualityScore; // 0-100 avg quality
+  final double tempo;        // seconds per half-rep
 
   const PushUpAnalysis({
     required this.elbowAngle,
@@ -79,6 +182,8 @@ class PushUpAnalysis {
     required this.isGoodPosture,
     required this.isHorizontal,
     required this.poses,
+    this.qualityScore = 0,
+    this.tempo = 0,
   });
 }
 
@@ -113,6 +218,7 @@ class PoseDetectorService extends _PoseServiceBase {
   final Queue<double> _hipBuf   = Queue();
   int    _counter = 0;
   String _stage   = 'up';
+  final _quality = RepQualityTracker();
 
   Future<PushUpAnalysis?> processImage(InputImage inputImage) async {
     if (!_initialized) init();
@@ -181,22 +287,30 @@ class PoseDetectorService extends _PoseServiceBase {
     // Counting — hanya saat horizontal & badan valid
     if (isHorizontal && hipAngle > _bodyThreshold) {
       if (elbowAngle < _downThreshold) {
-        _stage = 'down';
+        if (_stage != 'down') {
+          _quality.onStageChange(isGoodPosture);
+          _stage = 'down';
+        }
       } else if (elbowAngle > _upThreshold && _stage == 'down') {
         _stage = 'up';
+        _quality.onStageChange(isGoodPosture);
+        _quality.onRepComplete();
         _counter++;
       }
     }
+    _quality.onFrame(isGoodPosture, feedback);
 
     return PushUpAnalysis(
       elbowAngle:   elbowAngle,
       hipAngle:     hipAngle,
       repCount:     _counter,
       stage:        _stage,
-      feedback:     feedback,
-      isGoodPosture: isGoodPosture,
+      feedback:     _quality.isTooFast ? 'Terlalu Cepat! Perlambat.' : feedback,
+      isGoodPosture: _quality.isTooFast ? false : isGoodPosture,
       isHorizontal: isHorizontal,
       poses:        poses,
+      qualityScore: _quality.avgQuality,
+      tempo:        _quality.lastTempo,
     );
   }
 
@@ -205,6 +319,7 @@ class PoseDetectorService extends _PoseServiceBase {
     _stage   = 'up';
     _elbowBuf.clear();
     _hipBuf.clear();
+    _quality.reset();
   }
 }
 
@@ -230,6 +345,8 @@ class SitUpAnalysis {
   final bool   isGoodPosture;
   final bool   isHorizontal;
   final List<Pose> poses;
+  final double qualityScore;
+  final double tempo;
 
   const SitUpAnalysis({
     required this.bodyAngle,
@@ -240,6 +357,8 @@ class SitUpAnalysis {
     required this.isGoodPosture,
     required this.isHorizontal,
     required this.poses,
+    this.qualityScore = 0,
+    this.tempo = 0,
   });
 }
 
@@ -262,6 +381,7 @@ class SitUpDetectorService extends _PoseServiceBase {
   final Queue<double> _neckBuf = Queue();
   int    _counter = 0;
   String _stage   = 'down'; // mulai dari posisi berbaring
+  final _quality  = RepQualityTracker();
 
   Future<SitUpAnalysis?> processImage(InputImage inputImage) async {
     if (!_initialized) init();
@@ -324,25 +444,33 @@ class SitUpDetectorService extends _PoseServiceBase {
     // Counting — hanya saat horizontal
     if (isHorizontal) {
       if (bodyAngle > _downThreshold) {
-        _stage = 'down';
+        if (_stage != 'down') {
+          _quality.onStageChange(isGoodPosture);
+          _stage = 'down';
+        }
       } else if (bodyAngle < _upThreshold && _stage == 'down') {
         // Rep valid hanya jika sudut masuk range yang ditentukan Python
         if (bodyAngle >= _goodUpMin && bodyAngle <= _goodUpMax) {
+          _quality.onStageChange(isGoodPosture);
+          _quality.onRepComplete();
           _counter++;
           _stage = 'up';
         }
       }
     }
+    _quality.onFrame(isGoodPosture, feedback);
 
     return SitUpAnalysis(
       bodyAngle:    bodyAngle,
       neckAngle:    neckAngle,
       repCount:     _counter,
       stage:        _stage,
-      feedback:     feedback,
-      isGoodPosture: isGoodPosture,
+      feedback:     _quality.isTooFast ? 'Terlalu Cepat! Perlambat.' : feedback,
+      isGoodPosture: _quality.isTooFast ? false : isGoodPosture,
       isHorizontal: isHorizontal,
       poses:        poses,
+      qualityScore: _quality.avgQuality,
+      tempo:        _quality.lastTempo,
     );
   }
 
@@ -351,6 +479,7 @@ class SitUpDetectorService extends _PoseServiceBase {
     _stage   = 'down';
     _bodyBuf.clear();
     _neckBuf.clear();
+    _quality.reset();
   }
 }
 
@@ -380,6 +509,8 @@ class SquatAnalysis {
   final String feedback;
   final bool   isGoodPosture;
   final List<Pose> poses;
+  final double qualityScore;
+  final double tempo;
 
   const SquatAnalysis({
     required this.kneeAngle,
@@ -389,6 +520,8 @@ class SquatAnalysis {
     required this.feedback,
     required this.isGoodPosture,
     required this.poses,
+    this.qualityScore = 0,
+    this.tempo = 0,
   });
 }
 
@@ -408,6 +541,7 @@ class SquatDetectorService extends _PoseServiceBase {
   final Queue<double> _backBuf = Queue();
   int    _counter = 0;
   String _stage   = 'up'; // mulai dari posisi berdiri
+  final _quality  = RepQualityTracker();
 
   Future<SquatAnalysis?> processImage(InputImage inputImage) async {
     if (!_initialized) init();
@@ -458,20 +592,28 @@ class SquatDetectorService extends _PoseServiceBase {
 
     // Counting
     if (kneeAngle < _downThreshold) {
-      _stage = 'down';
+      if (_stage != 'down') {
+        _quality.onStageChange(isGoodPosture);
+        _stage = 'down';
+      }
     } else if (kneeAngle > _upThreshold && _stage == 'down') {
       _stage = 'up';
+      _quality.onStageChange(isGoodPosture);
+      _quality.onRepComplete();
       _counter++;
     }
+    _quality.onFrame(isGoodPosture, feedback);
 
     return SquatAnalysis(
       kneeAngle:    kneeAngle,
       backAngle:    backAngle,
       repCount:     _counter,
       stage:        _stage,
-      feedback:     feedback,
-      isGoodPosture: isGoodPosture,
+      feedback:     _quality.isTooFast ? 'Terlalu Cepat! Perlambat.' : feedback,
+      isGoodPosture: _quality.isTooFast ? false : isGoodPosture,
       poses:        poses,
+      qualityScore: _quality.avgQuality,
+      tempo:        _quality.lastTempo,
     );
   }
 
@@ -480,6 +622,7 @@ class SquatDetectorService extends _PoseServiceBase {
     _stage   = 'up';
     _kneeBuf.clear();
     _backBuf.clear();
+    _quality.reset();
   }
 }
 
@@ -697,6 +840,384 @@ class PlankDetectorService extends _PoseServiceBase {
     _hipBuf.clear();
     _accDuration = 0.0;
     _plankStart  = null;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// ⑤ LUNGE
+// Landmarks: LEFT shoulder, hip, knee, ankle + RIGHT knee
+// knee_angle: calculate_angle(hip, knee, ankle) on front leg
+// torso_angle: calculate_angle(shoulder, hip, knee) — uprightness
+//
+// Thresholds:
+//   DOWN  = 100  knee < 100 → stage down
+//   UP    = 160  knee > 160 → stage up, counter++
+//   TORSO = 150  torso < 150 → leaning forward too much
+//   KNEE_FWD = 0.10  |knee.x − ankle.x| > 0.10 → knee past toes
+// ═════════════════════════════════════════════════════════════
+class LungeAnalysis {
+  final double kneeAngle;
+  final double torsoAngle;
+  final int repCount;
+  final String stage;
+  final String feedback;
+  final bool isGoodPosture;
+  final List<Pose> poses;
+
+  const LungeAnalysis({
+    required this.kneeAngle,
+    required this.torsoAngle,
+    required this.repCount,
+    required this.stage,
+    required this.feedback,
+    required this.isGoodPosture,
+    required this.poses,
+  });
+}
+
+class LungeDetectorService extends _PoseServiceBase {
+  static final LungeDetectorService _i = LungeDetectorService._();
+  factory LungeDetectorService() => _i;
+  LungeDetectorService._();
+
+  static const double _downThreshold = 100.0;
+  static const double _upThreshold = 160.0;
+  static const double _torsoThreshold = 150.0;
+  static const double _kneeFwdLimit = 0.10;
+  static const int _kWindow = 5;
+
+  final Queue<double> _kneeBuf = Queue();
+  final Queue<double> _torsoBuf = Queue();
+  int _counter = 0;
+  String _stage = 'up';
+
+  Future<LungeAnalysis?> processImage(InputImage inputImage) async {
+    if (!_initialized) init();
+
+    final poses = await _detector.processImage(inputImage);
+    if (poses.isEmpty) return null;
+
+    final lm = poses.first.landmarks;
+    final lShoulder = lm[PoseLandmarkType.leftShoulder];
+    final lHip = lm[PoseLandmarkType.leftHip];
+    final lKnee = lm[PoseLandmarkType.leftKnee];
+    final lAnkle = lm[PoseLandmarkType.leftAnkle];
+
+    if (lShoulder == null || lHip == null ||
+        lKnee == null || lAnkle == null) {
+      return null;
+    }
+    if (lHip.likelihood < 0.5) return null;
+
+    final shoulder = _pt(lShoulder);
+    final hip = _pt(lHip);
+    final knee = _pt(lKnee);
+    final ankle = _pt(lAnkle);
+
+    final kneeAngle = _smooth(_kneeBuf,
+        calculateAngle(hip, knee, ankle), _kWindow);
+    final torsoAngle = _smooth(_torsoBuf,
+        calculateAngle(shoulder, hip, knee), _kWindow);
+
+    late final String feedback;
+    late final bool isGoodPosture;
+
+    if (torsoAngle < _torsoThreshold) {
+      feedback = 'Tegakkan Badanmu!';
+      isGoodPosture = false;
+    } else if ((knee[0] - ankle[0]).abs() > _kneeFwdLimit) {
+      feedback = 'Lutut Melewati Jari Kaki!';
+      isGoodPosture = false;
+    } else if (_stage == 'down' && kneeAngle > _downThreshold && kneeAngle < _upThreshold) {
+      feedback = 'Turun Lebih Dalam!';
+      isGoodPosture = false;
+    } else {
+      feedback = 'Postur Bagus!';
+      isGoodPosture = true;
+    }
+
+    if (kneeAngle < _downThreshold) {
+      _stage = 'down';
+    } else if (kneeAngle > _upThreshold && _stage == 'down') {
+      _stage = 'up';
+      _counter++;
+    }
+
+    return LungeAnalysis(
+      kneeAngle: kneeAngle,
+      torsoAngle: torsoAngle,
+      repCount: _counter,
+      stage: _stage,
+      feedback: feedback,
+      isGoodPosture: isGoodPosture,
+      poses: poses,
+    );
+  }
+
+  void reset() {
+    _counter = 0;
+    _stage = 'up';
+    _kneeBuf.clear();
+    _torsoBuf.clear();
+  }
+}
+
+// ═════════════════════════════════════════════════════════════
+// ⑥ BURPEE
+// Multi-phase detection using body angle + vertical position
+// Phases: standing → squat → plank → pushup → squat → jump
+// Simplified: count full cycles standing → down → up → standing
+// ═════════════════════════════════════════════════════════════
+class BurpeeAnalysis {
+  final double bodyAngle;
+  final double kneeAngle;
+  final int repCount;
+  final String stage; // 'up' | 'down' | 'plank'
+  final String feedback;
+  final bool isGoodPosture;
+  final List<Pose> poses;
+
+  const BurpeeAnalysis({
+    required this.bodyAngle,
+    required this.kneeAngle,
+    required this.repCount,
+    required this.stage,
+    required this.feedback,
+    required this.isGoodPosture,
+    required this.poses,
+  });
+}
+
+class BurpeeDetectorService extends _PoseServiceBase {
+  static final BurpeeDetectorService _i = BurpeeDetectorService._();
+  factory BurpeeDetectorService() => _i;
+  BurpeeDetectorService._();
+
+  // Burpee phases detected via knee angle + body angle
+  static const double _squatThreshold = 110.0; // knee < 110 → squat position
+  static const double _standingThreshold = 155.0; // knee > 155 → standing
+  static const double _plankBodyThreshold = 160.0; // body > 160 → body straight (plank)
+  static const int _kWindow = 5;
+
+  final Queue<double> _kneeBuf = Queue();
+  final Queue<double> _bodyBuf = Queue();
+  int _counter = 0;
+  String _stage = 'up'; // 'up' | 'down' | 'plank'
+  bool _wasInPlank = false;
+
+  Future<BurpeeAnalysis?> processImage(InputImage inputImage) async {
+    if (!_initialized) init();
+
+    final poses = await _detector.processImage(inputImage);
+    if (poses.isEmpty) return null;
+
+    final lm = poses.first.landmarks;
+    final lShoulder = lm[PoseLandmarkType.leftShoulder];
+    final lHip = lm[PoseLandmarkType.leftHip];
+    final lKnee = lm[PoseLandmarkType.leftKnee];
+    final lAnkle = lm[PoseLandmarkType.leftAnkle];
+
+    if (lShoulder == null || lHip == null ||
+        lKnee == null || lAnkle == null) {
+      return null;
+    }
+    if (lHip.likelihood < 0.4) return null;
+
+    final shoulder = _pt(lShoulder);
+    final hip = _pt(lHip);
+    final knee = _pt(lKnee);
+    final ankle = _pt(lAnkle);
+
+    final kneeAngle = _smooth(_kneeBuf,
+        calculateAngle(hip, knee, ankle), _kWindow);
+    final bodyAngle = _smooth(_bodyBuf,
+        calculateAngle(shoulder, hip, ankle), _kWindow);
+
+    // Detect if in plank (horizontal) position
+    final xDiff = (shoulder[0] - ankle[0]).abs();
+    final yDiff = (shoulder[1] - ankle[1]).abs();
+    final isHorizontal = xDiff > (yDiff * 1.2) || yDiff > (xDiff * 1.2);
+    final isInPlank = isHorizontal && bodyAngle > _plankBodyThreshold;
+
+    late final String feedback;
+    late final bool isGoodPosture;
+
+    if (_stage == 'up') {
+      feedback = 'Siap! Turun ke posisi squat.';
+      isGoodPosture = true;
+    } else if (_stage == 'down' && !isInPlank) {
+      feedback = 'Turun ke posisi plank!';
+      isGoodPosture = true;
+    } else if (isInPlank) {
+      feedback = 'Plank! Sekarang loncat berdiri!';
+      isGoodPosture = true;
+    } else {
+      feedback = 'Lanjutkan gerakan!';
+      isGoodPosture = true;
+    }
+
+    // State machine: up → down → plank → up = 1 rep
+    if (kneeAngle < _squatThreshold && _stage == 'up') {
+      _stage = 'down';
+      _wasInPlank = false;
+    } else if (isInPlank && _stage == 'down') {
+      _wasInPlank = true;
+      _stage = 'plank';
+    } else if (kneeAngle > _standingThreshold && (_stage == 'plank' || (_stage == 'down' && _wasInPlank))) {
+      _stage = 'up';
+      _counter++;
+      _wasInPlank = false;
+    }
+
+    return BurpeeAnalysis(
+      bodyAngle: bodyAngle,
+      kneeAngle: kneeAngle,
+      repCount: _counter,
+      stage: _stage,
+      feedback: feedback,
+      isGoodPosture: isGoodPosture,
+      poses: poses,
+    );
+  }
+
+  void reset() {
+    _counter = 0;
+    _stage = 'up';
+    _wasInPlank = false;
+    _kneeBuf.clear();
+    _bodyBuf.clear();
+  }
+}
+
+// ═════════════════════════════════════════════════════════════
+// ⑦ MOUNTAIN CLIMBER
+// Alternating knee drives in plank position
+// Tracks knee angle changes to count alternating reps
+// ═════════════════════════════════════════════════════════════
+class MountainClimberAnalysis {
+  final double leftKneeAngle;
+  final double rightKneeAngle;
+  final double hipAngle;
+  final int repCount;
+  final String stage; // 'left' | 'right' — which knee is forward
+  final String feedback;
+  final bool isGoodPosture;
+  final List<Pose> poses;
+
+  const MountainClimberAnalysis({
+    required this.leftKneeAngle,
+    required this.rightKneeAngle,
+    required this.hipAngle,
+    required this.repCount,
+    required this.stage,
+    required this.feedback,
+    required this.isGoodPosture,
+    required this.poses,
+  });
+}
+
+class MountainClimberDetectorService extends _PoseServiceBase {
+  static final MountainClimberDetectorService _i =
+      MountainClimberDetectorService._();
+  factory MountainClimberDetectorService() => _i;
+  MountainClimberDetectorService._();
+
+  static const double _kneeForwardThreshold = 120.0; // knee bent = forward
+  static const double _kneeExtendedThreshold = 150.0; // knee straight = back
+  static const double _hipGood = 155.0;
+  static const double _hipWarn = 140.0;
+  static const int _kWindow = 5;
+
+  final Queue<double> _leftKneeBuf = Queue();
+  final Queue<double> _rightKneeBuf = Queue();
+  final Queue<double> _hipBuf = Queue();
+  int _counter = 0;
+  String _stage = 'left'; // which leg is currently forward
+
+  Future<MountainClimberAnalysis?> processImage(InputImage inputImage) async {
+    if (!_initialized) init();
+
+    final poses = await _detector.processImage(inputImage);
+    if (poses.isEmpty) return null;
+
+    final lm = poses.first.landmarks;
+    final lShoulder = lm[PoseLandmarkType.leftShoulder];
+    final lHip = lm[PoseLandmarkType.leftHip];
+    final lKnee = lm[PoseLandmarkType.leftKnee];
+    final lAnkle = lm[PoseLandmarkType.leftAnkle];
+    final rHip = lm[PoseLandmarkType.rightHip];
+    final rKnee = lm[PoseLandmarkType.rightKnee];
+    final rAnkle = lm[PoseLandmarkType.rightAnkle];
+
+    if (lShoulder == null || lHip == null || lKnee == null || lAnkle == null ||
+        rHip == null || rKnee == null || rAnkle == null) {
+      return null;
+    }
+    if (lHip.likelihood < 0.4 || rHip.likelihood < 0.4) return null;
+
+    final lShoulderPt = _pt(lShoulder);
+    final lHipPt = _pt(lHip);
+    final lKneePt = _pt(lKnee);
+    final lAnklePt = _pt(lAnkle);
+    final rHipPt = _pt(rHip);
+    final rKneePt = _pt(rKnee);
+    final rAnklePt = _pt(rAnkle);
+
+    final leftKneeAngle = _smooth(_leftKneeBuf,
+        calculateAngle(lHipPt, lKneePt, lAnklePt), _kWindow);
+    final rightKneeAngle = _smooth(_rightKneeBuf,
+        calculateAngle(rHipPt, rKneePt, rAnklePt), _kWindow);
+    final hipAngle = _smooth(_hipBuf,
+        calculateAngle(lShoulderPt, lHipPt, lAnklePt), _kWindow);
+
+    // Hip height check
+    late final String feedback;
+    late final bool isGoodPosture;
+
+    if (hipAngle < _hipWarn) {
+      feedback = 'Angkat Pinggulmu!';
+      isGoodPosture = false;
+    } else if (hipAngle < _hipGood) {
+      feedback = 'Pinggul Sedikit Turun!';
+      isGoodPosture = false;
+    } else {
+      feedback = 'Bagus! Terus bergerak!';
+      isGoodPosture = true;
+    }
+
+    // Alternating knee detection
+    final leftForward = leftKneeAngle < _kneeForwardThreshold;
+    final rightForward = rightKneeAngle < _kneeForwardThreshold;
+    final leftExtended = leftKneeAngle > _kneeExtendedThreshold;
+    final rightExtended = rightKneeAngle > _kneeExtendedThreshold;
+
+    // Count when legs alternate
+    if (_stage == 'left' && rightForward && leftExtended) {
+      _stage = 'right';
+      _counter++;
+    } else if (_stage == 'right' && leftForward && rightExtended) {
+      _stage = 'left';
+      _counter++;
+    }
+
+    return MountainClimberAnalysis(
+      leftKneeAngle: leftKneeAngle,
+      rightKneeAngle: rightKneeAngle,
+      hipAngle: hipAngle,
+      repCount: _counter,
+      stage: _stage,
+      feedback: feedback,
+      isGoodPosture: isGoodPosture,
+      poses: poses,
+    );
+  }
+
+  void reset() {
+    _counter = 0;
+    _stage = 'left';
+    _leftKneeBuf.clear();
+    _rightKneeBuf.clear();
+    _hipBuf.clear();
   }
 }
 
