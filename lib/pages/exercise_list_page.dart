@@ -101,6 +101,60 @@ class ExerciseListPage extends StatelessWidget {
         "Lutut menyentuh lantai/tidak diangkat penuh",
       ],
     ),
+    Exercise(
+      name: "Lunge",
+      gif: "https://media.giphy.com/media/l4pTfx2qLszoacZRS/giphy.gif",
+      desc: "Latihan unilateral terbaik untuk membangun kekuatan kaki, keseimbangan, dan stabilitas pinggul.",
+      muscle: "Kaki, Bokong, Paha",
+      difficulty: "Menengah",
+      target: "3 Set x 10 Reps (per kaki)",
+      tips: [
+        "Lutut depan tidak melewati jari kaki",
+        "Jaga punggung tetap tegak lurus",
+        "Turun hingga lutut belakang hampir menyentuh lantai",
+      ],
+      mistakes: [
+        "Lutut depan terlalu maju melebihi jari kaki",
+        "Badan condong ke depan",
+        "Lutut belakang menyentuh lantai",
+      ],
+    ),
+    Exercise(
+      name: "Burpee",
+      gif: "https://media.giphy.com/media/14gMTHGoPAUytC/giphy.gif",
+      desc: "Latihan full-body intensif yang menggabungkan squat, plank, push-up, dan lompatan untuk kardio maksimal.",
+      muscle: "Full Body, Kardio",
+      difficulty: "Lanjutan",
+      target: "3 Set x 8 Reps",
+      tips: [
+        "Lakukan gerakan dengan ritme yang konsisten",
+        "Lompat setinggi mungkin di akhir gerakan",
+        "Jaga core tight saat posisi plank",
+      ],
+      mistakes: [
+        "Pinggul terlalu rendah saat posisi plank",
+        "Tidak melompat di akhir gerakan",
+        "Gerakan terlalu lambat tanpa intensitas",
+      ],
+    ),
+    Exercise(
+      name: "Mountain Climber",
+      gif: "https://media.giphy.com/media/3o7TKMt1VVNkHV2PaE/giphy.gif",
+      desc: "Latihan kardio intensif yang menargetkan otot inti sambil meningkatkan detak jantung.",
+      muscle: "Inti, Kardio, Kaki",
+      difficulty: "Menengah",
+      target: "3 Set x 20 Reps",
+      tips: [
+        "Jaga pinggul tetap rendah dan stabil",
+        "Gerakkan lutut bergantian dengan cepat",
+        "Pertahankan posisi plank yang kuat",
+      ],
+      mistakes: [
+        "Pinggul terlalu naik turun",
+        "Gerakan lutut terlalu lambat",
+        "Bahu tidak sejajar dengan pergelangan tangan",
+      ],
+    ),
   ];
 
   @override

@@ -8,6 +8,7 @@ import 'controllers/onboarding_controller.dart';
 import 'controllers/user_controller.dart';
 import 'routes/app_pages.dart';
 import 'routes/app_routes.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +17,7 @@ void main() async {
   Get.put(AuthController(), permanent: true);
   Get.put(UserController(), permanent: true);
   Get.put(OnboardingController(), permanent: true);
+  await NotificationService().init();
   runApp(const MyApp());
 }
 

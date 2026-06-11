@@ -5,6 +5,7 @@ import '../controllers/auth_controller.dart';
 import '../controllers/user_controller.dart';
 import '../routes/app_routes.dart';
 import '../services/user_service.dart';
+import '../services/notification_service.dart';
 import '../utils/snackbar_helper.dart';
 
 class ProfilController extends GetxController {
@@ -13,7 +14,19 @@ class ProfilController extends GetxController {
 
   void toggleNotifications(bool value) {
     notificationsEnabled.value = value;
-    // Optional: Update on backend too
+    if (value) {
+      const trainingDays = [1, 3, 5]; // Mon, Wed, Fri default
+      NotificationService().scheduleWorkoutReminders(
+        hour: 7,
+        minute: 0,
+        trainingDays: trainingDays,
+      );
+      NotificationService().scheduleRestDayMotivation(
+        trainingDays: trainingDays,
+      );
+    } else {
+      NotificationService().cancelAll();
+    }
   }
 
   void toggleHaptic(bool value) {

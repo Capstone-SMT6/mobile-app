@@ -8,6 +8,7 @@ class AppConfig {
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'https://justparadis-smafit-fastapi.hf.space',
+    // defaultValue: 'http://192.168.1.129:8000',
   );
 
   static String get usersEndpoint => '$apiBaseUrl/api/users/';
@@ -26,6 +27,16 @@ class AppConfig {
   static String chatbotStreamEndpoint(String sessionId) =>
       '$apiBaseUrl/chatbot/sessions/$sessionId/stream';
   static String get trendingEndpoint => '$apiBaseUrl/api/trends';
+  static String get generatePlanEndpoint =>
+      '$apiBaseUrl/api/users/me/generate-plan';
+  static String get activePlanEndpoint =>
+      '$apiBaseUrl/api/users/me/active-plan';
+  static String get analyticsSummaryEndpoint =>
+      '$apiBaseUrl/api/users/me/analytics/summary';
+  static String get analyticsWeeklyEndpoint =>
+      '$apiBaseUrl/api/users/me/analytics/weekly';
+  static String get analyticsCalendarEndpoint =>
+      '$apiBaseUrl/api/users/me/analytics/calendar';
   // ---------------------------------------------------------------------------
   // Google OAuth
   // ---------------------------------------------------------------------------

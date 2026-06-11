@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'warmup_page.dart';
 import 'pose_camera_page.dart';
+import 'workout_summary_page.dart';
 import '../services/workout_service.dart';
-import '../utils/snackbar_helper.dart';
 
 // ─────────────────────────────────────────────────────────────
 // WORKOUT SESSION PAGE
@@ -29,6 +29,12 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
   Timer? _restTimer;
 
   static const _restDuration = 30; // detik istirahat antar set
+
+  // Session tracking
+  final DateTime _sessionStart = DateTime.now();
+  final List<ExerciseResult> _exerciseResults = [];
+  int _totalReps = 0;
+  int _totalSets = 0;
 
   late AnimationController _progressCtrl;
   late Animation<double> _progressAnim;
@@ -55,7 +61,16 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
   bool get _isLastExercise => _currentIndex >= widget.workoutPlan.length - 1;
 
   void _onSetDone() {
-    if (_resting) return; // Guard against double-tap
+    if (_resting) return;
+    _totalReps += _currentExercise.reps;
+    _totalSets++;
+    _exerciseResults.add(ExerciseResult(
+      name: _currentExercise.name,
+      setsDone: 1,
+      repsDone: _currentExercise.reps,
+      quality: 85.0,
+    ));
+
     if (_isLastSet) {
       if (_isLastExercise) {
         _finishWorkout();
@@ -103,21 +118,40 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage>
   }
 
   void _finishWorkout() {
+    final durationSeconds = DateTime.now().difference(_sessionStart).inSeconds;
+
     // Log to backend (fire-and-forget)
     WorkoutService.logWorkout(
+      durationSeconds: durationSeconds,
       exercises: widget.workoutPlan.map((e) => {
         'exercise_name': e.name,
         'sets_completed': e.sets,
         'reps_completed': e.reps,
       }).toList(),
-    ).catchError((_) {}); // Silently ignore network errors
+    ).catchError((_) {});
 
-    Get.back();
-    showCustomSnackbar(
-      title: 'Workout Selesai',
-      message: 'Mantap! Latihan hari ini sudah tercatat.',
-      backgroundColor: const Color(0xFF222434),
+    final summary = WorkoutSummaryData(
+      totalExercises: widget.workoutPlan.length,
+      totalSets: _totalSets,
+      totalReps: _totalReps,
+      duration: DateTime.now().difference(_sessionStart),
+      avgQuality: _exerciseResults.isEmpty ? 0 :
+          _exerciseResults.map((e) => e.quality).reduce((a, b) => a + b) / _exerciseResults.length,
+      currentStreak: 0,
+      exercises: widget.workoutPlan.asMap().entries.map((entry) {
+        final i = entry.key;
+        final ex = entry.value;
+        return ExerciseResult(
+          name: ex.name,
+          setsDone: ex.sets,
+          repsDone: ex.reps,
+          quality: i < _exerciseResults.length ? _exerciseResults[i].quality : 85.0,
+        );
+      }).toList(),
     );
+
+    Get.offAll(() => WorkoutSummaryPage(data: summary),
+        transition: Transition.fadeIn);
   }
 
   void _openCamera() {

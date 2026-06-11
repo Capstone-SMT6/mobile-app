@@ -26,14 +26,27 @@ final _cardDecoration = BoxDecoration(
   ],
 );
 
-class ProfilPage extends StatelessWidget {
+class ProfilPage extends StatefulWidget {
   const ProfilPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final UserController userController = Get.find<UserController>();
-    final ProfilController profilController = Get.find<ProfilController>();
+  State<ProfilPage> createState() => _ProfilPageState();
+}
 
+class _ProfilPageState extends State<ProfilPage> {
+  final UserController userController = Get.find<UserController>();
+  final ProfilController profilController = Get.find<ProfilController>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      userController.refreshData();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _bg,
       body: Obx(() {
@@ -44,6 +57,13 @@ class ProfilPage extends StatelessWidget {
         final user = userController.user.value;
         final stats = userController.stats.value;
         final profile = userController.fitnessProfile.value;
+
+        // Calculate achievements
+        final totalWorkouts = (stats?.totalPushUps ?? 0) + (stats?.totalSitUps ?? 0);
+        final achievements = _calculateAchievements(
+          totalWorkouts: totalWorkouts,
+          streakDays: stats?.currentStreak ?? 0,
+        );
 
         return SafeArea(
           child: RefreshIndicator(
@@ -115,7 +135,7 @@ class ProfilPage extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () => Get.toNamed(AppRoutes.onboardingGoal),
                   icon: const Icon(Icons.edit_outlined, size: 15, color: Colors.white),
                   label: const Text('Edit Profil',
                       style: TextStyle(
@@ -223,6 +243,22 @@ class ProfilPage extends StatelessWidget {
 
                 const SizedBox(height: 28),
 
+                // Achievements section
+                if (achievements.isNotEmpty) ...[
+                  _sectionLabel('PENCAPAIAN'),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 80,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: achievements.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 12),
+                      itemBuilder: (_, i) => _AchievementBadge(achievement: achievements[i]),
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                ],
+
                 _sectionLabel('PERFORMA SEPANJANG MASA'),
                 const SizedBox(height: 12),
                 SizedBox(
@@ -278,6 +314,31 @@ class ProfilPage extends StatelessWidget {
       );
       }),
     );
+  }
+
+  // ── Achievement calculation ─────────────────────────────────
+
+  List<_Achievement> _calculateAchievements({
+    required int totalWorkouts,
+    required int streakDays,
+  }) {
+    final results = <_Achievement>[];
+    if (totalWorkouts >= 10) {
+      results.add(const _Achievement('10+ Workout', Icons.fitness_center, Color(0xFFAB47BC)));
+    }
+    if (totalWorkouts >= 50) {
+      results.add(const _Achievement('50+ Workout', Icons.whatshot, Color(0xFFFFA726)));
+    }
+    if (totalWorkouts >= 100) {
+      results.add(const _Achievement('100+ Workout', Icons.emoji_events, Color(0xFFFFD700)));
+    }
+    if (streakDays >= 7) {
+      results.add(const _Achievement('7 Hari Streak', Icons.local_fire_department, Color(0xFFEF5350)));
+    }
+    if (streakDays >= 30) {
+      results.add(const _Achievement('30 Hari Streak', Icons.diamond, Color(0xFF29B6F6)));
+    }
+    return results;
   }
 
   // ── Helper widgets ───────────────────────────────────────────
@@ -374,6 +435,47 @@ class ProfilPage extends StatelessWidget {
         activeThumbColor: accentGreen,
         inactiveThumbColor: _textSecondary,
         inactiveTrackColor: _border,
+      ),
+    );
+  }
+}
+
+class _Achievement {
+  final String label;
+  final IconData icon;
+  final Color color;
+  const _Achievement(this.label, this.icon, this.color);
+}
+
+class _AchievementBadge extends StatelessWidget {
+  final _Achievement achievement;
+  const _AchievementBadge({required this.achievement});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 70,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: achievement.color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: achievement.color.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(achievement.icon, color: achievement.color, size: 24),
+          const SizedBox(height: 4),
+          Text(
+            achievement.label,
+            style: TextStyle(
+              color: achievement.color,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
