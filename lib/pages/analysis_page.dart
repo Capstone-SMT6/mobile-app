@@ -370,10 +370,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
       final wc = (w['workout_count'] as num?)?.toDouble() ?? 0;
       return wc > max ? wc : max;
     });
-    final maxVolume = weeks.fold<double>(1, (max, w) {
-      final vol = (w['total_volume'] as num?)?.toDouble() ?? 0;
-      return vol > max ? vol : max;
-    });
 
     return BarChartData(
       alignment: BarChartAlignment.spaceAround,
@@ -451,7 +447,12 @@ class _AnalysisPageState extends State<AnalysisPage> {
     );
   }
 
-  Widget _buildSummaryRow(IconData icon, String label, String value, Color iconColor) {
+  Widget _buildSummaryRow(
+    IconData icon,
+    String label,
+    String value,
+    Color iconColor,
+  ) {
     return Row(
       children: [
         Container(

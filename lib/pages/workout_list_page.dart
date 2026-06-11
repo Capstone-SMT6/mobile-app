@@ -126,7 +126,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                 ),
               ),
             ),
-            
+
             Text(
               item["title"]!,
               style: const TextStyle(
@@ -136,7 +136,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
               ),
             ),
             const SizedBox(height: 20),
-            
+
             // GIF Animation
             Container(
               height: 220,
@@ -162,7 +162,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Description
             const Text(
               "Instruction",
@@ -185,7 +185,8 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
           ],
         ),
       ),
-      isScrollControlled: true, // Memungkinkan BottomSheet untuk tampil optimal jika layarnya kecil
+      isScrollControlled:
+          true, // Memungkinkan BottomSheet untuk tampil optimal jika layarnya kecil
     );
   }
 
@@ -233,7 +234,7 @@ class _WorkoutListPageState extends State<WorkoutListPage> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 8,
-                shadowColor: const Color(0xFF6CC551).withOpacity(0.4),
+                shadowColor: const Color(0xFF6CC551).withValues(alpha: 0.4),
               ),
               onPressed: () {
                 final exercises = _getTodaysExercises();

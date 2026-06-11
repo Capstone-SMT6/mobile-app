@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/user_controller.dart';
-import 'workout_list_page.dart'; // Ditambahkan agar tombol "Start Workout" berfungsi
+import 'workout_list_page.dart';
 
-const _bg = Color(0xFF0D0F14); // Warna background diselaraskan
-const _green = Color(0xFF6CC551); // Warna hijau diselaraskan
+const _bg = Color(0xFF0D0F14);
+const _green = Color(0xFF6CC551);
 const _purple = Color(0xFF7C6AF7);
 const _textPrimary = Color(0xFFE8EAF2);
 const _textSecondary = Color(0xFF8B92A5);
@@ -89,7 +89,7 @@ class LaporanPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: _purple.withOpacity(0.3),
+            color: _purple.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),

@@ -46,7 +46,8 @@ class _ExerciseListPageState extends State<ExerciseListPage> {
     Exercise(
       name: "Push Up",
       gif: "https://media.giphy.com/media/XIqCQx02E1U9W/giphy.gif",
-      desc: "Latihan fundamental untuk membangun kekuatan tubuh bagian atas, khususnya otot dada, bahu, dan triceps.",
+      desc:
+          "Latihan fundamental untuk membangun kekuatan tubuh bagian atas, khususnya otot dada, bahu, dan triceps.",
       muscle: "Chest, Shoulder, Triceps",
       category: "Upper Body",
       difficulty: "beginner",
@@ -54,8 +55,16 @@ class _ExerciseListPageState extends State<ExerciseListPage> {
       poseAngle: "side",
       defaultSets: 3,
       defaultReps: 15,
-      tips: ["Jaga punggung lurus seperti papan", "Turun perlahan dengan terkontrol", "Posisi tangan sedikit lebih lebar dari bahu"],
-      mistakes: ["Pinggul turun menyentuh lantai", "Gerakan terlalu cepat", "Leher mendongak ke depan"],
+      tips: [
+        "Jaga punggung lurus seperti papan",
+        "Turun perlahan dengan terkontrol",
+        "Posisi tangan sedikit lebih lebar dari bahu",
+      ],
+      mistakes: [
+        "Pinggul turun menyentuh lantai",
+        "Gerakan terlalu cepat",
+        "Leher mendongak ke depan",
+      ],
     ),
     Exercise(
       name: "Sit Up",
@@ -82,8 +91,16 @@ class _ExerciseListPageState extends State<ExerciseListPage> {
       poseAngle: "side",
       defaultSets: 3,
       defaultReps: 12,
-      tips: ["Turun sampai paha sejajar lantai", "Jaga lutut tetap stabil", "Berat badan bertumpu pada tumit"],
-      mistakes: ["Lutut menekuk ke dalam", "Kedalaman squat kurang", "Punggung terlalu membungkuk"],
+      tips: [
+        "Turun sampai paha sejajar lantai",
+        "Jaga lutut tetap stabil",
+        "Berat badan bertumpu pada tumit",
+      ],
+      mistakes: [
+        "Lutut menekuk ke dalam",
+        "Kedalaman squat kurang",
+        "Punggung terlalu membungkuk",
+      ],
     ),
     Exercise(
       name: "Plank",
@@ -416,7 +433,11 @@ class ExerciseDetailPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(24),
               border: Border.all(color: Colors.white10),
               boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10)),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
               ],
             ),
             child: ClipRRect(
@@ -425,7 +446,11 @@ class ExerciseDetailPage extends StatelessWidget {
                 exercise.gif,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => const Center(
-                  child: Icon(Icons.broken_image, color: Colors.white38, size: 64),
+                  child: Icon(
+                    Icons.broken_image,
+                    color: Colors.white38,
+                    size: 64,
+                  ),
                 ),
               ),
             ),
@@ -461,14 +486,28 @@ class ExerciseDetailPage extends StatelessWidget {
             title: "Deskripsi",
             icon: Icons.info_outline_rounded,
             iconColor: const Color(0xFF29B6F6),
-            child: Text(exercise.desc, style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.5)),
+            child: Text(
+              exercise.desc,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 15,
+                height: 1.5,
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           _card(
             title: "Target Otot",
             icon: Icons.fitness_center_rounded,
             iconColor: const Color(0xFF7C6AF7),
-            child: Text(exercise.muscle, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+            child: Text(
+              exercise.muscle,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           _card(
@@ -482,7 +521,10 @@ class ExerciseDetailPage extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Padding(padding: EdgeInsets.only(top: 4), child: Icon(Icons.circle, color: Color(0xFF6CC551), size: 6)),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4),
+                      child: Icon(Icons.circle, color: Color(0xFF6CC551), size: 6),
+                    ),
                     const SizedBox(width: 12),
                     Expanded(child: Text(e, style: const TextStyle(color: Colors.white70, fontSize: 14))),
                   ],
@@ -502,7 +544,10 @@ class ExerciseDetailPage extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Padding(padding: EdgeInsets.only(top: 4), child: Icon(Icons.close, color: Color(0xFFF76A6A), size: 12)),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4),
+                      child: Icon(Icons.close, color: Color(0xFFF76A6A), size: 12),
+                    ),
                     const SizedBox(width: 12),
                     Expanded(child: Text(e, style: const TextStyle(color: Colors.white70, fontSize: 14))),
                   ],
@@ -544,7 +589,12 @@ class ExerciseDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _card({required String title, required IconData icon, required Color iconColor, required Widget child}) {
+  Widget _card({
+    required String title,
+    required IconData icon,
+    required Color iconColor,
+    required Widget child,
+  }) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(

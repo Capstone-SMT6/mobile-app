@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import '../auth/login_page.dart';
-import '../auth/register_page.dart';
+import '../pages/auth/login_page.dart';
+import '../pages/auth/register_page.dart';
 import '../homepage.dart';
 import '../pages/chatbot_page.dart';
 import '../pages/onboarding/onboarding_goal.dart';
@@ -10,7 +10,6 @@ import '../pages/onboarding/onboarding_height.dart';
 import '../pages/onboarding/onboarding_weight.dart';
 import '../pages/onboarding/onboarding_expertise.dart';
 import '../pages/onboarding/onboarding_intensity.dart';
-import '../pages/onboarding/onboarding_kalori.dart';
 import '../pages/onboarding/onboarding_result.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/chatbot_binding.dart';
@@ -79,12 +78,6 @@ abstract class AppPages {
     GetPage(
       name: AppRoutes.onboardingIntensity,
       page: () => const OnboardingIntensityPage(),
-      customTransition: _carousel,
-      transitionDuration: const Duration(milliseconds: 350),
-    ),
-    GetPage(
-      name: AppRoutes.onboardingKalori,
-      page: () => const OnboardingKaloriPage(),
       customTransition: _carousel,
       transitionDuration: const Duration(milliseconds: 350),
     ),

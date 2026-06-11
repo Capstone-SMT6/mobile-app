@@ -10,6 +10,5 @@ abstract class AppRoutes {
   static const onboardingWeight = '/onboardingWeight';
   static const onboardingExpertise = '/onboardingExpertise';
   static const onboardingIntensity = '/onboardingIntensity';
-  static const onboardingKalori = '/onboardingKalori';
   static const onboardingResult = '/onboardingResult';
 }

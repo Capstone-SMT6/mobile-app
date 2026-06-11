@@ -22,7 +22,6 @@ class HomePage extends StatelessWidget {
     const accentGreen = Color(0xFF67C23A);
     const accentPurple = Color(0xFF7C6AF7);
     const textSecondary = Color(0xFF6B7280);
-    const textPrimary = Color(0xFFE8EAF2);
 
     return Scaffold(
       backgroundColor: bgColor,

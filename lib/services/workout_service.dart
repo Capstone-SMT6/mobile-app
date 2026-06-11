@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config.dart';
-import '../auth/auth_service.dart';
+import 'auth_service.dart';
 
 class WorkoutService {
   static final _authService = AuthService();

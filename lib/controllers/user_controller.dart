@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../models/user_model.dart';
 import '../services/user_service.dart';
@@ -17,10 +18,10 @@ class UserController extends GetxController {
   Future<void> refreshData() async {
     try {
       isLoading.value = true;
-      
+
       // Fetch User Info
       final userData = await UserService.getCurrentUser();
-      print('DEBUG: User Photo URL: ${userData.photoUrl}');
+      debugPrint('DEBUG: User Photo URL: ${userData.photoUrl}');
       user.value = userData;
 
       // Fetch Stats
@@ -28,7 +29,7 @@ class UserController extends GetxController {
         final statsData = await UserService.getUserStats();
         stats.value = statsData;
       } catch (e) {
-        print('Error fetching stats: $e');
+        debugPrint('Error fetching stats: $e');
       }
 
       // Fetch Fitness Profile
@@ -36,10 +37,10 @@ class UserController extends GetxController {
         final profileData = await UserService.getFitnessProfile();
         fitnessProfile.value = profileData;
       } catch (e) {
-        print('Fitness profile not found: $e');
+        debugPrint('Fitness profile not found: $e');
       }
     } catch (e) {
-      print('Error refreshing user data: $e');
+      debugPrint('Error refreshing user data: $e');
     } finally {
       isLoading.value = false;
     }

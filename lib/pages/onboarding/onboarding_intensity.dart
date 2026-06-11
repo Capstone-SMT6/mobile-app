@@ -166,7 +166,7 @@ class _OnboardingIntensityPageState extends State<OnboardingIntensityPage> {
                     ),
                     TextButton(
                       onPressed: selectedIntensity.isNotEmpty
-                          ? () => Get.toNamed(AppRoutes.onboardingKalori)
+                          ? () => Get.toNamed(AppRoutes.onboardingResult)
                           : null,
                       style: TextButton.styleFrom(
                         backgroundColor: const Color(0xFF222434),
@@ -196,7 +196,7 @@ class _OnboardingIntensityPageState extends State<OnboardingIntensityPage> {
                 // Pagination Dots (assume 8 pages, this is 7th)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(9, (i) {
+                  children: List.generate(8, (i) {
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       width: 8,

@@ -276,7 +276,7 @@ class _OnboardingHeightPageState extends State<OnboardingHeightPage> {
                 // Pagination Dots (4th dot active = index 3)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(9, (i) {
+                  children: List.generate(8, (i) {
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       width: 8,
