@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'firebase_options.dart';
-import 'controllers/auth_controller.dart';
-import 'controllers/onboarding_controller.dart';
-import 'controllers/user_controller.dart';
-import 'routes/app_pages.dart';
-import 'routes/app_routes.dart';
+import 'package:mobile_app/firebase_options.dart';
+import 'package:mobile_app/app/modules/auth/controllers/auth_controller.dart';
+import 'package:mobile_app/app/modules/onboarding/controllers/onboarding_controller.dart';
+import 'package:mobile_app/app/modules/auth/controllers/user_controller.dart';
+import 'package:mobile_app/app/routes/app_pages.dart';
+import 'package:mobile_app/app/routes/app_routes.dart';
+import 'package:mobile_app/app/data/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +17,7 @@ void main() async {
   Get.put(AuthController(), permanent: true);
   Get.put(UserController(), permanent: true);
   Get.put(OnboardingController(), permanent: true);
+  await NotificationService().init();
   runApp(const MyApp());
 }
 
