@@ -8,6 +8,8 @@ import 'package:mobile_app/app/data/services/trends_service.dart';
 import 'package:mobile_app/app/modules/home/views/calendar_view.dart';
 import 'package:mobile_app/app/modules/workout/views/workout_list_view.dart';
 import 'package:mobile_app/app/modules/workout/views/analysis_view.dart';
+import 'package:mobile_app/app/modules/nutrition/controllers/nutrition_controller.dart';
+
 
 class BerandaView extends StatelessWidget {
   final ColorScheme? colorScheme;
@@ -25,6 +27,7 @@ class BerandaView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               ProgressCard(),
+              TodayNutrition(),
               SizedBox(height: 32),
               TodayMenu(),
               SizedBox(height: 32),
@@ -33,12 +36,148 @@ class BerandaView extends StatelessWidget {
               WorkoutAnalysis(),
               SizedBox(height: 40),
             ],
+
           ),
         ),
       ),
     );
   }
 }
+
+// ───────────────────────────────────────────────────────────────
+// TODAY NUTRITION CARD  — Menampilkan kalori & macro hari ini
+// ───────────────────────────────────────────────────────────────
+class TodayNutrition extends StatelessWidget {
+  const TodayNutrition({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final nutritionCtrl = Get.find<NutritionController>();
+
+    return Obx(() {
+      final summary = nutritionCtrl.todaySummary.value;
+      final feedback = nutritionCtrl.dayFeedback.value;
+
+      final actualKcal = summary?.totalKcal ?? 0.0;
+      final actualProtein = summary?.totalProteinG ?? 0.0;
+      final actualCarbs = summary?.totalCarbsG ?? 0.0;
+      final actualFat = summary?.totalFatG ?? 0.0;
+
+      final targetKcal = feedback != null ? (actualKcal - feedback.kcalGap) : 2000.0;
+
+      final double totalGrams = actualProtein + actualCarbs + actualFat;
+
+      
+      final proteinRatio = totalGrams > 0 ? actualProtein / totalGrams : 0.0;
+      final carbsRatio = totalGrams > 0 ? actualCarbs / totalGrams : 0.0;
+      final fatRatio = totalGrams > 0 ? actualFat / totalGrams : 0.0;
+
+      return Container(
+        margin: const EdgeInsets.only(top: 28),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: surfaceColor,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: borderColor),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Nutrisi Hari Ini",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 18,
+                  ),
+                ),
+                Text(
+                  "${actualKcal.round()} / ${targetKcal.round()} kcal",
+                  style: const TextStyle(
+                    color: accentGreen,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (totalGrams > 0)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: SizedBox(
+                  height: 12,
+                  child: Row(
+                    children: [
+                      if (proteinRatio > 0)
+                        Expanded(
+                          flex: (proteinRatio * 100).round(),
+                          child: Container(color: Colors.orange),
+                        ),
+                      if (carbsRatio > 0)
+                        Expanded(
+                          flex: (carbsRatio * 100).round(),
+                          child: Container(color: Colors.blue),
+                        ),
+                      if (fatRatio > 0)
+                        Expanded(
+                          flex: (fatRatio * 100).round(),
+                          child: Container(color: Colors.redAccent),
+                        ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Container(
+                height: 12,
+                decoration: BoxDecoration(
+                  color: borderColor,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Center(
+                  child: Text(
+                    "Belum ada makanan dicatat hari ini",
+                    style: TextStyle(color: textSecondary, fontSize: 10),
+                  ),
+                ),
+              ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildMacroLabel("Protein", "${actualProtein.round()}g", Colors.orange),
+                _buildMacroLabel("Karb", "${actualCarbs.round()}g", Colors.blue),
+                _buildMacroLabel("Lemak", "${actualFat.round()}g", Colors.redAccent),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildMacroLabel(String label, String val, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          "$label: $val",
+          style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w500),
+        ),
+      ],
+    );
+  }
+}
+
 
 // ───────────────────────────────────────────────────────────────
 // HEADER  — Sapa user dengan nama & greeting waktu

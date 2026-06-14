@@ -16,6 +16,10 @@ import 'package:mobile_app/app/modules/onboarding/views/onboarding_days_view.dar
 import 'package:mobile_app/app/modules/onboarding/views/onboarding_result_view.dart';
 import 'package:mobile_app/app/modules/home/bindings/home_binding.dart';
 import 'package:mobile_app/app/modules/chatbot/bindings/chatbot_binding.dart';
+import 'package:mobile_app/app/modules/nutrition/views/nutrition_view.dart';
+import 'package:mobile_app/app/modules/nutrition/views/add_food_log_view.dart';
+import 'package:mobile_app/app/modules/nutrition/views/nutrition_report_view.dart';
+import 'package:mobile_app/app/modules/nutrition/bindings/nutrition_binding.dart';
 import 'package:mobile_app/app/routes/app_routes.dart';
 import 'package:mobile_app/app/routes/onboarding_transition.dart';
 
@@ -98,5 +102,19 @@ abstract class AppPages {
       customTransition: _carousel,
       transitionDuration: const Duration(milliseconds: 350),
     ),
+    GetPage(
+      name: AppRoutes.nutrition,
+      page: () => const NutritionView(),
+      binding: NutritionBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.addFoodLog,
+      page: () => const AddFoodLogView(),
+    ),
+    GetPage(
+      name: AppRoutes.nutritionReport,
+      page: () => const NutritionReportView(),
+    ),
   ];
 }
+

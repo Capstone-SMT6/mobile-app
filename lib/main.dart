@@ -9,9 +9,11 @@ import 'package:mobile_app/app/modules/auth/controllers/user_controller.dart';
 import 'package:mobile_app/app/routes/app_pages.dart';
 import 'package:mobile_app/app/routes/app_routes.dart';
 import 'package:mobile_app/app/data/services/notification_service.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id_ID', null);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // Register Controllers permanently so they're available app-wide
   Get.put(AuthController(), permanent: true);

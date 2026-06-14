@@ -8,7 +8,7 @@ class AppConfig {
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
     // defaultValue: 'https://justparadis-smafit-fastapi.hf.space',
-    defaultValue: 'https://sonless-vallie-unmercifully.ngrok-free.dev',
+    defaultValue: 'http://localhost:8000',
   );
 
   static String get usersEndpoint => '$apiBaseUrl/api/users/';
@@ -37,6 +37,16 @@ class AppConfig {
       '$apiBaseUrl/api/users/me/analytics/weekly';
   static String get analyticsCalendarEndpoint =>
       '$apiBaseUrl/api/users/me/analytics/calendar';
+
+  static String get nutritionFoodsEndpoint => '$apiBaseUrl/api/nutrition/foods';
+  static String get nutritionLogEndpoint => '$apiBaseUrl/api/nutrition/log';
+  static String get nutritionLogTodayEndpoint => '$apiBaseUrl/api/nutrition/log/today';
+  static String nutritionLogDateEndpoint(String date) => '$apiBaseUrl/api/nutrition/log/$date';
+  static String nutritionSummaryDayEndpoint(String date) => '$apiBaseUrl/api/nutrition/summary/day/$date';
+  static String get nutritionSummaryWeekEndpoint => '$apiBaseUrl/api/nutrition/summary/week';
+  static String get nutritionSummaryMonthEndpoint => '$apiBaseUrl/api/nutrition/summary/month';
+  static String nutritionFeedbackDayEndpoint(String date) => '$apiBaseUrl/api/nutrition/feedback/day/$date';
+
   // ---------------------------------------------------------------------------
   // Google OAuth
   // ---------------------------------------------------------------------------

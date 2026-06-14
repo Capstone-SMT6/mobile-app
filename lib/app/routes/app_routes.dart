@@ -14,4 +14,8 @@ abstract class AppRoutes {
   static const onboardingResult = '/onboardingResult';
   static const otpVerification = '/otp-verification';
   static const forgotPassword = '/forgot-password';
+  static const nutrition = '/nutrition';
+  static const addFoodLog = '/add-food-log';
+  static const nutritionReport = '/nutrition-report';
 }
+

@@ -4,6 +4,7 @@ import 'package:mobile_app/app/modules/home/views/beranda_view.dart';
 import 'package:mobile_app/app/modules/home/views/laporan_view.dart';
 import 'package:mobile_app/app/modules/home/views/profil_view.dart';
 import 'package:mobile_app/app/modules/workout/views/exercise_list_view.dart';
+import 'package:mobile_app/app/modules/nutrition/views/nutrition_view.dart';
 import 'package:mobile_app/app/modules/home/controllers/home_controller.dart';
 import 'package:mobile_app/app/routes/app_routes.dart';
 
@@ -30,11 +31,12 @@ class HomeView extends StatelessWidget {
             BerandaView(colorScheme: Theme.of(context).colorScheme),
             const LaporanView(),
             const ExerciseListView(),
-
+            const NutritionView(),
             const ProfilView(),
           ],
         ),
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () => Get.toNamed(AppRoutes.chatbot),
         backgroundColor: accentPurple,
@@ -68,13 +70,18 @@ class HomeView extends StatelessWidget {
                 activeIcon: Icon(Icons.fitness_center),
                 label: 'Latihan',
               ),
-
+              BottomNavigationBarItem(
+                icon: Icon(Icons.restaurant_menu_outlined),
+                activeIcon: Icon(Icons.restaurant_menu),
+                label: 'Nutrisi',
+              ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.person_outline),
                 activeIcon: Icon(Icons.person),
                 label: 'Profil',
               ),
             ],
+
             currentIndex: controller.selectedIndex.value,
             selectedItemColor: accentGreen,
             unselectedItemColor: textSecondary,
