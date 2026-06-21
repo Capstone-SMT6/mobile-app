@@ -1,14 +1,14 @@
-import 'package:mobile_app/app/core/theme/app_colors.dart';
+import 'package:smacofit/app/core/theme/app_colors.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mobile_app/app/modules/auth/controllers/user_controller.dart';
-import 'package:mobile_app/app/data/services/workout_service.dart';
-import 'package:mobile_app/app/data/services/trends_service.dart';
-import 'package:mobile_app/app/modules/home/views/calendar_view.dart';
-import 'package:mobile_app/app/modules/workout/views/workout_list_view.dart';
-import 'package:mobile_app/app/modules/workout/views/analysis_view.dart';
-import 'package:mobile_app/app/modules/nutrition/controllers/nutrition_controller.dart';
+import 'package:smacofit/app/modules/auth/controllers/user_controller.dart';
+import 'package:smacofit/app/data/services/workout_service.dart';
+import 'package:smacofit/app/data/services/trends_service.dart';
+import 'package:smacofit/app/modules/home/views/calendar_view.dart';
+import 'package:smacofit/app/modules/workout/views/workout_list_view.dart';
+import 'package:smacofit/app/modules/workout/views/analysis_view.dart';
+import 'package:smacofit/app/modules/nutrition/controllers/nutrition_controller.dart';
 
 
 class BerandaView extends StatelessWidget {

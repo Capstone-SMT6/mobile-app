@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_app/app/core/theme/app_colors.dart';
-import 'package:mobile_app/app/modules/nutrition/controllers/nutrition_controller.dart';
+import 'package:smacofit/app/core/theme/app_colors.dart';
+import 'package:smacofit/app/modules/nutrition/controllers/nutrition_controller.dart';
 
 
 class NutritionReportView extends StatelessWidget {

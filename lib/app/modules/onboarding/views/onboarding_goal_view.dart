@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mobile_app/app/modules/onboarding/controllers/onboarding_controller.dart';
-import 'package:mobile_app/app/routes/app_routes.dart';
+import 'package:smacofit/app/modules/onboarding/controllers/onboarding_controller.dart';
+import 'package:smacofit/app/routes/app_routes.dart';
 
 class OnboardingGoalView extends StatefulWidget {
   const OnboardingGoalView({super.key});

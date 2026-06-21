@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
-import 'package:mobile_app/app/data/services/auth_service.dart';
-import 'package:mobile_app/app/routes/app_routes.dart';
-import 'package:mobile_app/app/core/config/app_config.dart';
-import 'package:mobile_app/app/modules/auth/controllers/user_controller.dart';
+import 'package:smacofit/app/data/services/auth_service.dart';
+import 'package:smacofit/app/routes/app_routes.dart';
+import 'package:smacofit/app/core/config/app_config.dart';
+import 'package:smacofit/app/modules/auth/controllers/user_controller.dart';
 
 class AuthController extends GetxController {
   final AuthService _authService = AuthService();

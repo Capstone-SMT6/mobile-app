@@ -1,4 +1,4 @@
-import 'package:mobile_app/app/core/theme/app_colors.dart';
+import 'package:smacofit/app/core/theme/app_colors.dart';
 import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -7,10 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'package:sensors_plus/sensors_plus.dart';
-import 'package:mobile_app/app/data/services/pose_detector_service.dart';
-import 'package:mobile_app/app/core/utils/device_diagnostics.dart';
-import 'package:mobile_app/app/core/utils/memory_profiler.dart';
-import 'package:mobile_app/app/modules/workout/views/warmup_view.dart';
+import 'package:smacofit/app/data/services/pose_detector_service.dart';
+import 'package:smacofit/app/core/utils/device_diagnostics.dart';
+import 'package:smacofit/app/core/utils/memory_profiler.dart';
+import 'package:smacofit/app/modules/workout/views/warmup_view.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 // ─────────────────────────────────────────────────────────────

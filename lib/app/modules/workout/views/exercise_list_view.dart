@@ -1,7 +1,7 @@
-import 'package:mobile_app/app/core/theme/app_colors.dart';
+import 'package:smacofit/app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mobile_app/app/core/utils/snackbar_helper.dart';
+import 'package:smacofit/app/core/utils/snackbar_helper.dart';
 
 class Exercise {
   final String name;

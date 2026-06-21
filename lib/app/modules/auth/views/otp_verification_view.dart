@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_app/app/core/config/app_config.dart';
-import 'package:mobile_app/app/routes/app_routes.dart';
-import 'package:mobile_app/app/core/utils/snackbar_helper.dart';
+import 'package:smacofit/app/core/config/app_config.dart';
+import 'package:smacofit/app/routes/app_routes.dart';
+import 'package:smacofit/app/core/utils/snackbar_helper.dart';
 
 class OtpVerificationView extends StatefulWidget {
   const OtpVerificationView({super.key});

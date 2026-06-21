@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:get/get.dart';
-import 'package:mobile_app/app/modules/auth/controllers/auth_controller.dart';
-import 'package:mobile_app/app/core/config/app_config.dart';
-import 'package:mobile_app/app/routes/app_routes.dart';
-import 'package:mobile_app/app/core/utils/snackbar_helper.dart';
+import 'package:smacofit/app/modules/auth/controllers/auth_controller.dart';
+import 'package:smacofit/app/core/config/app_config.dart';
+import 'package:smacofit/app/routes/app_routes.dart';
+import 'package:smacofit/app/core/utils/snackbar_helper.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -186,7 +186,7 @@ class _RegisterPageState extends State<RegisterView> {
                           textBaseline: TextBaseline.alphabetic,
                           children: [
                             Text(
-                              'Sma',
+                              'SmaCo',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 46,

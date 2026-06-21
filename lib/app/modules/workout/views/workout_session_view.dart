@@ -1,11 +1,11 @@
-import 'package:mobile_app/app/core/theme/app_colors.dart';
+import 'package:smacofit/app/core/theme/app_colors.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mobile_app/app/modules/workout/views/warmup_view.dart';
-import 'package:mobile_app/app/modules/workout/views/pose_camera_view.dart';
-import 'package:mobile_app/app/modules/workout/views/workout_summary_view.dart';
-import 'package:mobile_app/app/data/services/workout_service.dart';
+import 'package:smacofit/app/modules/workout/views/warmup_view.dart';
+import 'package:smacofit/app/modules/workout/views/pose_camera_view.dart';
+import 'package:smacofit/app/modules/workout/views/workout_summary_view.dart';
+import 'package:smacofit/app/data/services/workout_service.dart';
 
 // ─────────────────────────────────────────────────────────────
 // WORKOUT SESSION PAGE

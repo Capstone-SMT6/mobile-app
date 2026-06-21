@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:mobile_app/app/core/config/app_config.dart';
+import 'package:smacofit/app/core/config/app_config.dart';
 import 'auth_service.dart';
-import 'package:mobile_app/app/data/models/user_model.dart';
+import 'package:smacofit/app/data/models/user_model.dart';
 
 class UserService {
   static final _authService = AuthService();

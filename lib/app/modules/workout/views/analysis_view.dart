@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:mobile_app/app/data/services/plan_service.dart';
+import 'package:smacofit/app/data/services/plan_service.dart';
 
 class AnalysisView extends StatefulWidget {
   const AnalysisView({super.key});

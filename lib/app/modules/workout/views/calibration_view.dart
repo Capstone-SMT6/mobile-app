@@ -1,14 +1,14 @@
-import 'package:mobile_app/app/core/theme/app_colors.dart';
+import 'package:smacofit/app/core/theme/app_colors.dart';
 import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
-import 'package:mobile_app/app/data/services/pose_detector_service.dart';
-import 'package:mobile_app/app/core/utils/device_diagnostics.dart';
-import 'package:mobile_app/app/modules/workout/views/pose_camera_view.dart';
-import 'package:mobile_app/app/modules/workout/views/warmup_view.dart' show WorkoutExercise;  
+import 'package:smacofit/app/data/services/pose_detector_service.dart';
+import 'package:smacofit/app/core/utils/device_diagnostics.dart';
+import 'package:smacofit/app/modules/workout/views/pose_camera_view.dart';
+import 'package:smacofit/app/modules/workout/views/warmup_view.dart' show WorkoutExercise;  
 
 class CalibrationView extends StatefulWidget {
   final WorkoutExercise exercise;

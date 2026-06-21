@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mobile_app/firebase_options.dart';
-import 'package:mobile_app/app/modules/auth/controllers/auth_controller.dart';
-import 'package:mobile_app/app/modules/onboarding/controllers/onboarding_controller.dart';
-import 'package:mobile_app/app/modules/auth/controllers/user_controller.dart';
-import 'package:mobile_app/app/routes/app_pages.dart';
-import 'package:mobile_app/app/routes/app_routes.dart';
-import 'package:mobile_app/app/data/services/notification_service.dart';
+import 'package:smacofit/firebase_options.dart';
+import 'package:smacofit/app/modules/auth/controllers/auth_controller.dart';
+import 'package:smacofit/app/modules/onboarding/controllers/onboarding_controller.dart';
+import 'package:smacofit/app/modules/auth/controllers/user_controller.dart';
+import 'package:smacofit/app/routes/app_pages.dart';
+import 'package:smacofit/app/routes/app_routes.dart';
+import 'package:smacofit/app/data/services/notification_service.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {

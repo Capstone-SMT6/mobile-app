@@ -1,8 +1,8 @@
-import 'package:mobile_app/app/core/theme/app_colors.dart';
+import 'package:smacofit/app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:get/get.dart';
-import 'package:mobile_app/app/modules/chatbot/controllers/chatbot_controller.dart';
+import 'package:smacofit/app/modules/chatbot/controllers/chatbot_controller.dart';
 
 class ChatbotView extends StatelessWidget {
   const ChatbotView({super.key});

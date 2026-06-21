@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mobile_app/app/modules/auth/controllers/auth_controller.dart';
-import 'package:mobile_app/app/modules/auth/controllers/user_controller.dart';
-import 'package:mobile_app/app/routes/app_routes.dart';
-import 'package:mobile_app/app/data/services/user_service.dart';
-import 'package:mobile_app/app/data/services/notification_service.dart';
-import 'package:mobile_app/app/core/utils/snackbar_helper.dart';
+import 'package:smacofit/app/modules/auth/controllers/auth_controller.dart';
+import 'package:smacofit/app/modules/auth/controllers/user_controller.dart';
+import 'package:smacofit/app/routes/app_routes.dart';
+import 'package:smacofit/app/data/services/user_service.dart';
+import 'package:smacofit/app/data/services/notification_service.dart';
+import 'package:smacofit/app/core/utils/snackbar_helper.dart';
 
 class ProfilController extends GetxController {
   final RxBool notificationsEnabled = true.obs;

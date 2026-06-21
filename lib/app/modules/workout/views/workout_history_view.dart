@@ -1,6 +1,6 @@
-import 'package:mobile_app/app/core/theme/app_colors.dart';
+import 'package:smacofit/app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_app/app/data/services/workout_service.dart';
+import 'package:smacofit/app/data/services/workout_service.dart';
 
 class WorkoutHistoryView extends StatefulWidget {
   const WorkoutHistoryView({super.key});

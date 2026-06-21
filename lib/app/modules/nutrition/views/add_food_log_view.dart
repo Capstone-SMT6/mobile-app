@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mobile_app/app/core/theme/app_colors.dart';
-import 'package:mobile_app/app/modules/nutrition/controllers/nutrition_controller.dart';
-import 'package:mobile_app/app/data/models/nutrition_model.dart';
+import 'package:smacofit/app/core/theme/app_colors.dart';
+import 'package:smacofit/app/modules/nutrition/controllers/nutrition_controller.dart';
+import 'package:smacofit/app/data/models/nutrition_model.dart';
 
 class AddFoodLogView extends StatefulWidget {
   const AddFoodLogView({super.key});

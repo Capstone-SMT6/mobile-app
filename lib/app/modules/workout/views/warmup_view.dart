@@ -1,8 +1,8 @@
-import 'package:mobile_app/app/core/theme/app_colors.dart';
+import 'package:smacofit/app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
-import 'package:mobile_app/app/modules/workout/views/workout_session_view.dart';
+import 'package:smacofit/app/modules/workout/views/workout_session_view.dart';
 
 // ─────────────────────────────────────────────────────────────
 // DATA: Workout plan yang diteruskan ke session setelah warmup

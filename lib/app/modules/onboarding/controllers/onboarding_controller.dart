@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:mobile_app/app/data/services/user_service.dart';
+import 'package:smacofit/app/data/services/user_service.dart';
 
 class OnboardingController extends GetxController {
   final RxString goal = 'membentuk_otot'.obs;

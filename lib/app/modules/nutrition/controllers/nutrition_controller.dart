@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_app/app/data/models/nutrition_model.dart';
-import 'package:mobile_app/app/data/services/nutrition_service.dart';
+import 'package:smacofit/app/data/models/nutrition_model.dart';
+import 'package:smacofit/app/data/services/nutrition_service.dart';
 
 class NutritionController extends GetxController {
   final todayLogs = <FoodLog>[].obs;

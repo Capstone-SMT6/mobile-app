@@ -1,7 +1,7 @@
-import 'package:mobile_app/app/core/theme/app_colors.dart';
+import 'package:smacofit/app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:mobile_app/app/data/services/workout_service.dart';
+import 'package:smacofit/app/data/services/workout_service.dart';
 
 class CalendarView extends StatefulWidget {
   const CalendarView({super.key});

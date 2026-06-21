@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mobile_app/app/data/services/chatbot_service.dart';
-import 'package:mobile_app/app/core/utils/snackbar_helper.dart';
+import 'package:smacofit/app/data/services/chatbot_service.dart';
+import 'package:smacofit/app/core/utils/snackbar_helper.dart';
 
 class DisplayMessage {
   final String role;

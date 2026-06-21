@@ -1,10 +1,10 @@
-import 'package:mobile_app/app/core/theme/app_colors.dart';
+import 'package:smacofit/app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mobile_app/app/modules/home/controllers/profil_controller.dart';
-import 'package:mobile_app/app/modules/auth/controllers/user_controller.dart';
-import 'package:mobile_app/app/routes/app_routes.dart';
-import 'package:mobile_app/app/modules/workout/views/workout_history_view.dart';
+import 'package:smacofit/app/modules/home/controllers/profil_controller.dart';
+import 'package:smacofit/app/modules/auth/controllers/user_controller.dart';
+import 'package:smacofit/app/routes/app_routes.dart';
+import 'package:smacofit/app/modules/workout/views/workout_history_view.dart';
 
 const _bg = bgColor;
 const _surface = surfaceColor;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mobile_app/app/data/models/user_model.dart';
-import 'package:mobile_app/app/data/services/user_service.dart';
+import 'package:smacofit/app/data/models/user_model.dart';
+import 'package:smacofit/app/data/services/user_service.dart';
 
 class UserController extends GetxController {
   final Rxn<User> user = Rxn<User>();

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mobile_app/app/modules/home/views/beranda_view.dart';
-import 'package:mobile_app/app/modules/home/views/laporan_view.dart';
-import 'package:mobile_app/app/modules/home/views/profil_view.dart';
-import 'package:mobile_app/app/modules/workout/views/exercise_list_view.dart';
-import 'package:mobile_app/app/modules/nutrition/views/nutrition_view.dart';
-import 'package:mobile_app/app/modules/home/controllers/home_controller.dart';
-import 'package:mobile_app/app/routes/app_routes.dart';
+import 'package:smacofit/app/modules/home/views/beranda_view.dart';
+import 'package:smacofit/app/modules/home/views/laporan_view.dart';
+import 'package:smacofit/app/modules/home/views/profil_view.dart';
+import 'package:smacofit/app/modules/workout/views/exercise_list_view.dart';
+import 'package:smacofit/app/modules/nutrition/views/nutrition_view.dart';
+import 'package:smacofit/app/modules/home/controllers/home_controller.dart';
+import 'package:smacofit/app/routes/app_routes.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
