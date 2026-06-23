@@ -116,4 +116,18 @@ class UserService {
       throw Exception(error['detail'] ?? 'Failed to update password');
     }
   }
+
+  static Future<DashboardReport> getDashboardReport() async {
+    final headers = await _getAuthHeaders();
+    final response = await http.get(
+      Uri.parse('${AppConfig.apiBaseUrl}/api/users/me/dashboard-report'),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      return DashboardReport.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to fetch dashboard report: ${response.statusCode}');
+    }
+  }
 }

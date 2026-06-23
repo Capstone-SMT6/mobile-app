@@ -154,12 +154,18 @@ class _WorkoutSessionPageState extends State<WorkoutSessionView>
         transition: Transition.fadeIn);
   }
 
-  void _openCamera() {
-    Get.to(
+  Future<void> _openCamera() async {
+    final result = await Get.to(
       () => PoseCameraView(exercise: _currentExercise),
       transition: Transition.downToUp,
       duration: const Duration(milliseconds: 400),
     );
+
+    if (result == true) {
+      // The camera detected that the user completed the required reps!
+      // We automatically mark the set as done.
+      _onSetDone();
+    }
   }
 
   @override
@@ -345,49 +351,22 @@ class _WorkoutSessionPageState extends State<WorkoutSessionView>
           const SizedBox(height: 24),
 
           // Action buttons
-          Row(
-            children: [
-              // Camera button
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _openCamera,
-                  icon: const Icon(Icons.camera_alt_rounded,
-                      color: Color(0xFF7C6AF7)),
-                  label: const Text('Cek Postur',
-                      style: TextStyle(color: Color(0xFF7C6AF7))),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(
-                        color: Color(0xFF7C6AF7), width: 1.5),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                  ),
-                ),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _openCamera,
+              icon: const Icon(Icons.camera_alt_rounded),
+              label: const Text('Buka Kamera AI (Mulai)',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF7C6AF7),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                elevation: 0,
               ),
-              const SizedBox(width: 12),
-              // Done button
-              Expanded(
-                flex: 2,
-                child: ElevatedButton(
-                  onPressed: _onSetDone,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: accentGreen,
-                    foregroundColor: bgColor,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    _isLastSet && _isLastExercise
-                        ? 'Selesai Workout'
-                        : 'Set $_currentSet Selesai',
-                    style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w800),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),

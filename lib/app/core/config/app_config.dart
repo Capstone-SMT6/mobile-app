@@ -32,11 +32,11 @@ class AppConfig {
   static String get activePlanEndpoint =>
       '$apiBaseUrl/api/users/me/active-plan';
   static String get analyticsSummaryEndpoint =>
-      '$apiBaseUrl/api/users/me/analytics/summary';
+      '$apiBaseUrl/api/workouts/analytics/summary';
   static String get analyticsWeeklyEndpoint =>
-      '$apiBaseUrl/api/users/me/analytics/weekly';
+      '$apiBaseUrl/api/workouts/analytics/weekly';
   static String get analyticsCalendarEndpoint =>
-      '$apiBaseUrl/api/users/me/analytics/calendar';
+      '$apiBaseUrl/api/workouts/analytics/calendar';
 
   static String get nutritionFoodsEndpoint => '$apiBaseUrl/api/nutrition/foods';
   static String get nutritionLogEndpoint => '$apiBaseUrl/api/nutrition/log';

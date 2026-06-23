@@ -1,6 +1,8 @@
 import 'package:smacofit/app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:smacofit/app/routes/app_routes.dart';
+import 'package:smacofit/app/modules/auth/controllers/user_controller.dart';
 
 /// Data model for workout completion summary.
 class WorkoutSummaryData {
@@ -290,8 +292,12 @@ class WorkoutSummaryView extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () {
-          // Pop to home (pop workout stack entirely)
-          Get.until((route) => route.isFirst);
+          // refresh user data so streak and last active date is updated
+          if (Get.isRegistered<UserController>()) {
+            UserController.to.refreshData();
+          }
+          // completely clear the navigation stack and go to home
+          Get.offAllNamed(AppRoutes.home);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: accentGreen,

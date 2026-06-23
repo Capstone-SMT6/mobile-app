@@ -7,8 +7,10 @@ import 'package:smacofit/app/data/services/workout_service.dart';
 import 'package:smacofit/app/data/services/trends_service.dart';
 import 'package:smacofit/app/modules/home/views/calendar_view.dart';
 import 'package:smacofit/app/modules/workout/views/workout_list_view.dart';
+import 'package:smacofit/app/modules/workout/views/warmup_view.dart';
 import 'package:smacofit/app/modules/workout/views/analysis_view.dart';
 import 'package:smacofit/app/modules/nutrition/controllers/nutrition_controller.dart';
+import 'package:smacofit/app/modules/home/views/notification_log_view.dart';
 
 
 class BerandaView extends StatelessWidget {
@@ -245,7 +247,10 @@ class HeaderSection extends StatelessWidget implements PreferredSizeWidget {
               onTap: () => Get.to(() => const CalendarView()),
             ),
             const SizedBox(width: 12),
-            _buildIconButton(Icons.notifications_none_rounded),
+            _buildIconButton(
+              Icons.notifications_none_rounded,
+              onTap: () => Get.to(() => const NotificationLogView()),
+            ),
             const SizedBox(width: 24),
           ],
         ),
@@ -390,7 +395,67 @@ class ProgressCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   GestureDetector(
-                    onTap: () => Get.to(() => const WorkoutListView()),
+                    onTap: () async {
+                      final today = DateTime.now();
+                      final isDoneToday = stats?.lastActiveDate != null &&
+                          stats!.lastActiveDate!.year == today.year &&
+                          stats.lastActiveDate!.month == today.month &&
+                          stats.lastActiveDate!.day == today.day;
+
+                      if (isDoneToday) {
+                        Get.defaultDialog(
+                          title: "Sudah Selesai!",
+                          titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+                          middleText: "Anda sudah menyelesaikan sesi harian hari ini. Ingin mengulangi latihannya?",
+                          textConfirm: "Ulangi Latihan",
+                          textCancel: "Batal",
+                          confirmTextColor: Colors.black,
+                          buttonColor: accentGreen,
+                          cancelTextColor: Colors.white,
+                          backgroundColor: surfaceColor,
+                          onConfirm: () async {
+                            Get.back();
+                            Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
+                            try {
+                              final plan = await WorkoutService.getActiveExercisePlan();
+                              final exercises = plan.exercisesForDate(today);
+                              Get.back(); // close loading
+                              if (exercises.isNotEmpty) {
+                                // map to WorkoutExercise
+                                final workoutExercises = exercises.map((e) {
+                                  final key = e.name.toLowerCase().trim().replaceAll('-', ' ');
+                                  const info = {
+                                    'push up': ('Jaga punggung lurus, turun perlahan dan terkontrol.', 'Punggung · Bahu · Triceps', 'side', 'pushup'),
+                                    'sit up':  ('Angkat badan sampai siku menyentuh lutut, jaga leher netral.', 'Perut · Inti · Fleksor Pinggul', 'side', 'situp'),
+                                    'squat':   ('Turun sampai paha sejajar lantai, lutut tidak melewati jari kaki.', 'Kaki · Bokong · Paha Depan', 'side', 'squat'),
+                                    'plank':   ('Tahan posisi tubuh lurus selama waktu yang ditentukan.', 'Inti · Punggung Bawah', 'side', 'plank'),
+                                  };
+                                  final (desc, muscle, angle, type) = info[key] ?? ('Ikuti gerakan dengan benar.', 'Seluruh Tubuh', 'side', 'other');
+                                  return WorkoutExercise(
+                                    name: e.name,
+                                    description: desc,
+                                    sets: e.sets,
+                                    reps: e.reps ?? e.targetDurationSeconds ?? 30,
+                                    muscleGroup: muscle,
+                                    poseAngle: angle,
+                                    exerciseType: type,
+                                  );
+                                }).toList();
+                                
+                                Get.to(() => WarmupView(workoutPlan: workoutExercises));
+                              } else {
+                                Get.to(() => const WorkoutListView());
+                              }
+                            } catch (e) {
+                              Get.back();
+                              Get.to(() => const WorkoutListView());
+                            }
+                          },
+                        );
+                      } else {
+                        Get.to(() => const WorkoutListView());
+                      }
+                    },
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Container(
@@ -400,9 +465,14 @@ class ProgressCard extends StatelessWidget {
                           color: accentGreen,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Text(
-                          "Mulai",
-                          style: TextStyle(
+                        child: Text(
+                          (stats?.lastActiveDate != null &&
+                                  stats!.lastActiveDate!.year == DateTime.now().year &&
+                                  stats.lastActiveDate!.month == DateTime.now().month &&
+                                  stats.lastActiveDate!.day == DateTime.now().day)
+                              ? "Ulangi"
+                              : "Mulai",
+                          style: const TextStyle(
                             color: Color(0xFF101216),
                             fontWeight: FontWeight.w800,
                             fontSize: 14,

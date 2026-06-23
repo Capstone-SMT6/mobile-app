@@ -38,6 +38,7 @@ class UserStats {
   final int longestStreak;
   final int totalPushUps;
   final int totalSitUps;
+  final DateTime? lastActiveDate;
 
   UserStats({
     required this.id,
@@ -46,6 +47,7 @@ class UserStats {
     required this.longestStreak,
     required this.totalPushUps,
     required this.totalSitUps,
+    this.lastActiveDate,
   });
 
   factory UserStats.fromJson(Map<String, dynamic> json) {
@@ -57,6 +59,9 @@ class UserStats {
         longestStreak: json['longestStreak'] as int? ?? 0,
         totalPushUps: json['totalPushUps'] as int? ?? 0,
         totalSitUps: json['totalSitUps'] as int? ?? 0,
+        lastActiveDate: json['lastActiveDate'] != null
+            ? DateTime.tryParse(json['lastActiveDate'])
+            : null,
       );
     } catch (e) {
       debugPrint('DEBUG ERROR: UserStats parsing failed. JSON: $json. Error: $e');
@@ -156,5 +161,39 @@ class UserFitnessProfile {
       case 'membentuk_otot': return 'Membentuk Otot';
       default: return goal;
     }
+  }
+}
+
+class InsightsModel {
+  final String wawasanAi;
+  final List<String> fokusHariIni;
+
+  InsightsModel({required this.wawasanAi, required this.fokusHariIni});
+
+  factory InsightsModel.fromJson(Map<String, dynamic> json) {
+    return InsightsModel(
+      wawasanAi: json['wawasan_ai'] as String? ?? 'Terus pertahankan konsistensi latihan Anda!',
+      fokusHariIni: (json['fokus_hari_ini'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+    );
+  }
+}
+
+class DashboardReport {
+  final InsightsModel insights;
+  final List<double> weeklyActivity;
+  final Map<String, double> goalsProgress;
+
+  DashboardReport({
+    required this.insights,
+    required this.weeklyActivity,
+    required this.goalsProgress,
+  });
+
+  factory DashboardReport.fromJson(Map<String, dynamic> json) {
+    return DashboardReport(
+      insights: InsightsModel.fromJson(json['insights'] ?? {}),
+      weeklyActivity: (json['weekly_activity'] as List<dynamic>?)?.map((e) => (e as num).toDouble()).toList() ?? [],
+      goalsProgress: (json['goals_progress'] as Map<String, dynamic>?)?.map((k, v) => MapEntry(k, (v as num).toDouble())) ?? {},
+    );
   }
 }

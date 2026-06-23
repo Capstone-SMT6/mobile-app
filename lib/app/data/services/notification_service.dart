@@ -1,221 +1,135 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz;
 
-/// Singleton notification service for workout reminders.
 class NotificationService {
-  static final NotificationService _instance = NotificationService._();
+  // Singleton pattern
+  static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
-  NotificationService._();
+  NotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
-  bool _initialized = false;
-  bool _permissionGranted = false;
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
-  // Channel configs
-  static const _workoutChannelId = 'workout_reminders';
-  static const _workoutChannelName = 'Pengingat Latihan';
-  static const _streakChannelId = 'streak_milestones';
-  static const _streakChannelName = 'Pencapaian Streak';
+  static const String channelId = 'workout_reminders';
+  static const String channelName = 'Workout Reminders';
+  static const String channelDesc = 'Daily notifications to remind you to workout';
 
   Future<void> init() async {
-    if (_initialized) return;
+    // Initialize timezone
     tz.initializeTimeZones();
+    // Assuming local timezone is detected, but setting to default simple setup
+    // In a real app, you might use flutter_timezone to get local timezone
+    tz.setLocalLocation(tz.getLocation('Asia/Jakarta')); // Defaulting to Jakarta as it's common for Indonesia
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/launcher_icon');
+
+    const DarwinInitializationSettings initializationSettingsIOS =
+        DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
     );
 
-    final initialized = await _plugin.initialize(
-      const InitializationSettings(
-        android: androidSettings,
-        iOS: iosSettings,
-      ),
-      onDidReceiveNotificationResponse: (response) {
-        // Navigate to home on notification tap
-        debugPrint('Notification tapped: ${response.payload}');
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
+
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (details) {
+        debugPrint('Notification clicked: ${details.payload}');
       },
     );
+  }
 
-    _initialized = initialized ?? false;
-
-    // Request permission on Android 13+
-    final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    if (androidPlugin != null) {
-      final granted = await androidPlugin.requestNotificationsPermission();
-      _permissionGranted = granted ?? false;
-    } else {
-      _permissionGranted = true; // iOS handles via settings
+  Future<bool> requestPermissions() async {
+    bool? granted;
+    if (Platform.isAndroid) {
+      granted = await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.requestNotificationsPermission();
+    } else if (Platform.isIOS) {
+      granted = await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
     }
-
-    // Create notification channels
-    await androidPlugin?.createNotificationChannel(
-      const AndroidNotificationChannel(
-        _workoutChannelId,
-        _workoutChannelName,
-        description: 'Pengingat jadwal latihan harian',
-        importance: Importance.high,
-      ),
-    );
-
-    await androidPlugin?.createNotificationChannel(
-      const AndroidNotificationChannel(
-        _streakChannelId,
-        _streakChannelName,
-        description: 'Notifikasi pencapaian streak latihan',
-        importance: Importance.defaultImportance,
-      ),
-    );
+    return granted ?? false;
   }
 
-  /// Schedule daily workout reminders on specified training days.
-  Future<void> scheduleWorkoutReminders({
-    required int hour,
-    required int minute,
-    required List<int> trainingDays,
-    String title = 'Waktunya Latihan! 💪',
-    String body = 'Jangan lewatkan sesi latihan hari ini. Yuk mulai!',
-  }) async {
-    if (!_initialized || !_permissionGranted) return;
-
-    await cancelWorkoutReminders();
-
-    for (final day in trainingDays) {
-      await _plugin.zonedSchedule(
-        100 + day,
-        title,
-        body,
-        _nextInstanceOfDay(day, hour, minute),
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            _workoutChannelId,
-            _workoutChannelName,
-            importance: Importance.high,
-            priority: Priority.high,
-          ),
-          iOS: DarwinNotificationDetails(),
-        ),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        payload: 'workout_reminder',
-      );
-    }
-  }
-
-  /// Schedule rest day motivation notifications.
-  Future<void> scheduleRestDayMotivation({
-    required List<int> trainingDays,
-    int hour = 9,
-    int minute = 0,
-  }) async {
-    if (!_initialized || !_permissionGranted) return;
-
-    // Find rest days (1=Mon ... 7=Sun that are NOT training days)
-    final allDays = {1, 2, 3, 4, 5, 6, 7};
-    final restDays = allDays.difference(trainingDays.toSet());
-
-    for (final day in restDays) {
-      await _plugin.zonedSchedule(
-        200 + day,
-        'Hari Istirahat 🌿',
-        'Nikmati hari pemulihanmu. Tubuhmu sedang membangun otot!',
-        _nextInstanceOfDay(day, hour, minute),
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            _workoutChannelId,
-            _workoutChannelName,
-            importance: Importance.defaultImportance,
-            priority: Priority.defaultPriority,
-          ),
-          iOS: DarwinNotificationDetails(),
-        ),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        payload: 'rest_day',
-      );
-    }
-  }
-
-  /// Show a streak milestone notification.
-  Future<void> showStreakMilestone(int streakDays) async {
-    if (!_initialized || !_permissionGranted) return;
-
-    String title;
-    String body;
-
-    if (streakDays == 7) {
-      title = '🔥 Streak 7 Hari!';
-      body = 'Satu minggu berturut-turut! Konsistensi adalah kuncinya.';
-    } else if (streakDays == 14) {
-      title = '💎 Streak 14 Hari!';
-      body = 'Dua minggu non-stop! Kamu luar biasa!';
-    } else if (streakDays == 30) {
-      title = '👑 Streak 30 Hari!';
-      body = 'Sebulan penuh! Dedikasimu menginspirasi!';
-    } else if (streakDays == 100) {
-      title = '🏆 Streak 100 Hari!';
-      body = '100 hari berturut-turut! Kamu seorang legenda!';
-    } else {
-      return; // Only show milestones
-    }
-
-    await _plugin.show(
-      streakDays,
-      title,
-      body,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          _streakChannelId,
-          _streakChannelName,
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
-      payload: 'streak_$streakDays',
-    );
-  }
-
-  /// Cancel all scheduled workout reminders.
-  Future<void> cancelWorkoutReminders() async {
-    if (!_initialized) return;
-    for (int i = 1; i <= 7; i++) {
-      await _plugin.cancel(100 + i);
-    }
-  }
-
-  /// Cancel all notifications (workout + rest day).
-  Future<void> cancelAll() async {
-    if (!_initialized) return;
-    await _plugin.cancelAll();
-  }
-
-  /// Calculate the next occurrence of a given day of week.
-  tz.TZDateTime _nextInstanceOfDay(int dayOfWeek, int hour, int minute) {
+  Future<void> scheduleDailyReminder() async {
+    // We schedule it for 08:00 AM every day
     final now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduled = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      hour,
-      minute,
-    );
-
-    // Adjust to the target day of week (1=Mon, 7=Sun)
-    while (scheduled.weekday != dayOfWeek || scheduled.isBefore(now)) {
-      scheduled = scheduled.add(const Duration(days: 1));
+    var scheduledDate = tz.TZDateTime(
+        tz.local, now.year, now.month, now.day, 8, 0); // 08:00 AM
+    
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
-    return scheduled;
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      channelId,
+      channelName,
+      channelDescription: channelDesc,
+      importance: Importance.max,
+      priority: Priority.high,
+      icon: '@mipmap/launcher_icon',
+      color: Color(0xFF6CC551), // Accent Green
+    );
+
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      0,
+      'Waktunya Bergerak! \uD83C\uDFC3\u200D\u2642\uFE0F',
+      'Jangan sampai Streak kamu putus! Selesaikan latihan harianmu sekarang.',
+      scheduledDate,
+      platformChannelSpecifics,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time, // Repeat daily at the same time
+    );
+    
+    debugPrint('Daily reminder scheduled for $scheduledDate');
+  }
+
+  Future<void> cancelDailyReminder() async {
+    await flutterLocalNotificationsPlugin.cancel(0);
+    debugPrint('Daily reminder cancelled');
+  }
+
+  // A quick test notification
+  Future<void> showTestNotification() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      channelId,
+      channelName,
+      channelDescription: channelDesc,
+      importance: Importance.max,
+      priority: Priority.high,
+      icon: '@mipmap/launcher_icon',
+    );
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.show(
+      1,
+      'Test Notifikasi',
+      'Jika kamu melihat ini, fitur notifikasi bekerja dengan baik!',
+      platformChannelSpecifics,
+    );
   }
 }

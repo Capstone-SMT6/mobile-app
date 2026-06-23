@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smacofit/app/data/services/workout_service.dart';
 import 'package:smacofit/app/modules/workout/views/warmup_view.dart';
+import 'package:smacofit/app/modules/auth/controllers/user_controller.dart';
 
 class WorkoutListView extends StatefulWidget {
   const WorkoutListView({super.key});
@@ -272,11 +273,43 @@ class _WorkoutListPageState extends State<WorkoutListView> {
               onPressed: _todayPlan.isEmpty
                   ? null
                   : () {
-                      Get.to(
-                        () => WarmupView(workoutPlan: _todayPlan),
-                        transition: Transition.fadeIn,
-                        duration: const Duration(milliseconds: 500),
-                      );
+                      final userStats = Get.isRegistered<UserController>()
+                          ? UserController.to.stats.value
+                          : null;
+                      
+                      final today = DateTime.now();
+                      final isDoneToday = userStats?.lastActiveDate != null &&
+                          userStats!.lastActiveDate!.year == today.year &&
+                          userStats.lastActiveDate!.month == today.month &&
+                          userStats.lastActiveDate!.day == today.day;
+
+                      void startWorkout() {
+                        Get.to(
+                          () => WarmupView(workoutPlan: _todayPlan),
+                          transition: Transition.fadeIn,
+                          duration: const Duration(milliseconds: 500),
+                        );
+                      }
+
+                      if (isDoneToday) {
+                        Get.defaultDialog(
+                          title: "Sudah Selesai!",
+                          titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+                          middleText: "Anda sudah menyelesaikan sesi harian hari ini. Ingin mengulangi latihannya?",
+                          textConfirm: "Ulangi Latihan",
+                          textCancel: "Batal",
+                          confirmTextColor: Colors.black,
+                          buttonColor: accentGreen,
+                          cancelTextColor: Colors.white,
+                          backgroundColor: surfaceColor,
+                          onConfirm: () {
+                            Get.back(); // tutup dialog
+                            startWorkout();
+                          },
+                        );
+                      } else {
+                        startWorkout();
+                      }
                     },
               child: const Text(
                 "Mulai Latihan",

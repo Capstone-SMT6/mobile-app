@@ -59,10 +59,10 @@ class _ProfilPageState extends State<ProfilView> {
         final profile = userController.fitnessProfile.value;
 
         // Calculate achievements
-        final totalWorkouts = (stats?.totalPushUps ?? 0) + (stats?.totalSitUps ?? 0);
         final achievements = _calculateAchievements(
-          totalWorkouts: totalWorkouts,
-          streakDays: stats?.currentStreak ?? 0,
+          totalPushUps: stats?.totalPushUps ?? 0,
+          totalSitUps: stats?.totalSitUps ?? 0,
+          streakDays: stats?.longestStreak ?? 0,
         );
 
         return SafeArea(
@@ -319,25 +319,44 @@ class _ProfilPageState extends State<ProfilView> {
   // ── Achievement calculation ─────────────────────────────────
 
   List<_Achievement> _calculateAchievements({
-    required int totalWorkouts,
+    required int totalPushUps,
+    required int totalSitUps,
     required int streakDays,
   }) {
     final results = <_Achievement>[];
-    if (totalWorkouts >= 10) {
-      results.add(const _Achievement('10+ Workout', Icons.fitness_center, Color(0xFFAB47BC)));
+    
+    // First badge for doing anything
+    if (totalPushUps > 0 || totalSitUps > 0 || streakDays > 0) {
+      results.add(const _Achievement('Pemula Aktif', Icons.star, Color(0xFF4CAF50)));
     }
-    if (totalWorkouts >= 50) {
-      results.add(const _Achievement('50+ Workout', Icons.whatshot, Color(0xFFFFA726)));
+    
+    // Push Up Achievements
+    if (totalPushUps >= 50) {
+      results.add(const _Achievement('50+ Push Up', Icons.fitness_center, Color(0xFFAB47BC)));
     }
-    if (totalWorkouts >= 100) {
-      results.add(const _Achievement('100+ Workout', Icons.emoji_events, Color(0xFFFFD700)));
+    if (totalPushUps >= 100) {
+      results.add(const _Achievement('100+ Push Up', Icons.workspace_premium, Color(0xFFFFD700)));
+    }
+
+    // Sit Up Achievements
+    if (totalSitUps >= 50) {
+      results.add(const _Achievement('50+ Sit Up', Icons.accessibility_new, Color(0xFFAB47BC)));
+    }
+    if (totalSitUps >= 100) {
+      results.add(const _Achievement('100+ Sit Up', Icons.workspace_premium, Color(0xFFFFD700)));
+    }
+
+    // Streak Achievements
+    if (streakDays >= 3) {
+      results.add(const _Achievement('3 Hari Streak', Icons.local_fire_department, Color(0xFFFFA726)));
     }
     if (streakDays >= 7) {
-      results.add(const _Achievement('7 Hari Streak', Icons.local_fire_department, Color(0xFFEF5350)));
+      results.add(const _Achievement('7 Hari Streak', Icons.whatshot, Color(0xFFEF5350)));
     }
     if (streakDays >= 30) {
       results.add(const _Achievement('30 Hari Streak', Icons.diamond, Color(0xFF29B6F6)));
     }
+    
     return results;
   }
 
@@ -474,6 +493,8 @@ class _AchievementBadge extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
             textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

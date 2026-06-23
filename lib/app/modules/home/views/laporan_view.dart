@@ -38,6 +38,7 @@ class LaporanView extends StatelessWidget {
       body: SafeArea(
         child: Obx(() {
           final stats = c.stats.value;
+          final report = c.dashboardReport.value;
 
           return ListView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -45,20 +46,20 @@ class LaporanView extends StatelessWidget {
               _heroSection(stats),
 
               const SizedBox(height: 24),
-              _insightCard(),
+              _insightCard(report),
 
               const SizedBox(height: 20),
-              _focusCard(),
+              _focusCard(report),
 
               const SizedBox(height: 24),
               _personalBest(stats),
 
               const SizedBox(height: 24),
-              _weeklyChart(),
+              _weeklyChart(report),
 
               const SizedBox(height: 24),
 
-              _goals(),
+              _goals(report),
 
               const SizedBox(height: 32),
             ],
@@ -141,12 +142,12 @@ class LaporanView extends StatelessWidget {
     );
   }
 
-  Widget _insightCard() {
+  Widget _insightCard(report) {
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Row(
+        children: [
+          const Row(
             children: [
               Icon(Icons.lightbulb, color: _gold, size: 22),
               SizedBox(width: 8),
@@ -155,23 +156,23 @@ class LaporanView extends StatelessWidget {
                       color: _textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
             ],
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
-            "Form push-up Anda meningkat 15% minggu ini.\n"
-            "Tetapi kedalaman squat Anda masih di bawah target.",
-            style: TextStyle(color: _textSecondary, fontSize: 14, height: 1.5),
+            report?.insights.wawasanAi ?? "Menganalisa data latihan Anda...",
+            style: const TextStyle(color: _textSecondary, fontSize: 14, height: 1.5),
           ),
         ],
       ),
     );
   }
 
-  Widget _focusCard() {
+  Widget _focusCard(report) {
+    final List<String> focusList = report?.insights.fokusHariIni ?? ["Lakukan latihan pertamamu hari ini!"];
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Row(
+        children: [
+          const Row(
             children: [
               Icon(Icons.center_focus_strong, color: Colors.orangeAccent, size: 22),
               SizedBox(width: 8),
@@ -180,9 +181,8 @@ class LaporanView extends StatelessWidget {
                       color: _textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
             ],
           ),
-          SizedBox(height: 12),
-          Text("• Tingkatkan kedalaman squat", style: TextStyle(color: _textSecondary, fontSize: 14, height: 1.5)),
-          Text("• Perlambat tempo", style: TextStyle(color: _textSecondary, fontSize: 14, height: 1.5)),
+          const SizedBox(height: 12),
+          ...focusList.map((fokus) => Text("• $fokus", style: const TextStyle(color: _textSecondary, fontSize: 14, height: 1.5))),
         ],
       ),
     );
@@ -232,9 +232,20 @@ class LaporanView extends StatelessWidget {
   }
 
   // WEEKLY
-  Widget _weeklyChart() {
-    final vals = [0.6, 0.3, 0.85, 0.4, 0.95, 0.5, 0.2];
-    final days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+  Widget _weeklyChart(report) {
+    final List<double> rawVals = report?.weeklyActivity ?? [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+    final vals = rawVals.length == 7 ? rawVals : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+    
+    final now = DateTime.now();
+    final dateData = List.generate(7, (i) {
+      final d = now.subtract(Duration(days: 6 - i));
+      const weekDays = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
+      return {
+        "dayName": weekDays[d.weekday - 1],
+        "dateNum": d.day.toString(),
+        "isToday": i == 6,
+      };
+    });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,8 +270,19 @@ class LaporanView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(days[i],
-                      style: const TextStyle(color: _textSecondary, fontSize: 12))
+                  Text(
+                    dateData[i]["dateNum"] as String,
+                    style: TextStyle(
+                      color: dateData[i]["isToday"] == true ? _green : Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    dateData[i]["dayName"] as String,
+                    style: const TextStyle(color: _textSecondary, fontSize: 10),
+                  ),
                 ],
               );
             }),
@@ -271,7 +293,15 @@ class LaporanView extends StatelessWidget {
   }
 
   // GOALS
-  Widget _goals() {
+  Widget _goals(report) {
+    Map<String, double> goalsProgress = report?.goalsProgress ?? {};
+    if (goalsProgress.isEmpty) {
+        goalsProgress = {
+            "Konsistensi": 0.0,
+            "Kekuatan": 0.0
+        };
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -280,11 +310,12 @@ class LaporanView extends StatelessWidget {
         const SizedBox(height: 12),
         _card(
           child: Column(
-            children: [
-              _progress("Konsistensi", 0.6),
-              const SizedBox(height: 20),
-              _progress("Kekuatan", 0.3),
-            ],
+            children: goalsProgress.entries.map((e) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: _progress(e.key, e.value),
+              );
+            }).toList(),
           ),
         ),
       ],

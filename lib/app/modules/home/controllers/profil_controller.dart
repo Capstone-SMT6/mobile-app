@@ -15,17 +15,9 @@ class ProfilController extends GetxController {
   void toggleNotifications(bool value) {
     notificationsEnabled.value = value;
     if (value) {
-      const trainingDays = [1, 3, 5]; // Mon, Wed, Fri default
-      NotificationService().scheduleWorkoutReminders(
-        hour: 7,
-        minute: 0,
-        trainingDays: trainingDays,
-      );
-      NotificationService().scheduleRestDayMotivation(
-        trainingDays: trainingDays,
-      );
+      NotificationService().scheduleDailyReminder();
     } else {
-      NotificationService().cancelAll();
+      NotificationService().cancelDailyReminder();
     }
   }
 
