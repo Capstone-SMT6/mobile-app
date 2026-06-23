@@ -63,49 +63,77 @@ class PlanService {
     final plans = <String, List<Map<String, dynamic>>>{};
     final dayNames = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
 
-    // Base exercises by goal
-    final baseExercises = <Map<String, dynamic>>[];
+    // 1. Determine active training days to ensure proper rest
+    final List<String> activeDays = [];
+    final tDays = trainingDays.clamp(1, 7);
+    if (tDays == 1) activeDays.add('rabu');
+    else if (tDays == 2) activeDays.addAll(['selasa', 'jumat']);
+    else if (tDays == 3) activeDays.addAll(['senin', 'rabu', 'jumat']);
+    else if (tDays == 4) activeDays.addAll(['senin', 'selasa', 'kamis', 'jumat']);
+    else if (tDays == 5) activeDays.addAll(['senin', 'selasa', 'kamis', 'jumat', 'sabtu']);
+    else if (tDays == 6) activeDays.addAll(['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu']);
+    else activeDays.addAll(dayNames); // 7 days
+
+    // 2. Define exercise pool
+    final pushUp = {'name': 'Push Up', 'sets': 3, 'reps': 12, 'muscleGroup': 'Punggung, Bahu, Triceps', 'poseAngle': 'side', 'exerciseType': 'pushup'};
+    final squat = {'name': 'Squat', 'sets': 3, 'reps': 15, 'muscleGroup': 'Kaki, Bokong', 'poseAngle': 'front', 'exerciseType': 'squat'};
+    final plank = {'name': 'Plank', 'sets': 3, 'reps': 30, 'muscleGroup': 'Inti, Perut', 'poseAngle': 'side', 'exerciseType': 'plank'};
+    final sitUp = {'name': 'Sit Up', 'sets': 3, 'reps': 15, 'muscleGroup': 'Perut, Inti', 'poseAngle': 'side', 'exerciseType': 'situp'};
+    final jumpingJack = {'name': 'Jumping Jack', 'sets': 3, 'reps': 20, 'muscleGroup': 'Full Body, Kardio', 'poseAngle': 'front', 'exerciseType': 'jumping_jack'};
+    final highKnee = {'name': 'High Knee', 'sets': 3, 'reps': 20, 'muscleGroup': 'Inti, Kardio', 'poseAngle': 'front', 'exerciseType': 'high_knee'};
+    final shoulderPress = {'name': 'Shoulder Press', 'sets': 3, 'reps': 10, 'muscleGroup': 'Bahu, Triceps', 'poseAngle': 'front', 'exerciseType': 'shoulder_press'};
+
+    // Fixed typo in squat declaration
+
+    // 3. Create Split Routines based on Goal
+    List<List<Map<String, dynamic>>> routines = [];
     if (isWeightLoss) {
-      baseExercises.addAll([
-        {'name': 'Push Up', 'sets': 3, 'reps': 12, 'muscleGroup': 'Punggung, Bahu, Triceps', 'poseAngle': 'side', 'exerciseType': 'pushup'},
-        {'name': 'Squat', 'sets': 3, 'reps': 15, 'muscleGroup': 'Kaki, Bokong', 'poseAngle': 'front', 'exerciseType': 'squat'},
-        {'name': 'Jumping Jack', 'sets': 3, 'reps': 20, 'muscleGroup': 'Full Body, Kardio', 'poseAngle': 'front', 'exerciseType': 'jumping_jack'},
-        {'name': 'High Knee', 'sets': 3, 'reps': 20, 'muscleGroup': 'Inti, Kardio', 'poseAngle': 'front', 'exerciseType': 'high_knee'},
-      ]);
+      routines = [
+        [jumpingJack, highKnee, plank], // Cardio & Core Focus
+        [pushUp, jumpingJack, sitUp],   // Upper & Cardio
+        [squat, highKnee, plank],       // Lower & Cardio
+        [pushUp, squat, jumpingJack],   // Full Body HIIT
+      ];
     } else if (isMuscleGain) {
-      baseExercises.addAll([
-        {'name': 'Push Up', 'sets': 4, 'reps': 10, 'muscleGroup': 'Punggung, Bahu, Triceps', 'poseAngle': 'side', 'exerciseType': 'pushup'},
-        {'name': 'Squat', 'sets': 4, 'reps': 12, 'muscleGroup': 'Kaki, Bokong', 'poseAngle': 'front', 'exerciseType': 'squat'},
-        {'name': 'Shoulder Press', 'sets': 3, 'reps': 10, 'muscleGroup': 'Bahu, Triceps', 'poseAngle': 'front', 'exerciseType': 'shoulder_press'},
-        {'name': 'Plank', 'sets': 3, 'reps': 45, 'muscleGroup': 'Inti, Perut', 'poseAngle': 'side', 'exerciseType': 'plank'},
-      ]);
+      routines = [
+        [pushUp, shoulderPress, plank], // Upper Body Strength
+        [squat, sitUp, highKnee],       // Lower Body & Core
+        [pushUp, squat, shoulderPress], // Full Body Power
+      ];
     } else {
-      baseExercises.addAll([
-        {'name': 'Push Up', 'sets': 3, 'reps': 12, 'muscleGroup': 'Punggung, Bahu, Triceps', 'poseAngle': 'side', 'exerciseType': 'pushup'},
-        {'name': 'Sit Up', 'sets': 3, 'reps': 15, 'muscleGroup': 'Perut, Inti', 'poseAngle': 'side', 'exerciseType': 'situp'},
-        {'name': 'Squat', 'sets': 3, 'reps': 15, 'muscleGroup': 'Kaki, Bokong', 'poseAngle': 'front', 'exerciseType': 'squat'},
-        {'name': 'Plank', 'sets': 3, 'reps': 30, 'muscleGroup': 'Inti, Perut', 'poseAngle': 'side', 'exerciseType': 'plank'},
-      ]);
+      routines = [
+        [pushUp, plank, sitUp],         // Upper & Core
+        [squat, jumpingJack, highKnee], // Lower & Cardio
+        [pushUp, squat, shoulderPress], // Full Body
+      ];
     }
 
-    // Distribute across training days (alternating)
-    final shuffled = List<Map<String, dynamic>>.from(baseExercises)..shuffle(Random(42));
-    for (int i = 0; i < trainingDays; i++) {
-      final dayName = dayNames[i];
-      final dayExercises = <Map<String, dynamic>>[];
-      // Pick 3-4 exercises per day
-      final count = min(4, shuffled.length);
-      for (int j = 0; j < count; j++) {
-        dayExercises.add(Map<String, dynamic>.from(shuffled[(i + j) % shuffled.length]));
+    // 4. Distribute routines across active days
+    int routineIndex = 0;
+    
+    // Intensity Multiplier
+    final intensityMultiplier = intensity.toLowerCase() == 'berat' || intensity.toLowerCase() == 'heavy' ? 1.3 :
+        intensity.toLowerCase() == 'ringan' || intensity.toLowerCase() == 'light' ? 0.7 : 1.0;
+
+    for (final dayName in dayNames) {
+      if (activeDays.contains(dayName)) {
+        final dayExercises = <Map<String, dynamic>>[];
+        final selectedRoutine = routines[routineIndex % routines.length];
+        
+        for (final ex in selectedRoutine) {
+          final modifiedEx = Map<String, dynamic>.from(ex);
+          // Scale reps and sets
+          modifiedEx['sets'] = max(2, ((modifiedEx['sets'] as int) * intensityMultiplier).round());
+          modifiedEx['reps'] = max(5, ((modifiedEx['reps'] as int) * intensityMultiplier).round());
+          dayExercises.add(modifiedEx);
+        }
+        
+        plans[dayName] = dayExercises;
+        routineIndex++;
+      } else {
+        // Rest Day
+        plans[dayName] = [];
       }
-      // Adjust sets/reps based on intensity
-      final intensityMultiplier = intensity.toLowerCase() == 'berat' || intensity.toLowerCase() == 'heavy' ? 1.3 :
-          intensity.toLowerCase() == 'ringan' || intensity.toLowerCase() == 'light' ? 0.7 : 1.0;
-      for (final ex in dayExercises) {
-        ex['sets'] = max(2, (ex['sets'] * intensityMultiplier).round());
-        ex['reps'] = max(5, (ex['reps'] * intensityMultiplier).round());
-      }
-      plans[dayName] = dayExercises;
     }
 
     return plans;

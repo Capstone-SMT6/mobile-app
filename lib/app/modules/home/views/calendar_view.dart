@@ -289,9 +289,11 @@ class _CalendarPageState extends State<CalendarView> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                "Jadwal Hari Ini",
-                                style: TextStyle(
+                              Text(
+                                isSameDay(today, DateTime.now())
+                                    ? "Jadwal Hari Ini"
+                                    : "Jadwal ${today.day}/${today.month}/${today.year}",
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,

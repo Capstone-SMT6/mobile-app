@@ -353,20 +353,35 @@ class _WorkoutSessionPageState extends State<WorkoutSessionView>
           // Action buttons
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _openCamera,
-              icon: const Icon(Icons.camera_alt_rounded),
-              label: const Text('Buka Kamera AI (Mulai)',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7C6AF7),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                elevation: 0,
-              ),
-            ),
+            child: ['pushup', 'situp', 'squat', 'plank'].contains(exercise.exerciseType)
+                ? ElevatedButton.icon(
+                    onPressed: _openCamera,
+                    icon: const Icon(Icons.camera_alt_rounded),
+                    label: const Text('Buka Kamera AI (Mulai)',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF7C6AF7),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
+                    ),
+                  )
+                : ElevatedButton.icon(
+                    onPressed: _onSetDone,
+                    icon: const Icon(Icons.check_circle_outline),
+                    label: const Text('Tandai Selesai',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: accentGreen,
+                      foregroundColor: const Color(0xFF101216),
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
+                    ),
+                  ),
           ),
         ],
       ),

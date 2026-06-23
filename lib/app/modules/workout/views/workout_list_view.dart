@@ -24,6 +24,9 @@ class _WorkoutListPageState extends State<WorkoutListView> {
       'sit up':  ('Angkat badan sampai siku menyentuh lutut, jaga leher netral.', 'Perut · Inti · Fleksor Pinggul', 'side', 'situp'),
       'squat':   ('Turun sampai paha sejajar lantai, lutut tidak melewati jari kaki.', 'Kaki · Bokong · Paha Depan', 'side', 'squat'),
       'plank':   ('Tahan posisi tubuh lurus selama waktu yang ditentukan.', 'Inti · Punggung Bawah', 'side', 'plank'),
+      'jumping jack': ('Lompat sambil membuka kaki dan ayunkan tangan ke atas kepala.', 'Seluruh Tubuh · Kardio', 'front', 'jumping_jack'),
+      'high knee': ('Lari di tempat dengan mengangkat lutut setinggi pinggang.', 'Inti · Kardio', 'front', 'high_knee'),
+      'shoulder press': ('Angkat beban lurus ke atas kepala, lalu turunkan perlahan.', 'Bahu · Triceps', 'front', 'shoulder_press'),
     };
     final (desc, muscle, angle, type) = info[key] ?? ('Ikuti gerakan dengan benar.', 'Seluruh Tubuh', 'side', 'other');
     return WorkoutExercise(
