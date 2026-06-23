@@ -67,7 +67,7 @@ class _AnalysisPageState extends State<AnalysisView> {
                     children: [
                       _buildStatsCards(),
                       const SizedBox(height: 24),
-                      _buildChartCard(),
+                      _buildPostureScoreCard(),
                       const SizedBox(height: 24),
                       summaryCard(),
                     ],
@@ -129,7 +129,12 @@ class _AnalysisPageState extends State<AnalysisView> {
     );
   }
 
-  Widget _buildChartCard() {
+  Widget _buildPostureScoreCard() {
+    // Dummy score for illustration
+    final score = 88.0;
+    final grade = "A-";
+    final message = "Teknik tubuh bagian atasmu sangat solid! Namun AI mencatat postur lutut saat Squat masih perlu sedikit perbaikan. Pertahankan konsistensi ini!";
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -142,93 +147,114 @@ class _AnalysisPageState extends State<AnalysisView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("EVALUATE FORM", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+              const Text("AI POSTURE SCORE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF171925),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white10),
+                  color: const Color(0xFF6CC551).withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<int>(
-                    value: _selectedWeeks,
-                    dropdownColor: const Color(0xFF222434),
-                    icon: const Icon(Icons.arrow_drop_down, color: Colors.white54),
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
-                    items: [4, 8, 12].map((w) => DropdownMenuItem(value: w, child: Text('$w Minggu'))).toList(),
-                    onChanged: (val) => setState(() => _selectedWeeks = val!),
-                  ),
-                ),
+                child: const Text("+5% Naik", style: TextStyle(color: Color(0xFF6CC551), fontSize: 12, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
           const SizedBox(height: 32),
           SizedBox(
-            height: 220,
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.spaceAround,
-                maxY: 5,
-                barTouchData: BarTouchData(enabled: false),
-                titlesData: FlTitlesData(
-                  show: true,
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        const weeks = ["M1", "M2", "M3", "M4"];
-                        if (value.toInt() >= 0 && value.toInt() < weeks.length) {
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(weeks[value.toInt()], style: const TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold)),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                      reservedSize: 30,
-                    ),
+            height: 200,
+            child: Stack(
+              children: [
+                PieChart(
+                  PieChartData(
+                    startDegreeOffset: 270,
+                    sectionsSpace: 0,
+                    centerSpaceRadius: 75,
+                    sections: [
+                      PieChartSectionData(
+                        value: score,
+                        color: const Color(0xFF6CC551),
+                        radius: 16,
+                        showTitle: false,
+                      ),
+                      PieChartSectionData(
+                        value: 100 - score,
+                        color: const Color(0xFF222434), // Background hole color
+                        borderSide: const BorderSide(color: Colors.white10, width: 2),
+                        radius: 16,
+                        showTitle: false,
+                      ),
+                    ],
                   ),
-                  leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 30, getTitlesWidget: (v, _) => Text(v.toInt().toString(), style: const TextStyle(color: Colors.white38, fontSize: 12)))),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
-                gridData: FlGridData(show: true, drawVerticalLine: false, getDrawingHorizontalLine: (_) => const FlLine(color: Colors.white10, strokeWidth: 1)),
-                borderData: FlBorderData(show: false),
-                barGroups: [
-                  _makeGroup(0, 3, 1),
-                  _makeGroup(1, 4, 0),
-                  _makeGroup(2, 1.5, 2),
-                  _makeGroup(3, 3.5, 0.5),
-                ],
-              ),
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "${score.toInt()}%",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 40,
+                          fontWeight: FontWeight.w900,
+                          height: 1.0,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Grade $grade",
+                        style: const TextStyle(
+                          color: Color(0xFF6CC551),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(Icons.circle, color: Color(0xFF6CC551), size: 12),
-              SizedBox(width: 8),
-              Text("Good", style: TextStyle(color: Colors.white70, fontSize: 14)),
-              SizedBox(width: 24),
-              Icon(Icons.circle, color: Color(0xFFF76A6A), size: 12),
-              SizedBox(width: 8),
-              Text("Bad", style: TextStyle(color: Colors.white70, fontSize: 14)),
-            ],
+          const SizedBox(height: 32),
+          // AI Insight Card
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF171925),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF29B6F6).withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.auto_awesome, color: Color(0xFF29B6F6), size: 20),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "AI Insight",
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        message,
+                        style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
-    );
-  }
-
-  BarChartGroupData _makeGroup(int x, double good, double bad) {
-    return BarChartGroupData(
-      x: x,
-      barRods: [
-        BarChartRodData(toY: good, color: const Color(0xFF6CC551), width: 12, borderRadius: BorderRadius.circular(4)),
-        BarChartRodData(toY: bad, color: const Color(0xFFF76A6A), width: 12, borderRadius: BorderRadius.circular(4)),
-      ],
     );
   }
 
