@@ -69,14 +69,14 @@ class PlanService {
       baseExercises.addAll([
         {'name': 'Push Up', 'sets': 3, 'reps': 12, 'muscleGroup': 'Punggung, Bahu, Triceps', 'poseAngle': 'side', 'exerciseType': 'pushup'},
         {'name': 'Squat', 'sets': 3, 'reps': 15, 'muscleGroup': 'Kaki, Bokong', 'poseAngle': 'front', 'exerciseType': 'squat'},
-        {'name': 'Mountain Climber', 'sets': 3, 'reps': 20, 'muscleGroup': 'Inti, Kardio', 'poseAngle': 'front', 'exerciseType': 'mountain_climber'},
-        {'name': 'Burpee', 'sets': 3, 'reps': 10, 'muscleGroup': 'Full Body, Kardio', 'poseAngle': 'side', 'exerciseType': 'burpee'},
+        {'name': 'Jumping Jack', 'sets': 3, 'reps': 20, 'muscleGroup': 'Full Body, Kardio', 'poseAngle': 'front', 'exerciseType': 'jumping_jack'},
+        {'name': 'High Knee', 'sets': 3, 'reps': 20, 'muscleGroup': 'Inti, Kardio', 'poseAngle': 'front', 'exerciseType': 'high_knee'},
       ]);
     } else if (isMuscleGain) {
       baseExercises.addAll([
         {'name': 'Push Up', 'sets': 4, 'reps': 10, 'muscleGroup': 'Punggung, Bahu, Triceps', 'poseAngle': 'side', 'exerciseType': 'pushup'},
         {'name': 'Squat', 'sets': 4, 'reps': 12, 'muscleGroup': 'Kaki, Bokong', 'poseAngle': 'front', 'exerciseType': 'squat'},
-        {'name': 'Lunge', 'sets': 3, 'reps': 10, 'muscleGroup': 'Kaki, Bokong', 'poseAngle': 'side', 'exerciseType': 'lunge'},
+        {'name': 'Shoulder Press', 'sets': 3, 'reps': 10, 'muscleGroup': 'Bahu, Triceps', 'poseAngle': 'front', 'exerciseType': 'shoulder_press'},
         {'name': 'Plank', 'sets': 3, 'reps': 45, 'muscleGroup': 'Inti, Perut', 'poseAngle': 'side', 'exerciseType': 'plank'},
       ]);
     } else {

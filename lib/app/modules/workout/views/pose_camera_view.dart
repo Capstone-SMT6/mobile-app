@@ -46,9 +46,9 @@ class _PoseCameraPageState extends State<PoseCameraView>
   final _sitUpService  = SitUpDetectorService();
   final _squatService  = SquatDetectorService();
   final _plankService  = PlankDetectorService();
-  final _lungeService  = LungeDetectorService();
-  final _burpeeService = BurpeeDetectorService();
-  final _mtClimberService = MountainClimberDetectorService();
+  final _jumpingJackService  = JumpingJackDetectorService();
+  final _highKneeService = HighKneeDetectorService();
+  final _shoulderPressService = ShoulderPressDetectorService();
   bool _isProcessing = false;
 
   // Union result — hanya satu yang non-null sesuai exerciseType
@@ -56,53 +56,53 @@ class _PoseCameraPageState extends State<PoseCameraView>
   SitUpAnalysis?  _sitUpAnalysis;
   SquatAnalysis?  _squatAnalysis;
   PlankAnalysis?  _plankAnalysis;
-  LungeAnalysis?  _lungeAnalysis;
-  BurpeeAnalysis? _burpeeAnalysis;
-  MountainClimberAnalysis? _mtClimberAnalysis;
+  JumpingJackAnalysis? _jumpingJackAnalysis;
+  HighKneeAnalysis? _highKneeAnalysis;
+  ShoulderPressAnalysis? _shoulderPressAnalysis;
 
   // ── Shortcut getters (7-way switch) ──────────────────────
   int get _repCount => switch (widget.exercise.exerciseType) {
     'situp' => _sitUpAnalysis?.repCount  ?? 0,
     'squat' => _squatAnalysis?.repCount  ?? 0,
     'plank' => _plankAnalysis?.formScore ?? 0,
-    'lunge' => _lungeAnalysis?.repCount  ?? 0,
-    'burpee' => _burpeeAnalysis?.repCount ?? 0,
-    'mountain_climber' => _mtClimberAnalysis?.repCount ?? 0,
+    'jumping_jack' => _jumpingJackAnalysis?.repCount  ?? 0,
+    'high_knee' => _highKneeAnalysis?.repCount ?? 0,
+    'shoulder_press' => _shoulderPressAnalysis?.repCount ?? 0,
     _       => _pushUpAnalysis?.repCount ?? 0,
   };
   String get _stage => switch (widget.exercise.exerciseType) {
     'situp'  => _sitUpAnalysis?.stage  ?? 'down',
     'squat'  => _squatAnalysis?.stage  ?? 'up',
     'plank'  => _plankAnalysis?.stage  ?? 'paused',
-    'lunge'  => _lungeAnalysis?.stage  ?? 'up',
-    'burpee' => _burpeeAnalysis?.stage ?? 'standing',
-    'mountain_climber' => _mtClimberAnalysis?.stage ?? 'extended',
+    'jumping_jack'  => _jumpingJackAnalysis?.stage  ?? 'down',
+    'high_knee' => _highKneeAnalysis?.stage ?? 'down',
+    'shoulder_press' => _shoulderPressAnalysis?.stage ?? 'down',
     _        => _pushUpAnalysis?.stage ?? 'up',
   };
   String get _feedback => switch (widget.exercise.exerciseType) {
     'situp'  => _sitUpAnalysis?.feedback  ?? 'Mendeteksi pose...',
     'squat'  => _squatAnalysis?.feedback  ?? 'Mendeteksi pose...',
     'plank'  => _plankAnalysis?.feedback  ?? 'Mendeteksi pose...',
-    'lunge'  => _lungeAnalysis?.feedback  ?? 'Mendeteksi pose...',
-    'burpee' => _burpeeAnalysis?.feedback ?? 'Mendeteksi pose...',
-    'mountain_climber' => _mtClimberAnalysis?.feedback ?? 'Mendeteksi pose...',
+    'jumping_jack'  => _jumpingJackAnalysis?.feedback  ?? 'Mendeteksi pose...',
+    'high_knee' => _highKneeAnalysis?.feedback ?? 'Mendeteksi pose...',
+    'shoulder_press' => _shoulderPressAnalysis?.feedback ?? 'Mendeteksi pose...',
     _        => _pushUpAnalysis?.feedback ?? 'Mendeteksi pose...',
   };
   bool get _isGoodPosture => switch (widget.exercise.exerciseType) {
     'situp'  => _sitUpAnalysis?.isGoodPosture  ?? false,
     'squat'  => _squatAnalysis?.isGoodPosture  ?? false,
     'plank'  => _plankAnalysis?.isGoodPosture  ?? false,
-    'lunge'  => _lungeAnalysis?.isGoodPosture  ?? false,
-    'burpee' => _burpeeAnalysis?.isGoodPosture ?? false,
-    'mountain_climber' => _mtClimberAnalysis?.isGoodPosture ?? false,
+    'jumping_jack'  => _jumpingJackAnalysis?.isGoodPosture  ?? false,
+    'high_knee' => _highKneeAnalysis?.isGoodPosture ?? false,
+    'shoulder_press' => _shoulderPressAnalysis?.isGoodPosture ?? false,
     _        => _pushUpAnalysis?.isGoodPosture ?? false,
   };
   bool get _isHorizontal => switch (widget.exercise.exerciseType) {
     'situp' => _sitUpAnalysis?.isHorizontal  ?? false,
     'squat' => true,
-    'lunge' => true,
-    'burpee' => true,
-    'mountain_climber' => true,
+    'jumping_jack' => true,
+    'high_knee' => true,
+    'shoulder_press' => true,
     'plank' => _plankAnalysis?.isHorizontal  ?? false,
     _       => _pushUpAnalysis?.isHorizontal ?? false,
   };
@@ -110,18 +110,18 @@ class _PoseCameraPageState extends State<PoseCameraView>
     'situp'  => _sitUpAnalysis?.poses  ?? [],
     'squat'  => _squatAnalysis?.poses  ?? [],
     'plank'  => _plankAnalysis?.poses  ?? [],
-    'lunge'  => _lungeAnalysis?.poses  ?? [],
-    'burpee' => _burpeeAnalysis?.poses ?? [],
-    'mountain_climber' => _mtClimberAnalysis?.poses ?? [],
+    'jumping_jack'  => _jumpingJackAnalysis?.poses  ?? [],
+    'high_knee' => _highKneeAnalysis?.poses ?? [],
+    'shoulder_press' => _shoulderPressAnalysis?.poses ?? [],
     _        => _pushUpAnalysis?.poses ?? [],
   };
   bool get _hasAnalysis => switch (widget.exercise.exerciseType) {
     'situp'  => _sitUpAnalysis != null,
     'squat'  => _squatAnalysis != null,
     'plank'  => _plankAnalysis != null,
-    'lunge'  => _lungeAnalysis != null,
-    'burpee' => _burpeeAnalysis != null,
-    'mountain_climber' => _mtClimberAnalysis != null,
+    'jumping_jack'  => _jumpingJackAnalysis != null,
+    'high_knee' => _highKneeAnalysis != null,
+    'shoulder_press' => _shoulderPressAnalysis != null,
     _        => _pushUpAnalysis != null,
   };
 
@@ -175,15 +175,15 @@ class _PoseCameraPageState extends State<PoseCameraView>
       case 'plank':
         _plankService.init();
         _plankService.reset();
-      case 'lunge':
-        _lungeService.init();
-        _lungeService.reset();
-      case 'burpee':
-        _burpeeService.init();
-        _burpeeService.reset();
-      case 'mountain_climber':
-        _mtClimberService.init();
-        _mtClimberService.reset();
+      case 'jumping_jack':
+        _jumpingJackService.init();
+        _jumpingJackService.reset();
+      case 'high_knee':
+        _highKneeService.init();
+        _highKneeService.reset();
+      case 'shoulder_press':
+        _shoulderPressService.init();
+        _shoulderPressService.reset();
       default:
         _pushUpService.init();
         _pushUpService.reset();
@@ -527,13 +527,13 @@ class _PoseCameraPageState extends State<PoseCameraView>
           }
           break;
 
-        case 'lunge':
-          final analysis = await _lungeService.processImage(inputImage)
+        case 'jumping_jack':
+          final analysis = await _jumpingJackService.processImage(inputImage)
               .timeout(const Duration(milliseconds: 500));
           if (mounted && analysis != null) {
-            final prev = _lungeAnalysis?.repCount ?? 0;
+            final prev = _jumpingJackAnalysis?.repCount ?? 0;
             setState(() {
-              _lungeAnalysis = analysis;
+              _jumpingJackAnalysis = analysis;
               _consecutiveErrors = 0;
               _persistentError = null;
             });
@@ -545,13 +545,13 @@ class _PoseCameraPageState extends State<PoseCameraView>
           }
           break;
 
-        case 'burpee':
-          final analysis = await _burpeeService.processImage(inputImage)
+        case 'high_knee':
+          final analysis = await _highKneeService.processImage(inputImage)
               .timeout(const Duration(milliseconds: 500));
           if (mounted && analysis != null) {
-            final prev = _burpeeAnalysis?.repCount ?? 0;
+            final prev = _highKneeAnalysis?.repCount ?? 0;
             setState(() {
-              _burpeeAnalysis = analysis;
+              _highKneeAnalysis = analysis;
               _consecutiveErrors = 0;
               _persistentError = null;
             });
@@ -563,13 +563,13 @@ class _PoseCameraPageState extends State<PoseCameraView>
           }
           break;
 
-        case 'mountain_climber':
-          final analysis = await _mtClimberService.processImage(inputImage)
+        case 'shoulder_press':
+          final analysis = await _shoulderPressService.processImage(inputImage)
               .timeout(const Duration(milliseconds: 500));
           if (mounted && analysis != null) {
-            final prev = _mtClimberAnalysis?.repCount ?? 0;
+            final prev = _shoulderPressAnalysis?.repCount ?? 0;
             setState(() {
-              _mtClimberAnalysis = analysis;
+              _shoulderPressAnalysis = analysis;
               _consecutiveErrors = 0;
               _persistentError = null;
             });
@@ -881,15 +881,15 @@ class _PoseCameraPageState extends State<PoseCameraView>
                   case 'plank':
                     _plankService.reset();
                     setState(() => _plankAnalysis = null);
-                  case 'lunge':
-                    _lungeService.reset();
-                    setState(() => _lungeAnalysis = null);
-                  case 'burpee':
-                    _burpeeService.reset();
-                    setState(() => _burpeeAnalysis = null);
-                  case 'mountain_climber':
-                    _mtClimberService.reset();
-                    setState(() => _mtClimberAnalysis = null);
+                  case 'jumping_jack':
+                    _jumpingJackService.reset();
+                    setState(() => _jumpingJackAnalysis = null);
+                  case 'high_knee':
+                    _highKneeService.reset();
+                    setState(() => _highKneeAnalysis = null);
+                  case 'shoulder_press':
+                    _shoulderPressService.reset();
+                    setState(() => _shoulderPressAnalysis = null);
                   default:
                     _pushUpService.reset();
                     setState(() => _pushUpAnalysis = null);
@@ -975,45 +975,23 @@ class _PoseCameraPageState extends State<PoseCameraView>
                               ? const Color(0xFFF0A500)
                               : Colors.white70,
                         ),
-                      ] else if (widget.exercise.exerciseType == 'lunge') ...[
-                        _StatBox(
-                          label: 'LUTUT DPAN',
-                          value: '${_lungeAnalysis?.frontKneeAngle.toStringAsFixed(0) ?? '--'}°',
-                          color: Colors.white70,
-                        ),
-                        VerticalDivider(color: Colors.white12, width: 1, thickness: 1),
-                        _StatBox(
-                          label: 'LUTUT BLKG',
-                          value: '${_lungeAnalysis?.backKneeAngle.toStringAsFixed(0) ?? '--'}°',
-                          color: (_lungeAnalysis?.backKneeAngle ?? 99) < 70
-                              ? const Color(0xFFF0A500)
-                              : Colors.white70,
-                        ),
-                      ] else if (widget.exercise.exerciseType == 'burpee') ...[
+                      ] else if (widget.exercise.exerciseType == 'jumping_jack') ...[
                         _StatBox(
                           label: 'STAGE',
                           value: _stage.toUpperCase(),
                           color: accentGreen,
                         ),
-                        VerticalDivider(color: Colors.white12, width: 1, thickness: 1),
-                        _StatBox(
-                          label: 'PINGGUL',
-                          value: '${_burpeeAnalysis?.hipAngle.toStringAsFixed(0) ?? '--'}°',
-                          color: Colors.white70,
-                        ),
-                      ] else if (widget.exercise.exerciseType == 'mountain_climber') ...[
+                      ] else if (widget.exercise.exerciseType == 'high_knee') ...[
                         _StatBox(
                           label: 'STAGE',
                           value: _stage.toUpperCase(),
                           color: accentGreen,
                         ),
-                        VerticalDivider(color: Colors.white12, width: 1, thickness: 1),
+                      ] else if (widget.exercise.exerciseType == 'shoulder_press') ...[
                         _StatBox(
-                          label: 'LUTUT KANAN',
-                          value: '${_mtClimberAnalysis?.rightKneeFlex.toStringAsFixed(0) ?? '--'}°',
-                          color: (_mtClimberAnalysis?.rightKneeFlex ?? 180) < 90
-                              ? accentGreen
-                              : Colors.white70,
+                          label: 'STAGE',
+                          value: _stage.toUpperCase(),
+                          color: accentGreen,
                         ),
                       ] else if (widget.exercise.exerciseType == 'plank') ...[
                         _StatBox(
@@ -1406,24 +1384,18 @@ class PosePainter extends CustomPainter {
         _drawTextLabel(canvas, _toScreen(hip, size).translate(10, -20),
             'Punggung', color);
       }
-    } else if (exerciseType == 'lunge') {
-      final knee = lm[PoseLandmarkType.rightKnee];
-      final hip  = lm[PoseLandmarkType.rightHip];
-      if (knee != null && knee.likelihood > 0.5) {
-        _drawTextLabel(canvas, _toScreen(knee, size).translate(10, -20),
-            'Lutut', color);
+    } else if (exerciseType == 'jumping_jack') {
+      final lWrist = lm[PoseLandmarkType.leftWrist];
+      final rWrist = lm[PoseLandmarkType.rightWrist];
+      if (lWrist != null && lWrist.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(lWrist, size).translate(10, -20),
+            'Wrist L', color);
       }
-      if (hip != null && hip.likelihood > 0.5) {
-        _drawTextLabel(canvas, _toScreen(hip, size).translate(10, -20),
-            'Pinggul', color);
+      if (rWrist != null && rWrist.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(rWrist, size).translate(10, -20),
+            'Wrist R', color);
       }
-    } else if (exerciseType == 'burpee') {
-      final hip = lm[PoseLandmarkType.leftHip];
-      if (hip != null && hip.likelihood > 0.5) {
-        _drawTextLabel(canvas, _toScreen(hip, size).translate(10, -20),
-            'Pinggul', color);
-      }
-    } else if (exerciseType == 'mountain_climber') {
+    } else if (exerciseType == 'high_knee') {
       final rKnee = lm[PoseLandmarkType.rightKnee];
       final lKnee = lm[PoseLandmarkType.leftKnee];
       if (rKnee != null && rKnee.likelihood > 0.5) {
@@ -1433,6 +1405,12 @@ class PosePainter extends CustomPainter {
       if (lKnee != null && lKnee.likelihood > 0.5) {
         _drawTextLabel(canvas, _toScreen(lKnee, size).translate(10, -20),
             'Lutut Kiri', color);
+      }
+    } else if (exerciseType == 'shoulder_press') {
+      final elbow = lm[PoseLandmarkType.rightElbow] ?? lm[PoseLandmarkType.leftElbow];
+      if (elbow != null && elbow.likelihood > 0.5) {
+        _drawTextLabel(canvas, _toScreen(elbow, size).translate(10, -20),
+            'Siku', color);
       }
     } else if (exerciseType == 'plank') {
       // Plank: label di pinggul (hip angle) dan bahu (neck angle)
