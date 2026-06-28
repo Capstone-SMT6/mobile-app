@@ -1,7 +1,21 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:get/get.dart';
+import 'package:smacofit/app/routes/app_routes.dart';
+import 'package:smacofit/app/data/services/user_service.dart';
+
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint('========================================================');
+  debugPrint('[BACKGROUND FCM MESSAGE RECEIVED]');
+  debugPrint('Title: ${message.notification?.title}');
+  debugPrint('Body: ${message.notification?.body}');
+  debugPrint('Data: ${message.data}');
+  debugPrint('========================================================');
+}
 
 /// Singleton notification service for workout reminders.
 class NotificationService {
@@ -21,6 +35,14 @@ class NotificationService {
 
   Future<void> init() async {
     if (_initialized) return;
+
+    if (kIsWeb) {
+      _initialized = true;
+      _permissionGranted = true;
+      debugPrint('NotificationService: Initialized in web fallback mode.');
+      return;
+    }
+
     tz.initializeTimeZones();
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -36,8 +58,8 @@ class NotificationService {
         iOS: iosSettings,
       ),
       onDidReceiveNotificationResponse: (response) {
-        // Navigate to home on notification tap
         debugPrint('Notification tapped: ${response.payload}');
+        _instance._navigateToHome();
       },
     );
 
@@ -81,7 +103,7 @@ class NotificationService {
     String title = 'Waktunya Latihan! 💪',
     String body = 'Jangan lewatkan sesi latihan hari ini. Yuk mulai!',
   }) async {
-    if (!_initialized || !_permissionGranted) return;
+    if (kIsWeb || !_initialized || !_permissionGranted) return;
 
     await cancelWorkoutReminders();
 
@@ -115,7 +137,7 @@ class NotificationService {
     int hour = 9,
     int minute = 0,
   }) async {
-    if (!_initialized || !_permissionGranted) return;
+    if (kIsWeb || !_initialized || !_permissionGranted) return;
 
     // Find rest days (1=Mon ... 7=Sun that are NOT training days)
     final allDays = {1, 2, 3, 4, 5, 6, 7};
@@ -147,7 +169,7 @@ class NotificationService {
 
   /// Show a streak milestone notification.
   Future<void> showStreakMilestone(int streakDays) async {
-    if (!_initialized || !_permissionGranted) return;
+    if (kIsWeb || !_initialized || !_permissionGranted) return;
 
     String title;
     String body;
@@ -187,7 +209,7 @@ class NotificationService {
 
   /// Cancel all scheduled workout reminders.
   Future<void> cancelWorkoutReminders() async {
-    if (!_initialized) return;
+    if (kIsWeb || !_initialized) return;
     for (int i = 1; i <= 7; i++) {
       await _plugin.cancel(100 + i);
     }
@@ -195,7 +217,7 @@ class NotificationService {
 
   /// Cancel all notifications (workout + rest day).
   Future<void> cancelAll() async {
-    if (!_initialized) return;
+    if (kIsWeb || !_initialized) return;
     await _plugin.cancelAll();
   }
 
@@ -218,4 +240,124 @@ class NotificationService {
 
     return scheduled;
   }
+
+  /// Initialize Firebase Cloud Messaging (FCM)
+  Future<void> initFcm() async {
+    if (!_initialized) {
+      await init();
+    }
+
+    try {
+      final messaging = FirebaseMessaging.instance;
+
+      // Request FCM permissions
+      final settings = await messaging.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
+      debugPrint('User granted FCM permission: ${settings.authorizationStatus}');
+
+      // Get initial FCM token and upload to backend
+      final token = await messaging.getToken();
+      if (token != null) {
+        debugPrint('FCM Token: $token');
+        await _uploadFcmToken(token);
+      }
+
+      // Listen for token refresh and upload
+      messaging.onTokenRefresh.listen((newToken) async {
+        debugPrint('FCM Token Refreshed: $newToken');
+        await _uploadFcmToken(newToken);
+      });
+
+      // Handle foreground messages
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        debugPrint('========================================================');
+        debugPrint('[FOREGROUND FCM MESSAGE RECEIVED]');
+        debugPrint('Title: ${message.notification?.title}');
+        debugPrint('Body: ${message.notification?.body}');
+        debugPrint('Data: ${message.data}');
+        debugPrint('========================================================');
+        _showForegroundNotification(message);
+      });
+
+      // Handle notification tapped/clicked (when app is in background/foreground)
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        debugPrint('FCM message tapped (app in background/foreground): ${message.messageId}');
+        _navigateToHome();
+      });
+
+      // Handle notification tapped/clicked (when app is opened from terminated state)
+      final initialMessage = await messaging.getInitialMessage();
+      if (initialMessage != null) {
+        debugPrint('App launched from terminated FCM message: ${initialMessage.messageId}');
+        Future.delayed(const Duration(milliseconds: 500), () {
+          _navigateToHome();
+        });
+      }
+    } catch (e) {
+      debugPrint('Error initializing FCM: $e');
+    }
+  }
+
+  Future<void> _uploadFcmToken(String token) async {
+    try {
+      await UserService.updateFcmToken(token);
+      debugPrint('FCM Token successfully uploaded to backend.');
+    } catch (e) {
+      debugPrint('Error uploading FCM Token: $e');
+    }
+  }
+
+  void _navigateToHome() {
+    try {
+      Get.offAllNamed(AppRoutes.home);
+    } catch (e) {
+      debugPrint('Error navigating to home: $e');
+    }
+  }
+
+  void _showForegroundNotification(RemoteMessage message) async {
+    final notification = message.notification;
+    final android = message.notification?.android;
+    
+    if (kIsWeb) {
+      debugPrint('========================================================');
+      debugPrint('[WEB NOTIFICATION FALLBACK LOG]');
+      debugPrint('Title: ${notification?.title}');
+      debugPrint('Body: ${notification?.body}');
+      debugPrint('Data: ${message.data}');
+      debugPrint('========================================================');
+      return;
+    }
+    
+    if (notification != null) {
+      await _plugin.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            _workoutChannelId,
+            _workoutChannelName,
+            importance: Importance.high,
+            priority: Priority.high,
+            icon: android?.smallIcon ?? '@mipmap/ic_launcher',
+          ),
+          iOS: const DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+        payload: 'fcm_notification',
+      );
+    }
+  }
 }
+

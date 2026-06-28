@@ -116,4 +116,32 @@ class UserService {
       throw Exception(error['detail'] ?? 'Failed to update password');
     }
   }
+
+  static Future<void> updateFcmToken(String token) async {
+    final headers = await _getAuthHeaders();
+    final response = await http.post(
+      Uri.parse(AppConfig.fcmTokenEndpoint),
+      headers: headers,
+      body: jsonEncode({'fcm_token': token}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update FCM token: ${response.statusCode}');
+    }
+  }
+
+  static Future<User> updateNotificationPreference(String userId, bool enabled) async {
+    final headers = await _getAuthHeaders();
+    final response = await http.put(
+      Uri.parse('${AppConfig.usersEndpoint}$userId'),
+      headers: headers,
+      body: jsonEncode({'notificationEnabled': enabled}),
+    );
+
+    if (response.statusCode == 200) {
+      return User.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to update notification settings: ${response.statusCode}');
+    }
+  }
 }

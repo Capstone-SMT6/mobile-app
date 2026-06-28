@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smacofit/app/data/models/user_model.dart';
 import 'package:smacofit/app/data/services/user_service.dart';
+import 'package:smacofit/app/data/services/notification_service.dart';
 
 class UserController extends GetxController {
   final Rxn<User> user = Rxn<User>();
@@ -28,6 +29,9 @@ class UserController extends GetxController {
       final userData = await UserService.getCurrentUser();
       debugPrint('DEBUG: User Photo URL: ${userData.photoUrl}');
       user.value = userData;
+      
+      // Initialize FCM token registration
+      NotificationService().initFcm();
 
       // Fetch Stats
       try {

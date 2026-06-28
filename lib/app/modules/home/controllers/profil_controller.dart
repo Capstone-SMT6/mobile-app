@@ -12,8 +12,34 @@ class ProfilController extends GetxController {
   final RxBool notificationsEnabled = true.obs;
   final RxBool hapticEnabled = true.obs;
 
-  void toggleNotifications(bool value) {
+  @override
+  void onInit() {
+    super.onInit();
+    final userCtrl = Get.find<UserController>();
+    notificationsEnabled.value = userCtrl.user.value?.notificationEnabled ?? true;
+  }
+
+  void toggleNotifications(bool value) async {
     notificationsEnabled.value = value;
+    
+    try {
+      final userCtrl = Get.find<UserController>();
+      final currentUser = userCtrl.user.value;
+      if (currentUser != null) {
+        final updatedUser = await UserService.updateNotificationPreference(currentUser.id, value);
+        userCtrl.user.value = updatedUser;
+      }
+    } catch (e) {
+      debugPrint('Error updating notification preference: $e');
+      notificationsEnabled.value = !value;
+      showCustomSnackbar(
+        title: 'Error',
+        message: 'Gagal memperbarui pengaturan notifikasi',
+        backgroundColor: Colors.red,
+      );
+      return;
+    }
+
     if (value) {
       const trainingDays = [1, 3, 5]; // Mon, Wed, Fri default
       NotificationService().scheduleWorkoutReminders(

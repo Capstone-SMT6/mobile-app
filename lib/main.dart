@@ -10,11 +10,13 @@ import 'package:smacofit/app/routes/app_pages.dart';
 import 'package:smacofit/app/routes/app_routes.dart';
 import 'package:smacofit/app/data/services/notification_service.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('id_ID', null);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   // Register Controllers permanently so they're available app-wide
   Get.put(AuthController(), permanent: true);
   Get.put(UserController(), permanent: true);

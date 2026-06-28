@@ -62,4 +62,5 @@ class AppConfig {
   // ---------------------------------------------------------------------------
 
   static const String firebaseProjectId = 'capstone-smt6';
+  static String get fcmTokenEndpoint => '$apiBaseUrl/api/users/me/fcm-token';
 }
